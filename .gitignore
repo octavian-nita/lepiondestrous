@@ -1,0 +1,14 @@
+**/.idea
+**/*.iml
+
+**/.settings
+**/.buildpath
+**/.classpath
+**/.project
+
+**/nbproject
+**/nbactions.xml
+**/nb-configuration.xml
+
+**/target
+**/node_modules
