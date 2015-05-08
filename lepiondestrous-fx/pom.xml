@@ -9,7 +9,7 @@
     <artifactId>lepiondestrous</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>lepiondestrous-opengl</artifactId>
+  <artifactId>lepiondestrous-fx</artifactId>
   <packaging>jar</packaging>
 
   <build>
