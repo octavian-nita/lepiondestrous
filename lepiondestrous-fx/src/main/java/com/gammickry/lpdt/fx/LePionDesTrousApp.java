@@ -1,8 +1,8 @@
 package com.gammickry.lpdt.fx;
 
 import javafx.application.Application;
-import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.util.logging.ConsoleHandler;
@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import static com.gammickry.lpdt.fx.Utils.BOARD_RATIO;
 import static java.lang.System.getenv;
 
 /**
@@ -20,19 +21,18 @@ import static java.lang.System.getenv;
  */
 public class LePionDesTrousApp extends Application {
 
-    private static final double BOARD_RATIO = 3. / 4.;
-
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage stage) throws Exception {
+        double height = 600;
 
-        LePionDesTrousView lePionDesTrousView = new LePionDesTrousView();
+        LePionDesTrousView lePionDesTrousView = new LePionDesTrousView(height);
 
-        primaryStage.setTitle("Le Pion Des Trous, fx v. 0.0.1");
-        primaryStage.setScene(new Scene(new Group(lePionDesTrousView)));
-        primaryStage.setMinWidth(302);
-        primaryStage.setMaxWidth(802);
-        primaryStage.minHeightProperty().bind(primaryStage.widthProperty().divide(BOARD_RATIO));
-        primaryStage.show();
+        stage.setMinHeight(height);
+        stage.setMinWidth(height * BOARD_RATIO);
+        stage.setTitle("Le Pion Des Trous :: FX, v. 0.0.1");
+
+        stage.setScene(new Scene(new StackPane(lePionDesTrousView)));
+        stage.show();
     }
 
     public static void main(String[] args) {
