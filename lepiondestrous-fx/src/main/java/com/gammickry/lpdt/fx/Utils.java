@@ -6,7 +6,34 @@ package com.gammickry.lpdt.fx;
  */
 public class Utils {
 
-    public static final double BOARD_RATIO = 3. / 4.;
+    public static double snap(double value) {
+        return (int) value + .5;
+    }
 
-    public static double snap(double d) { return (int) d + .5; }
+    public static double[] snap(double... values) {
+        if (values != null) {
+            for (int i = 0; i < values.length; i++) {
+                values[i] = (int) values[i] + .5;
+            }
+        }
+        return values;
+    }
+
+    public static double[] times(double multiplier, double... values) {
+        if (values != null) {
+            for (int i = 0; i < values.length; i++) {
+                values[i] *= multiplier;
+            }
+        }
+        return values;
+    }
+
+    public static double[] timesAndSnap(double multiplier, double... values) {
+        if (values != null) {
+            for (int i = 0; i < values.length; i++) {
+                values[i] = (int) (multiplier * values[i]) + .5;
+            }
+        }
+        return values;
+    }
 }

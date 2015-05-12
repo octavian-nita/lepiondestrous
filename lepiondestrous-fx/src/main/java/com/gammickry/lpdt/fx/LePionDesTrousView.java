@@ -1,55 +1,57 @@
 package com.gammickry.lpdt.fx;
 
-import javafx.collections.ObservableList;
-import javafx.scene.Group;
-import javafx.scene.shape.ArcTo;
-import javafx.scene.shape.HLineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.PathElement;
-import javafx.scene.shape.Rectangle;
-
-import static com.gammickry.lpdt.fx.Utils.BOARD_RATIO;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.shape.ArcType;
 
 /**
  * @author Octavian Theodor NITA (http://github.com/octavian-nita)
  * @version 1.0, May 08, 2015
  */
-public class LePionDesTrousView extends Group {
+public class LePionDesTrousView extends Canvas {
 
-    private Theme theme = Theme.DEFAULT;
+    public LePionDesTrousView(double unit) {
+        super(unit * 29, unit * 40);
+        this.unit = unit;
 
-    private final double height;
+        draw();
+    }
+
+    private void draw() {
+        double width = getWidth();
+        double height = getHeight();
+
+        GraphicsContext gc = getGraphicsContext2D();
+
+        // The board:
+        gc.setFill(theme.getBoardPaint());
+        gc.fillRect(0, 0, width, height);
+
+        // The bridge decoration:
+        drawBridge(gc);
+    }
+
+    private void drawBridge(GraphicsContext gc) {
+
+        double l0 = unit * 11.;
+        double l1 = unit * 6.5;
+        double l2 = unit * 5.5;
+
+        gc.setStroke(theme.getTextPaint());
+        gc.setLineWidth(2.5);
+
+        gc.beginPath();
+        gc.moveTo(0, l0);
+        gc.lineTo(unit * 5., l0);
+        gc.stroke();
+
+        gc.strokeArc(unit * 5, l1, unit * 5, unit * 9, 90, 90, ArcType.OPEN);
+
+        //gc.arcTo(unit * 5.5, unit * 8., unit * 7.5, l1, 100);
+        //gc.arcTo(unit * 9.5, unit * 8., unit * 10., l0, 120);
+    }
 
     private final double unit;
 
-    public LePionDesTrousView(double height) {
-        if (height < 0) {
-            throw new IllegalArgumentException("cannot create a view with a negative height");
-        }
-
-        this.height = height;
-        this.unit = height / 40;
-
-        addBoard();
-        addBridgeDecoration();
-    }
-
-    private void addBoard() {
-        getChildren().add(new Rectangle(height * BOARD_RATIO, height, theme.getBoardPaint()));
-    }
-
-    private void addBridgeDecoration() {
-        Path path = new Path();
-        path.setStroke(theme.getTextPaint());
-        path.setStrokeWidth(3);
-
-        ObservableList<PathElement> elms = path.getElements();
-
-        elms.add(new MoveTo(2, 11 * unit));
-        elms.add(new HLineTo(5 * unit));
-        elms.add(new ArcTo(8 * unit, 11 * unit, 0, 7.5 * unit, 7.5 * unit, false, true));
-
-        getChildren().add(path);
-    }
+    private Theme theme = Theme.DEFAULT;
 }

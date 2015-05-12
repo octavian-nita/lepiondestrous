@@ -12,7 +12,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import static com.gammickry.lpdt.fx.Utils.BOARD_RATIO;
 import static java.lang.System.getenv;
 
 /**
@@ -23,14 +22,13 @@ public class LePionDesTrousApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        double height = 600;
 
-        LePionDesTrousView lePionDesTrousView = new LePionDesTrousView(height);
+        LePionDesTrousView lePionDesTrousView = new LePionDesTrousView(15);
 
-        stage.setMinHeight(height);
-        stage.setMinWidth(height * BOARD_RATIO);
+        stage.setMinWidth(lePionDesTrousView.getWidth());
+        stage.setMinHeight(lePionDesTrousView.getHeight());
+
         stage.setTitle("Le Pion Des Trous :: FX, v. 0.0.1");
-
         stage.setScene(new Scene(new StackPane(lePionDesTrousView)));
         stage.show();
     }
