@@ -25,8 +25,8 @@ public class LePionDesTrousApp extends Application {
 
         LePionDesTrousView lePionDesTrousView = new LePionDesTrousView(15);
 
-        stage.setMinWidth(lePionDesTrousView.getWidth());
-        stage.setMinHeight(lePionDesTrousView.getHeight());
+        stage.setMinWidth(lePionDesTrousView.prefWidth(0));
+        stage.setMinHeight(lePionDesTrousView.prefHeight(0));
 
         stage.setTitle("Le Pion Des Trous :: FX, v. 0.0.1");
         stage.setScene(new Scene(new StackPane(lePionDesTrousView)));

@@ -1,6 +1,8 @@
 package com.gammickry.lpdt.fx;
 
+import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 
 import static javafx.scene.paint.Color.ANTIQUEWHITE;
 import static javafx.scene.paint.Color.web;
@@ -21,7 +23,13 @@ public interface Theme {
 
     Paint getScorePawnPaint();
 
+    DropShadow getPrimaryDropShadow();
+
+    DropShadow getSecondaryDropShadow();
+
     Paint getTextPaint();
+
+    Font getFont();
 
     public static final Theme DEFAULT = new Theme() {
 
@@ -50,9 +58,22 @@ public interface Theme {
         @Override
         public Paint getScorePawnPaint() { return scorePawnPaint; }
 
+        private final DropShadow primaryDropShadow = new DropShadow(10, 0, 2, web("#000", 0.26));
+
+        public DropShadow getPrimaryDropShadow() { return primaryDropShadow; }
+
+        private final DropShadow secondaryDropShadow = new DropShadow(5, 0, 2, web("#000", 0.36));
+
+        public DropShadow getSecondaryDropShadow() { return secondaryDropShadow; }
+
         private final Paint textPaint = web("#FFEB3B");
 
         @Override
         public Paint getTextPaint() { return textPaint; }
+
+        private final Font font = Font.loadFont("file:font/chantelli-antiqua.ttf", 30);
+
+        @Override
+        public Font getFont() { return font; }
     };
 }

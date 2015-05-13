@@ -13,4 +13,5 @@
 **/target
 **/node_modules
 
-**/*.log
+**/*.log*
+**/*.lck*
