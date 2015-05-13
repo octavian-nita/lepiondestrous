@@ -32,7 +32,9 @@ public class LePionDesTrousView extends Group {
         // Poor man's layer system:
         ObservableList<Node> layers = getChildren();
         layers.add(initBoard(new Canvas(boardWidth, boardHeight)));
-        layers.add(initBackgroundDecoration(new Canvas(boardWidth, boardHeight)));
+        layers.add(initDecoration(new Canvas(boardWidth, boardHeight)));
+        layers.add(initHoles(new Canvas(boardWidth, boardHeight)));
+        layers.add(initPawns(new Canvas(boardWidth, boardHeight)));
     }
 
     private Canvas initBoard(Canvas board) {
@@ -42,14 +44,14 @@ public class LePionDesTrousView extends Group {
         return board;
     }
 
-    private Canvas initBackgroundDecoration(Canvas backgroundDecoration) {
-        GraphicsContext gc = backgroundDecoration.getGraphicsContext2D();
+    private Canvas initDecoration(Canvas decoration) {
 
         double r1 = boardUnit * 4.;   // small arch (circle) radius
         double y0 = boardUnit * 11.;  // water level y
         double y1 = boardUnit * 6.5;  // small arch top level y
         double cy1 = boardUnit * 7.5; // small arch control point y
 
+        GraphicsContext gc = decoration.getGraphicsContext2D();
         gc.setLineWidth(2.5);
         gc.setFont(theme.getFont());
         gc.setFill(theme.getTextPaint());
@@ -78,15 +80,77 @@ public class LePionDesTrousView extends Group {
         gc.beginPath();
         gc.moveTo(boardUnit * 5.5, 0);
         gc.lineTo(boardUnit * 5.5, boardUnit * 3);
-        gc.lineTo(boardUnit * 24., boardUnit * 3);
-        gc.lineTo(boardUnit * 24., 0);
+        gc.lineTo(boardUnit * 23.5, boardUnit * 3);
+        gc.lineTo(boardUnit * 23.5, 0);
         gc.stroke();
 
-        gc.fillText("Le pion des trous", boardUnit * 6.9, boardUnit * 2.2);
+        gc.fillText("Le pion des trous", boardUnit * 8.4, boardUnit * 2.);
+        gc.applyEffect(theme.getDropShadow());
 
-        gc.applyEffect(theme.getPrimaryDropShadow());
-        gc.applyEffect(theme.getSecondaryDropShadow());
+        return decoration;
+    }
 
-        return backgroundDecoration;
+    private Canvas initHoles(Canvas holes) {
+
+        double du = boardUnit * 2.;
+        double fu = boardUnit * 5.;
+        double dx = boardUnit * 25.;
+        double dy = boardUnit * 12.;
+
+        GraphicsContext gc = holes.getGraphicsContext2D();
+        gc.setFill(theme.getHolePaint());
+
+        for (int i = 0; i < 14; i++) {
+            for (int j = 0; j < 14; j++) {
+                gc.fillOval(boardUnit + i * du, dy + j * du, boardUnit, boardUnit);
+            }
+        }
+
+        gc.fillOval(boardUnit, boardUnit, boardUnit, boardUnit);
+        gc.fillOval(boardUnit + du, boardUnit, boardUnit, boardUnit);
+        gc.fillOval(boardUnit, boardUnit + du, boardUnit, boardUnit);
+        gc.fillOval(boardUnit + du, boardUnit + du, boardUnit, boardUnit);
+
+        gc.fillOval(du, boardUnit * 5., boardUnit, boardUnit);
+        gc.fillOval(du, boardUnit * 7., boardUnit, boardUnit);
+        gc.fillOval(du, boardUnit * 9., boardUnit, boardUnit);
+
+        gc.fillOval(boardUnit * 6., fu, boardUnit, boardUnit);
+        gc.fillOval(boardUnit * 8.5, fu, boardUnit, boardUnit);
+        gc.fillOval(boardUnit * 11., fu, boardUnit, boardUnit);
+
+        gc.fillOval(dx, boardUnit, boardUnit, boardUnit);
+        gc.fillOval(dx + du, boardUnit, boardUnit, boardUnit);
+        gc.fillOval(dx, boardUnit + du, boardUnit, boardUnit);
+        gc.fillOval(dx + du, boardUnit + du, boardUnit, boardUnit);
+
+        gc.fillOval(dx + boardUnit, boardUnit * 5., boardUnit, boardUnit);
+        gc.fillOval(dx + boardUnit, boardUnit * 7., boardUnit, boardUnit);
+        gc.fillOval(dx + boardUnit, boardUnit * 9., boardUnit, boardUnit);
+
+        gc.fillOval(boardUnit * 17., fu, boardUnit, boardUnit);
+        gc.fillOval(boardUnit * 19.5, fu, boardUnit, boardUnit);
+        gc.fillOval(boardUnit * 22., fu, boardUnit, boardUnit);
+
+        gc.applyEffect(theme.getInnerShadow());
+
+        return holes;
+    }
+
+    private Canvas initPawns(Canvas pawns) {
+
+        double du = boardUnit * 2.;
+        double dy = boardUnit * 12.;
+
+        GraphicsContext gc = pawns.getGraphicsContext2D();
+
+        gc.setFill(theme.getDarkPawnPaint());
+        gc.fillOval(boardUnit + 2 * du, dy + 2 * du, boardUnit, boardUnit);
+        gc.setFill(theme.getLightPawnPaint());
+        gc.fillOval(boardUnit + 3 * du, dy + 3 * du, boardUnit, boardUnit);
+
+        gc.applyEffect(theme.getDropShadow());
+
+        return pawns;
     }
 }

@@ -1,11 +1,13 @@
 package com.gammickry.lpdt.fx;
 
 import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.InnerShadow;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 
 import static javafx.scene.paint.Color.ANTIQUEWHITE;
 import static javafx.scene.paint.Color.web;
+import static javafx.scene.text.Font.loadFont;
 
 /**
  * @author Octavian Theodor NITA (http://github.com/octavian-nita)
@@ -13,27 +15,39 @@ import static javafx.scene.paint.Color.web;
  */
 public interface Theme {
 
+    Font getFont();
+
+    Paint getTextPaint();
+
     Paint getHolePaint();
 
     Paint getBoardPaint();
 
     Paint getDarkPawnPaint();
 
+    Paint getDarkScorePaint();
+
     Paint getLightPawnPaint();
 
-    Paint getScorePawnPaint();
+    Paint getLightScorePaint();
 
-    DropShadow getPrimaryDropShadow();
+    DropShadow getDropShadow();
 
-    DropShadow getSecondaryDropShadow();
-
-    Paint getTextPaint();
-
-    Font getFont();
+    InnerShadow getInnerShadow();
 
     public static final Theme DEFAULT = new Theme() {
 
-        private final Paint holePaint = web("#5D4037");
+        private final Font font = loadFont("file:font/chantelli-antiqua.ttf", 24);
+
+        @Override
+        public Font getFont() { return font; }
+
+        private final Paint textPaint = web("#FFEB3B");
+
+        @Override
+        public Paint getTextPaint() { return textPaint; }
+
+        private final Paint holePaint = web("#5d4037");
 
         @Override
         public Paint getHolePaint() { return holePaint; }
@@ -43,37 +57,42 @@ public interface Theme {
         @Override
         public Paint getBoardPaint() { return boardPaint; }
 
-        private final Paint darkPawnPaint = web("#E91E63");
+        private final Paint darkPawnPaint = web("#e91e63");
 
         @Override
         public Paint getDarkPawnPaint() { return darkPawnPaint; }
 
-        private final Paint lightPawnPaint = web("#CFD8DC");
+        private final Paint darkScorePaint = ANTIQUEWHITE;
+
+        @Override
+        public Paint getDarkScorePaint() { return darkScorePaint; }
+
+        private final Paint lightPawnPaint = web("#cfd8dc");
 
         @Override
         public Paint getLightPawnPaint() { return lightPawnPaint; }
 
-        private final Paint scorePawnPaint = ANTIQUEWHITE;
+        private final Paint lightScorePaint = ANTIQUEWHITE;
 
         @Override
-        public Paint getScorePawnPaint() { return scorePawnPaint; }
+        public Paint getLightScorePaint() { return lightScorePaint; }
 
-        private final DropShadow primaryDropShadow = new DropShadow(10, 0, 2, web("#000", 0.26));
+        private final DropShadow dropShadow = new DropShadow(5, 0, 2, web("#000", 0.45));
 
-        public DropShadow getPrimaryDropShadow() { return primaryDropShadow; }
-
-        private final DropShadow secondaryDropShadow = new DropShadow(5, 0, 2, web("#000", 0.36));
-
-        public DropShadow getSecondaryDropShadow() { return secondaryDropShadow; }
-
-        private final Paint textPaint = web("#FFEB3B");
+        {
+            dropShadow.setInput(new DropShadow(10, 0, 2, web("#000", 0.35)));
+        }
 
         @Override
-        public Paint getTextPaint() { return textPaint; }
+        public DropShadow getDropShadow() { return dropShadow; }
 
-        private final Font font = Font.loadFont("file:font/chantelli-antiqua.ttf", 30);
+        private final InnerShadow innerShadow = new InnerShadow(5, 0, 2, web("#000", 0.45));
+
+        {
+            innerShadow.setInput(new InnerShadow(10, 0, 2, web("#000", 0.35)));
+        }
 
         @Override
-        public Font getFont() { return font; }
+        public InnerShadow getInnerShadow() { return innerShadow; }
     };
 }
