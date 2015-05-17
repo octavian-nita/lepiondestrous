@@ -6,18 +6,20 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
+import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
+import static javafx.scene.input.MouseEvent.MOUSE_MOVED;
+
 /**
  * @author Octavian Theodor NITA (http://github.com/octavian-nita)
  * @version 1.0, May 08, 2015
  */
 public class LePionDesTrousView extends Group {
 
-    // In a resizable / fluid / responsive version, these could be properties:
-
+    // In a resizable / responsive / fluid version, this could be a property:
     private final double boardUnit;
 
     // Simple theme system:
-
     private Theme theme = Theme.DEFAULT;
 
     public LePionDesTrousView(double boardUnit) {
@@ -150,6 +152,16 @@ public class LePionDesTrousView extends Group {
         gc.fillOval(boardUnit + 3 * du, dy + 3 * du, boardUnit, boardUnit);
 
         gc.applyEffect(theme.getDropShadow());
+
+        addEventHandler(MOUSE_MOVED, e -> {
+            double x = e.getX(), y = e.getY();
+
+            if (y < dy) {
+                return;
+            }
+
+            System.out.println(ceil(x / boardUnit / 2));
+        });
 
         return pawns;
     }

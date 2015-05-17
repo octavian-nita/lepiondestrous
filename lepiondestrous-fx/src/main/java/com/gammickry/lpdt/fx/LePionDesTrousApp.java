@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
@@ -25,11 +26,10 @@ public class LePionDesTrousApp extends Application {
 
         LePionDesTrousView lePionDesTrousView = new LePionDesTrousView(15);
 
-        stage.setMinWidth(lePionDesTrousView.prefWidth(0));
-        stage.setMinHeight(lePionDesTrousView.prefHeight(0));
-
-        stage.setTitle("Le Pion Des Trous :: FX, v. 0.0.1");
         stage.setScene(new Scene(new StackPane(lePionDesTrousView)));
+        stage.setTitle("Le Pion Des Trous :: FX, v. 0.0.1");
+        stage.setResizable(false);
+
         stage.show();
     }
 
