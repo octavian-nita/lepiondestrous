@@ -7,7 +7,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
 import static java.lang.Math.ceil;
-import static java.lang.Math.floor;
 import static javafx.scene.input.MouseEvent.MOUSE_MOVED;
 
 /**
@@ -156,11 +155,14 @@ public class LePionDesTrousView extends Group {
         addEventHandler(MOUSE_MOVED, e -> {
             double x = e.getX(), y = e.getY();
 
-            if (y < dy) {
+            if (y < dy || x % boardUnit != 0) {
                 return;
             }
 
-            System.out.println(ceil(x / boardUnit / 2));
+            int col = (int) ceil(x / boardUnit);
+            int row = (int) ceil((y - dy) / boardUnit);
+
+            System.out.println(col + ", " + row);
         });
 
         return pawns;
