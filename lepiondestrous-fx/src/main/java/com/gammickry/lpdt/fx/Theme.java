@@ -1,10 +1,13 @@
 package com.gammickry.lpdt.fx;
 
+import com.gammickry.lpdt.fx.model.Opponent;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 
+import static com.gammickry.lpdt.fx.model.Opponent.DARK;
+import static com.gammickry.lpdt.fx.model.Opponent.LIGHT;
 import static javafx.scene.paint.Color.ANTIQUEWHITE;
 import static javafx.scene.paint.Color.web;
 import static javafx.scene.text.Font.loadFont;
@@ -13,27 +16,44 @@ import static javafx.scene.text.Font.loadFont;
  * @author Octavian Theodor NITA (http://github.com/octavian-nita)
  * @version 1.0, May 11, 2015
  */
-public interface Theme {
+public abstract class Theme {
 
-    Font getFont();
+    public abstract Font getFont();
 
-    Paint getTextPaint();
+    public abstract Paint getTextPaint();
 
-    Paint getHolePaint();
+    public abstract Paint getHolePaint();
 
-    Paint getBoardPaint();
+    public abstract Paint getBoardPaint();
 
-    Paint getDarkPawnPaint();
+    public abstract Paint getDarkPawnPaint();
 
-    Paint getDarkScorePaint();
+    public abstract Paint getDarkPawnTransparentPaint();
 
-    Paint getLightPawnPaint();
+    public abstract Paint getDarkScorePaint();
 
-    Paint getLightScorePaint();
+    public abstract Paint getLightPawnPaint();
 
-    DropShadow getDropShadow();
+    public abstract Paint getLightPawnTransparentPaint();
 
-    InnerShadow getInnerShadow();
+    public abstract Paint getLightScorePaint();
+
+    public abstract DropShadow getDropShadow();
+
+    public abstract InnerShadow getInnerShadow();
+
+    public Paint getOpponentPaint(Opponent opponent) {
+        return opponent == DARK ? getDarkPawnPaint() : opponent == LIGHT ? getLightPawnPaint() : null;
+    }
+
+    public Paint getOpponentTransparentPaint(Opponent opponent) {
+        return opponent == DARK ? getDarkPawnTransparentPaint()
+                                : opponent == LIGHT ? getLightPawnTransparentPaint() : null;
+    }
+
+    public Paint getOpponentScorePaint(Opponent opponent) {
+        return opponent == DARK ? getDarkScorePaint() : opponent == LIGHT ? getLightScorePaint() : null;
+    }
 
     public static final Theme DEFAULT = new Theme() {
 
@@ -57,10 +77,15 @@ public interface Theme {
         @Override
         public Paint getBoardPaint() { return boardPaint; }
 
-        private final Paint darkPawnPaint = web("#e91e63");
+        private final Paint darkPawnPaint = web("#d32f2f");
 
         @Override
         public Paint getDarkPawnPaint() { return darkPawnPaint; }
+
+        private final Paint darkPawnTransparentPaint = web("#d32f2f", 0.6);
+
+        @Override
+        public Paint getDarkPawnTransparentPaint() { return darkPawnTransparentPaint; }
 
         private final Paint darkScorePaint = ANTIQUEWHITE;
 
@@ -71,6 +96,11 @@ public interface Theme {
 
         @Override
         public Paint getLightPawnPaint() { return lightPawnPaint; }
+
+        private final Paint lightPawnTransparentPaint = web("#cfd8dc", 0.6);
+
+        @Override
+        public Paint getLightPawnTransparentPaint() { return lightPawnTransparentPaint; }
 
         private final Paint lightScorePaint = ANTIQUEWHITE;
 

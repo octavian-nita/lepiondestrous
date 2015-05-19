@@ -97,17 +97,7 @@ public class MNBoard {
 
         MNBoard board = (MNBoard) object;
 
-        if (cols != board.cols) {
-            return false;
-        }
-        if (rows != board.rows) {
-            return false;
-        }
-        if (!Arrays.equals(grid, board.grid)) {
-            return false;
-        }
-
-        return true;
+        return cols == board.cols && rows == board.rows && Arrays.equals(grid, board.grid);
     }
 
     @Override

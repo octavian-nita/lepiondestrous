@@ -6,7 +6,9 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
+import static com.gammickry.lpdt.fx.model.Opponent.DARK;
 import static java.lang.Math.ceil;
+import static javafx.scene.effect.BlendMode.HARD_LIGHT;
 import static javafx.scene.input.MouseEvent.MOUSE_MOVED;
 
 /**
@@ -15,11 +17,11 @@ import static javafx.scene.input.MouseEvent.MOUSE_MOVED;
  */
 public class LePionDesTrousView extends Group {
 
-    // In a resizable / responsive / fluid version, this could be a property:
-    private final double boardUnit;
-
     // Simple theme system:
     private Theme theme = Theme.DEFAULT;
+
+    // In a resizable / responsive / fluid version, this could be a JavaFX property:
+    private double boardUnit;
 
     public LePionDesTrousView(double boardUnit) {
         if (boardUnit < 0) {
@@ -27,15 +29,16 @@ public class LePionDesTrousView extends Group {
         }
         this.boardUnit = boardUnit;
 
-        double boardWidth = 29 * boardUnit;
-        double boardHeight = 40 * boardUnit;
+        double width = 29 * boardUnit;
+        double height = 40 * boardUnit;
 
         // Poor man's layer system:
         ObservableList<Node> layers = getChildren();
-        layers.add(initBoard(new Canvas(boardWidth, boardHeight)));
-        layers.add(initDecoration(new Canvas(boardWidth, boardHeight)));
-        layers.add(initHoles(new Canvas(boardWidth, boardHeight)));
-        layers.add(initPawns(new Canvas(boardWidth, boardHeight)));
+        layers.add(initBoard(new Canvas(width, height)));
+        layers.add(initFrill(new Canvas(width, height)));
+        layers.add(initHoles(new Canvas(width, height)));
+        layers.add(initPawns(new Canvas(width, width)));
+        layers.add(initGlass(new Canvas(width, width)));
     }
 
     private Canvas initBoard(Canvas board) {
@@ -45,14 +48,14 @@ public class LePionDesTrousView extends Group {
         return board;
     }
 
-    private Canvas initDecoration(Canvas decoration) {
+    private Canvas initFrill(Canvas frill) {
 
         double r1 = boardUnit * 4.;   // small arch (circle) radius
         double y0 = boardUnit * 11.;  // water level y
         double y1 = boardUnit * 6.5;  // small arch top level y
         double cy1 = boardUnit * 7.5; // small arch control point y
 
-        GraphicsContext gc = decoration.getGraphicsContext2D();
+        GraphicsContext gc = frill.getGraphicsContext2D();
         gc.setLineWidth(2.5);
         gc.setFont(theme.getFont());
         gc.setFill(theme.getTextPaint());
@@ -88,7 +91,7 @@ public class LePionDesTrousView extends Group {
         gc.fillText("Le pion des trous", boardUnit * 8.4, boardUnit * 2.);
         gc.applyEffect(theme.getDropShadow());
 
-        return decoration;
+        return frill;
     }
 
     private Canvas initHoles(Canvas holes) {
@@ -139,34 +142,44 @@ public class LePionDesTrousView extends Group {
     }
 
     private Canvas initPawns(Canvas pawns) {
+        pawns.setLayoutY(boardUnit * 11.); // push the pawns 'layer' below the score board and decoration
+        pawns.setBlendMode(HARD_LIGHT);    // more vibrant colors?
 
         double du = boardUnit * 2.;
-        double dy = boardUnit * 12.;
 
         GraphicsContext gc = pawns.getGraphicsContext2D();
 
-        gc.setFill(theme.getDarkPawnPaint());
-        gc.fillOval(boardUnit + 2 * du, dy + 2 * du, boardUnit, boardUnit);
-        gc.setFill(theme.getLightPawnPaint());
-        gc.fillOval(boardUnit + 3 * du, dy + 3 * du, boardUnit, boardUnit);
+        gc.setFill(theme.getOpponentPaint(DARK));
+        gc.fillOval(boardUnit + 2. * du, boardUnit + 2. * du, boardUnit, boardUnit);
+        gc.setFill(theme.getOpponentPaint(DARK.opponent()));
+        gc.fillOval(boardUnit + 3. * du, boardUnit + 3. * du, boardUnit, boardUnit);
 
         gc.applyEffect(theme.getDropShadow());
 
-        addEventHandler(MOUSE_MOVED, e -> {
+        return pawns;
+    }
+
+    private Canvas initGlass(Canvas glass) {
+        glass.setLayoutY(boardUnit * 11.); // push the glass 'layer' below the score board and decoration
+
+        double du = boardUnit * 2.;
+        GraphicsContext gc = glass.getGraphicsContext2D();
+        gc.setFill(theme.getOpponentTransparentPaint(DARK));
+        gc.fillOval(boardUnit + 5. * du, boardUnit + 5. * du, boardUnit, boardUnit);
+        gc.setFill(theme.getOpponentTransparentPaint(DARK.opponent()));
+        gc.fillOval(boardUnit + 6. * du, boardUnit + 6. * du, boardUnit, boardUnit);
+
+        glass.addEventHandler(MOUSE_MOVED, e -> {
             int col = (int) ceil(e.getX() / boardUnit);
-            int row = (int) ceil((e.getY() - dy) / boardUnit);
+            int row = (int) ceil(e.getY() / boardUnit);
 
-            if (row < 0) {
-                return;
-            }
-
-            if (row % 2 == 0 || col % 2 != 0) {
+            if (row == 0 || row % 2 != 0 || col == 0 || col % 2 != 0) {
                 return;
             }
 
             System.out.println(col + ", " + row);
         });
 
-        return pawns;
+        return glass;
     }
 }
