@@ -153,14 +153,16 @@ public class LePionDesTrousView extends Group {
         gc.applyEffect(theme.getDropShadow());
 
         addEventHandler(MOUSE_MOVED, e -> {
-            double x = e.getX(), y = e.getY();
+            int col = (int) ceil(e.getX() / boardUnit);
+            int row = (int) ceil((e.getY() - dy) / boardUnit);
 
-            if (y < dy || x % boardUnit != 0) {
+            if (row < 0) {
                 return;
             }
 
-            int col = (int) ceil(x / boardUnit);
-            int row = (int) ceil((y - dy) / boardUnit);
+            if (row % 2 == 0 || col % 2 != 0) {
+                return;
+            }
 
             System.out.println(col + ", " + row);
         });
