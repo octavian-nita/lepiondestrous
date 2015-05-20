@@ -8,11 +8,9 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 
-import static com.gammickry.boardgame.Opponent.DARK;
 import static java.lang.Math.ceil;
 import static javafx.scene.Cursor.DEFAULT;
 import static javafx.scene.Cursor.HAND;
-import static javafx.scene.input.MouseEvent.MOUSE_MOVED;
 
 /**
  * @author Octavian Theodor NITA (http://github.com/octavian-nita)
@@ -25,6 +23,8 @@ public class LePionDesTrousView extends Group {
 
     // In a resizable / responsive / fluid version, this could be a JavaFX property:
     private double boardUnit;
+
+    private Canvas pawns;
 
     private LePionDesTrous game;
 
@@ -116,9 +116,10 @@ public class LePionDesTrousView extends Group {
         GraphicsContext gc = holes.getGraphicsContext2D();
         gc.setFill(theme.getHolePaint());
 
-        for (int i = 0; i < 14; i++) {
-            for (int j = 0; j < 14; j++) {
-                gc.fillOval(boardUnit + i * du, dy + j * du, boardUnit, boardUnit);
+        int boardSize = game.getBoardSize();
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                gc.fillOval(boardUnit + j * du, dy + i * du, boardUnit, boardUnit);
             }
         }
 
@@ -152,77 +153,110 @@ public class LePionDesTrousView extends Group {
     }
 
     private Canvas initPawns(Canvas pawns) {
-        pawns.setLayoutY(boardUnit * 11.); // push the pawns 'layer' below the scoreboard and decoration
+        this.pawns = pawns;
+        this.pawns.setLayoutY(boardUnit * 11.); // push the pawns 'layer' below the scoreboard and decoration
 
         double du = boardUnit * 2.;
 
-        GraphicsContext gc = pawns.getGraphicsContext2D();
+        GraphicsContext gc = this.pawns.getGraphicsContext2D();
+        gc.setEffect(theme.getDropShadow());
 
-        game.play(2, 2);
-        game.play(3, 3);
-        gc.setFill(theme.getOpponentPaint(DARK));
-        gc.fillOval(boardUnit + 2. * du, boardUnit + 2. * du, boardUnit, boardUnit);
-        gc.setFill(theme.getOpponentPaint(DARK.opponent()));
-        gc.fillOval(boardUnit + 3. * du, boardUnit + 3. * du, boardUnit, boardUnit);
+        int boardSize = game.getBoardSize();
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                if (!game.isEmpty(j, i)) {
+                    gc.setFill(theme.getOpponentPaint(game.getOpponentAt(j, i)));
+                    gc.fillOval(boardUnit + j * du, boardUnit + i * du, boardUnit, boardUnit);
+                }
+            }
+        }
 
-        gc.applyEffect(theme.getDropShadow());
-
-        return pawns;
+        return this.pawns;
     }
 
     private Canvas initGlass(Canvas glass) {
         glass.setLayoutY(boardUnit * 11.); // push the glass 'layer' below the score board and decoration
-        glass.addEventHandler(MOUSE_MOVED, new HoverHandler(glass));
+        glass.setOnMouseMoved(new HoverHandler());
+        glass.setOnMouseClicked(new ClickHandler());
         return glass;
     }
 
-    private class HoverHandler implements EventHandler<MouseEvent> {
+    private abstract class MouseEventHandler implements EventHandler<MouseEvent> {
 
-        private Canvas canvas;
+        protected int lastCol = -1;
 
-        private int hoveredCol = -1;
-
-        private int hoveredRow = -1;
-
-        private void clearHovered() {
-            canvas.setCursor(DEFAULT);
-            canvas.getGraphicsContext2D()
-                  .clearRect(hoveredCol * boardUnit * 2. + boardUnit, hoveredRow * boardUnit * 2. + boardUnit,
-                             boardUnit, boardUnit);
-            hoveredCol = hoveredRow = -1;
-        }
-
-        private HoverHandler(Canvas canvas) { this.canvas = canvas; }
+        protected int lastRow = -1;
 
         @Override
-        public void handle(MouseEvent e) {
+        public void handle(MouseEvent event) {
 
-            int col = (int) ceil(e.getX() / boardUnit);
-            int row = (int) ceil(e.getY() / boardUnit);
-            if (row == 0 || row % 2 != 0 || col == 0 || col % 2 != 0) {
-                clearHovered();
+            Object src = event.getSource();
+            if (!(src instanceof Canvas)) {
+                return;
+            }
+            Canvas canvas = (Canvas) src; // and assume the canvas is a square with the edge a multiple of boardUnit!
+
+            int currCol = (int) ceil(event.getX() / boardUnit);
+            int currRow = (int) ceil(event.getY() / boardUnit);
+            if (currRow == 0 || currRow % 2 != 0 || currCol == 0 || currCol % 2 != 0) {
+                onHoleMiss(currCol, currRow, canvas);
+                lastCol = lastRow = -1;
                 return;
             }
 
-            col = col / 2 - 1;
-            row = row / 2 - 1;
-            if (!game.isEmpty(col, row)) {
-                clearHovered();
+            currCol = currCol / 2 - 1;
+            currRow = currRow / 2 - 1;
+            if (!game.isEmpty(currCol, currRow)) {
+                onPawn(currCol, currRow, canvas);
+                lastCol = lastRow = -1;
                 return;
             }
 
-            if (col != hoveredCol && row != hoveredRow) {
-                clearHovered();
-
-                hoveredCol = col;
-                hoveredRow = row;
-
-                canvas.setCursor(HAND);
-                GraphicsContext gc = canvas.getGraphicsContext2D();
-                gc.setFill(theme.getOpponentTransparentPaint(game.getCurrentOpponent()));
-                gc.fillOval(hoveredCol * boardUnit * 2. + boardUnit, hoveredRow * boardUnit * 2. + boardUnit, boardUnit,
-                            boardUnit);
+            if (currCol != lastCol || currRow != lastRow) {
+                onHole(currCol, currRow, canvas);
+                lastCol = currCol;
+                lastRow = currRow;
             }
+        }
+
+        protected void onHoleMiss(int currCol, int currRow, Canvas canvas) {}
+
+        protected abstract void onHole(int currCol, int currRow, Canvas canvas);
+
+        protected void onPawn(int currCol, int currRow, Canvas canvas) { onHoleMiss(currCol, currRow, canvas); }
+    }
+
+    private class HoverHandler extends MouseEventHandler {
+
+        @Override
+        protected void onHoleMiss(int currCol, int currRow, Canvas canvas) {
+            canvas.setCursor(DEFAULT);
+            canvas.getGraphicsContext2D()
+                  .clearRect(lastCol * boardUnit * 2. + boardUnit, lastRow * boardUnit * 2. + boardUnit, boardUnit,
+                             boardUnit);
+        }
+
+        @Override
+        protected void onHole(int currCol, int currRow, Canvas canvas) {
+            onHoleMiss(currCol, currRow, canvas); // clear last hovered hole
+
+            canvas.setCursor(HAND);
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            gc.setFill(theme.getOpponentTransparentPaint(game.getCurrentOpponent()));
+            gc.fillOval(currCol * boardUnit * 2. + boardUnit, currRow * boardUnit * 2. + boardUnit, boardUnit,
+                        boardUnit);
+        }
+    }
+
+    private class ClickHandler extends MouseEventHandler {
+
+        @Override
+        protected void onHole(int currCol, int currRow, Canvas canvas) {
+            game.play(currCol, currRow);
+
+            GraphicsContext gc = pawns.getGraphicsContext2D();
+            gc.setFill(theme.getOpponentPaint(game.getOpponentAt(currCol, currRow)));
+            gc.fillOval(boardUnit * (1 + currCol * 2.), boardUnit * (1 + currRow * 2.), boardUnit, boardUnit);
         }
     }
 }
