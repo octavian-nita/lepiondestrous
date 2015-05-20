@@ -232,8 +232,7 @@ public class LePionDesTrousView extends Group {
         protected void onHoleMiss(int currCol, int currRow, Canvas canvas) {
             canvas.setCursor(DEFAULT);
             canvas.getGraphicsContext2D()
-                  .clearRect(lastCol * boardUnit * 2. + boardUnit, lastRow * boardUnit * 2. + boardUnit, boardUnit,
-                             boardUnit);
+                  .clearRect(boardUnit * (1 + lastCol * 2.), boardUnit * (1 + lastRow * 2.), boardUnit, boardUnit);
         }
 
         @Override
@@ -243,8 +242,7 @@ public class LePionDesTrousView extends Group {
             canvas.setCursor(HAND);
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.setFill(theme.getOpponentTransparentPaint(game.getCurrentOpponent()));
-            gc.fillOval(currCol * boardUnit * 2. + boardUnit, currRow * boardUnit * 2. + boardUnit, boardUnit,
-                        boardUnit);
+            gc.fillOval(boardUnit * (1 + currCol * 2.), boardUnit * (1 + currRow * 2.), boardUnit, boardUnit);
         }
     }
 
