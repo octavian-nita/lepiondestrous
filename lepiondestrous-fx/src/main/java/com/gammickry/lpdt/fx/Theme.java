@@ -1,13 +1,13 @@
 package com.gammickry.lpdt.fx;
 
-import com.gammickry.lpdt.fx.model.Opponent;
+import com.gammickry.boardgame.Opponent;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 
-import static com.gammickry.lpdt.fx.model.Opponent.DARK;
-import static com.gammickry.lpdt.fx.model.Opponent.LIGHT;
+import static com.gammickry.boardgame.Opponent.DARK;
+import static com.gammickry.boardgame.Opponent.LIGHT;
 import static javafx.scene.paint.Color.ANTIQUEWHITE;
 import static javafx.scene.paint.Color.web;
 import static javafx.scene.text.Font.loadFont;

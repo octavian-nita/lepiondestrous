@@ -6,9 +6,8 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
-import static com.gammickry.lpdt.fx.model.Opponent.DARK;
+import static com.gammickry.boardgame.Opponent.DARK;
 import static java.lang.Math.ceil;
-import static javafx.scene.effect.BlendMode.HARD_LIGHT;
 import static javafx.scene.input.MouseEvent.MOUSE_MOVED;
 
 /**
@@ -23,14 +22,19 @@ public class LePionDesTrousView extends Group {
     // In a resizable / responsive / fluid version, this could be a JavaFX property:
     private double boardUnit;
 
-    public LePionDesTrousView(double boardUnit) {
-        if (boardUnit < 0) {
-            throw new IllegalArgumentException("cannot use a negative board unit");
-        }
-        this.boardUnit = boardUnit;
+    private LePionDesTrous game;
 
-        double width = 29 * boardUnit;
-        double height = 40 * boardUnit;
+    public LePionDesTrousView(double boardUnit, LePionDesTrous game) {
+        if (boardUnit <= 0) {
+            throw new IllegalArgumentException("cannot use a board unit less than or equal to 0");
+        }
+
+        this.boardUnit = boardUnit;
+        this.game = game == null ? new LePionDesTrous() : game;
+
+        int boardSize = this.game.getBoardSize();
+        double height = (boardSize * 2 + 12) * boardUnit;
+        double width = (boardSize * 2 + 1) * boardUnit;
 
         // Poor man's layer system:
         ObservableList<Node> layers = getChildren();
@@ -41,6 +45,8 @@ public class LePionDesTrousView extends Group {
         layers.add(initGlass(new Canvas(width, width)));
     }
 
+    public LePionDesTrousView(double boardUnit) { this(boardUnit, null); }
+
     private Canvas initBoard(Canvas board) {
         GraphicsContext gc = board.getGraphicsContext2D();
         gc.setFill(theme.getBoardPaint());
@@ -50,23 +56,22 @@ public class LePionDesTrousView extends Group {
 
     private Canvas initFrill(Canvas frill) {
 
-        double r1 = boardUnit * 4.;   // small arch (circle) radius
-        double y0 = boardUnit * 11.;  // water level y
-        double y1 = boardUnit * 6.5;  // small arch top level y
-        double cy1 = boardUnit * 7.5; // small arch control point y
+        double sr = boardUnit * 4.;  // small arch (circle) radius
+        double y0 = boardUnit * 11.; // water level y
+        double y1 = boardUnit * 6.5; // small arch top level y
+        double cy = boardUnit * 7.5; // small arch control point y
 
         GraphicsContext gc = frill.getGraphicsContext2D();
+
         gc.setLineWidth(2.5);
-        gc.setFont(theme.getFont());
-        gc.setFill(theme.getTextPaint());
         gc.setStroke(theme.getTextPaint());
 
         gc.beginPath();
         gc.moveTo(0, y0);
         gc.lineTo(boardUnit * 5., y0);
         // First small arch:
-        gc.arcTo(boardUnit * 5.5, cy1, boardUnit * 7.5, y1, r1);
-        gc.arcTo(boardUnit * 9.5, cy1, boardUnit * 10., y0, r1);
+        gc.arcTo(boardUnit * 5.5, cy, boardUnit * 7.5, y1, sr);
+        gc.arcTo(boardUnit * 9.5, cy, boardUnit * 10., y0, sr);
         gc.lineTo(boardUnit * 10., y0); // finish the first small arch
         gc.lineTo(boardUnit * 11., y0);
         // Middle large arch:
@@ -75,8 +80,8 @@ public class LePionDesTrousView extends Group {
         gc.lineTo(boardUnit * 18., y0); // finish the middle large arch
         gc.lineTo(boardUnit * 19., y0);
         // Second small arch:
-        gc.arcTo(boardUnit * 19.5, cy1, boardUnit * 21.5, y1, r1);
-        gc.arcTo(boardUnit * 23.5, cy1, boardUnit * 24., y0, r1);
+        gc.arcTo(boardUnit * 19.5, cy, boardUnit * 21.5, y1, sr);
+        gc.arcTo(boardUnit * 23.5, cy, boardUnit * 24., y0, sr);
         gc.lineTo(boardUnit * 24., y0); // finish the second small arch
         gc.lineTo(boardUnit * 29., y0);
         gc.stroke();                    // finish the bridge lower outline
@@ -88,7 +93,10 @@ public class LePionDesTrousView extends Group {
         gc.lineTo(boardUnit * 23.5, 0);
         gc.stroke();
 
+        gc.setFont(theme.getFont());
+        gc.setFill(theme.getTextPaint());
         gc.fillText("Le pion des trous", boardUnit * 8.4, boardUnit * 2.);
+
         gc.applyEffect(theme.getDropShadow());
 
         return frill;
@@ -110,28 +118,26 @@ public class LePionDesTrousView extends Group {
             }
         }
 
+        // Scoreboard on the left:
         gc.fillOval(boardUnit, boardUnit, boardUnit, boardUnit);
         gc.fillOval(boardUnit + du, boardUnit, boardUnit, boardUnit);
         gc.fillOval(boardUnit, boardUnit + du, boardUnit, boardUnit);
         gc.fillOval(boardUnit + du, boardUnit + du, boardUnit, boardUnit);
-
         gc.fillOval(du, boardUnit * 5., boardUnit, boardUnit);
         gc.fillOval(du, boardUnit * 7., boardUnit, boardUnit);
         gc.fillOval(du, boardUnit * 9., boardUnit, boardUnit);
-
         gc.fillOval(boardUnit * 6., fu, boardUnit, boardUnit);
         gc.fillOval(boardUnit * 8.5, fu, boardUnit, boardUnit);
         gc.fillOval(boardUnit * 11., fu, boardUnit, boardUnit);
 
+        // Scoreboard on the right:
         gc.fillOval(dx, boardUnit, boardUnit, boardUnit);
         gc.fillOval(dx + du, boardUnit, boardUnit, boardUnit);
         gc.fillOval(dx, boardUnit + du, boardUnit, boardUnit);
         gc.fillOval(dx + du, boardUnit + du, boardUnit, boardUnit);
-
         gc.fillOval(dx + boardUnit, boardUnit * 5., boardUnit, boardUnit);
         gc.fillOval(dx + boardUnit, boardUnit * 7., boardUnit, boardUnit);
         gc.fillOval(dx + boardUnit, boardUnit * 9., boardUnit, boardUnit);
-
         gc.fillOval(boardUnit * 17., fu, boardUnit, boardUnit);
         gc.fillOval(boardUnit * 19.5, fu, boardUnit, boardUnit);
         gc.fillOval(boardUnit * 22., fu, boardUnit, boardUnit);
@@ -142,8 +148,7 @@ public class LePionDesTrousView extends Group {
     }
 
     private Canvas initPawns(Canvas pawns) {
-        pawns.setLayoutY(boardUnit * 11.); // push the pawns 'layer' below the score board and decoration
-        pawns.setBlendMode(HARD_LIGHT);    // more vibrant colors?
+        pawns.setLayoutY(boardUnit * 11.); // push the pawns 'layer' below the scoreboard and decoration
 
         double du = boardUnit * 2.;
 
@@ -163,10 +168,11 @@ public class LePionDesTrousView extends Group {
         glass.setLayoutY(boardUnit * 11.); // push the glass 'layer' below the score board and decoration
 
         double du = boardUnit * 2.;
+
         GraphicsContext gc = glass.getGraphicsContext2D();
-        gc.setFill(theme.getOpponentTransparentPaint(DARK));
+        gc.setFill(theme.getOpponentTransparentPaint(game.getOpponent()));
         gc.fillOval(boardUnit + 5. * du, boardUnit + 5. * du, boardUnit, boardUnit);
-        gc.setFill(theme.getOpponentTransparentPaint(DARK.opponent()));
+        gc.setFill(theme.getOpponentTransparentPaint(game.getOpponent().opponent()));
         gc.fillOval(boardUnit + 6. * du, boardUnit + 6. * du, boardUnit, boardUnit);
 
         glass.addEventHandler(MOUSE_MOVED, e -> {

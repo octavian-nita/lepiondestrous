@@ -22,8 +22,6 @@ public class MNBoard {
 
     protected final int[] grid;
 
-    public MNBoard(int size) { this(size, size); }
-
     public MNBoard(int cols, int rows) {
         if (cols <= 0) {
             throw new IllegalArgumentException("the number of columns in a m×n board cannot be <= 0");
@@ -35,6 +33,8 @@ public class MNBoard {
         this.rows = rows;
         this.grid = new int[this.rows * this.cols];
     }
+
+    public MNBoard(int size) { this(size, size); }
 
     public MNBoard(MNBoard board) {
         if (board == null) {
@@ -48,6 +48,14 @@ public class MNBoard {
 
     public final boolean onTheBoard(int col, int row) {
         return 0 <= col && col < cols && 0 <= row && row < rows;
+    }
+
+    public int at(int col, int row) {
+        if (!onTheBoard(col, row)) {
+            throw new IllegalArgumentException("the specified location is off the board");
+        }
+
+        return grid[rows * row + col];
     }
 
     public boolean empty(int col, int row) {
