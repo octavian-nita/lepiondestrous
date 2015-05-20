@@ -4,6 +4,7 @@ import com.gammickry.boardgame.MNBoard;
 import com.gammickry.boardgame.Opponent;
 
 import static com.gammickry.boardgame.Opponent.LIGHT;
+import static com.gammickry.boardgame.Opponent.opponent;
 
 /**
  * @author Octavian Theodor NITA (http://github.com/octavian-nita)
@@ -15,7 +16,7 @@ public class LePionDesTrous {
 
     private MNBoard board;
 
-    private Opponent opponent = LIGHT;
+    private Opponent currentOpponent = LIGHT;
 
     public LePionDesTrous() { this(14); }
 
@@ -29,9 +30,14 @@ public class LePionDesTrous {
 
     public int getBoardSize() { return boardSize; }
 
-    public Opponent getOpponent() { return opponent; }
-
-    public void nextOpponent() { opponent = opponent.opponent(); }
-
     public boolean isEmpty(int col, int row) { return board.empty(col, row); }
+
+    public Opponent getCurrentOpponent() { return currentOpponent; }
+
+    public Opponent getOpponentAt(int col, int row) { return opponent(board.at(col, row)); }
+
+    public void play(int col, int row) {
+        board.place(col, row, currentOpponent.value());
+        currentOpponent = currentOpponent.opponent();
+    }
 }

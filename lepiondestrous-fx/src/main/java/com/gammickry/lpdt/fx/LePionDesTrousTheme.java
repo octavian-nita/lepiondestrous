@@ -16,7 +16,7 @@ import static javafx.scene.text.Font.loadFont;
  * @author Octavian Theodor NITA (http://github.com/octavian-nita)
  * @version 1.0, May 11, 2015
  */
-public abstract class Theme {
+public abstract class LePionDesTrousTheme {
 
     public abstract Font getFont();
 
@@ -55,7 +55,7 @@ public abstract class Theme {
         return opponent == DARK ? getDarkScorePaint() : opponent == LIGHT ? getLightScorePaint() : null;
     }
 
-    public static final Theme DEFAULT = new Theme() {
+    public static final LePionDesTrousTheme DEFAULT = new LePionDesTrousTheme() {
 
         private final Font font = loadFont("file:font/chantelli-antiqua.ttf", 24);
 

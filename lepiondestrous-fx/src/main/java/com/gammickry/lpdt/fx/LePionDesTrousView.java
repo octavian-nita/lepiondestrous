@@ -1,13 +1,17 @@
 package com.gammickry.lpdt.fx;
 
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
 
 import static com.gammickry.boardgame.Opponent.DARK;
 import static java.lang.Math.ceil;
+import static javafx.scene.Cursor.DEFAULT;
+import static javafx.scene.Cursor.HAND;
 import static javafx.scene.input.MouseEvent.MOUSE_MOVED;
 
 /**
@@ -17,7 +21,7 @@ import static javafx.scene.input.MouseEvent.MOUSE_MOVED;
 public class LePionDesTrousView extends Group {
 
     // Simple theme system:
-    private Theme theme = Theme.DEFAULT;
+    private LePionDesTrousTheme theme = LePionDesTrousTheme.DEFAULT;
 
     // In a resizable / responsive / fluid version, this could be a JavaFX property:
     private double boardUnit;
@@ -33,8 +37,8 @@ public class LePionDesTrousView extends Group {
         this.game = game == null ? new LePionDesTrous() : game;
 
         int boardSize = this.game.getBoardSize();
-        double height = (boardSize * 2 + 12) * boardUnit;
         double width = (boardSize * 2 + 1) * boardUnit;
+        double height = (boardSize * 2 + 12) * boardUnit;
 
         // Poor man's layer system:
         ObservableList<Node> layers = getChildren();
@@ -154,6 +158,8 @@ public class LePionDesTrousView extends Group {
 
         GraphicsContext gc = pawns.getGraphicsContext2D();
 
+        game.play(2, 2);
+        game.play(3, 3);
         gc.setFill(theme.getOpponentPaint(DARK));
         gc.fillOval(boardUnit + 2. * du, boardUnit + 2. * du, boardUnit, boardUnit);
         gc.setFill(theme.getOpponentPaint(DARK.opponent()));
@@ -166,26 +172,57 @@ public class LePionDesTrousView extends Group {
 
     private Canvas initGlass(Canvas glass) {
         glass.setLayoutY(boardUnit * 11.); // push the glass 'layer' below the score board and decoration
+        glass.addEventHandler(MOUSE_MOVED, new HoverHandler(glass));
+        return glass;
+    }
 
-        double du = boardUnit * 2.;
+    private class HoverHandler implements EventHandler<MouseEvent> {
 
-        GraphicsContext gc = glass.getGraphicsContext2D();
-        gc.setFill(theme.getOpponentTransparentPaint(game.getOpponent()));
-        gc.fillOval(boardUnit + 5. * du, boardUnit + 5. * du, boardUnit, boardUnit);
-        gc.setFill(theme.getOpponentTransparentPaint(game.getOpponent().opponent()));
-        gc.fillOval(boardUnit + 6. * du, boardUnit + 6. * du, boardUnit, boardUnit);
+        private Canvas canvas;
 
-        glass.addEventHandler(MOUSE_MOVED, e -> {
+        private int hoveredCol = -1;
+
+        private int hoveredRow = -1;
+
+        private void clearHovered() {
+            canvas.setCursor(DEFAULT);
+            canvas.getGraphicsContext2D()
+                  .clearRect(hoveredCol * boardUnit * 2. + boardUnit, hoveredRow * boardUnit * 2. + boardUnit,
+                             boardUnit, boardUnit);
+            hoveredCol = hoveredRow = -1;
+        }
+
+        private HoverHandler(Canvas canvas) { this.canvas = canvas; }
+
+        @Override
+        public void handle(MouseEvent e) {
+
             int col = (int) ceil(e.getX() / boardUnit);
             int row = (int) ceil(e.getY() / boardUnit);
-
             if (row == 0 || row % 2 != 0 || col == 0 || col % 2 != 0) {
+                clearHovered();
                 return;
             }
 
-            System.out.println(col + ", " + row);
-        });
+            col = col / 2 - 1;
+            row = row / 2 - 1;
+            if (!game.isEmpty(col, row)) {
+                clearHovered();
+                return;
+            }
 
-        return glass;
+            if (col != hoveredCol && row != hoveredRow) {
+                clearHovered();
+
+                hoveredCol = col;
+                hoveredRow = row;
+
+                canvas.setCursor(HAND);
+                GraphicsContext gc = canvas.getGraphicsContext2D();
+                gc.setFill(theme.getOpponentTransparentPaint(game.getCurrentOpponent()));
+                gc.fillOval(hoveredCol * boardUnit * 2. + boardUnit, hoveredRow * boardUnit * 2. + boardUnit, boardUnit,
+                            boardUnit);
+            }
+        }
     }
 }
