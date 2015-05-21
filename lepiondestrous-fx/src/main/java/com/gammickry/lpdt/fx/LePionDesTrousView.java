@@ -18,6 +18,8 @@ import static javafx.scene.Cursor.HAND;
  */
 public class LePionDesTrousView extends Group {
 
+    private LePionDesTrous game;
+
     // Simple theme system:
     private LePionDesTrousTheme theme = LePionDesTrousTheme.DEFAULT;
 
@@ -26,47 +28,46 @@ public class LePionDesTrousView extends Group {
 
     private Canvas pawns;
 
-    private LePionDesTrous game;
+    private Canvas glass;
+
+    public LePionDesTrousView(double boardUnit) { this(boardUnit, null); }
 
     public LePionDesTrousView(double boardUnit, LePionDesTrous game) {
         if (boardUnit <= 0) {
             throw new IllegalArgumentException("cannot use a board unit less than or equal to 0");
         }
 
-        this.boardUnit = boardUnit;
         this.game = game == null ? new LePionDesTrous() : game;
 
         int boardSize = this.game.getBoardSize();
-        double width = (boardSize * 2 + 1) * boardUnit;
-        double height = (boardSize * 2 + 12) * boardUnit;
+        double sidePx = (boardSize * 2 + 1) * boardUnit;
+
+        this.boardUnit = boardUnit;
+        this.pawns = new Canvas(sidePx, sidePx);
+        this.glass = new Canvas(sidePx, sidePx);
 
         // Poor man's layer system:
         ObservableList<Node> layers = getChildren();
-        layers.add(initBoard(new Canvas(width, height)));
-        layers.add(initFrill(new Canvas(width, height)));
-        layers.add(initHoles(new Canvas(width, height)));
-        layers.add(initPawns(new Canvas(width, width)));
-        layers.add(initGlass(new Canvas(width, width)));
+        layers.add(initBoard(new Canvas(sidePx, (boardSize * 2 + 12) * boardUnit)));
+        layers.add(initHoles(new Canvas(sidePx, (boardSize * 2 + 12) * boardUnit)));
+        layers.add(initPawns(pawns));
+        layers.add(initGlass(glass));
     }
-
-    public LePionDesTrousView(double boardUnit) { this(boardUnit, null); }
 
     private Canvas initBoard(Canvas board) {
-        GraphicsContext gc = board.getGraphicsContext2D();
-        gc.setFill(theme.getBoardPaint());
-        gc.fillRect(0, 0, board.getWidth(), board.getHeight());
-        return board;
-    }
-
-    private Canvas initFrill(Canvas frill) {
-
         double sr = boardUnit * 4.;  // small arch (circle) radius
         double y0 = boardUnit * 11.; // water level y
         double y1 = boardUnit * 6.5; // small arch top level y
         double cy = boardUnit * 7.5; // small arch control point y
 
-        GraphicsContext gc = frill.getGraphicsContext2D();
+        GraphicsContext gc = board.getGraphicsContext2D();
+        gc.setEffect(theme.getDropShadow());
 
+        // Board background:
+        gc.setFill(theme.getBoardPaint());
+        gc.fillRect(0, 0, board.getWidth(), board.getHeight());
+
+        // Board decoration:
         gc.setLineWidth(2.5);
         gc.setStroke(theme.getTextPaint());
 
@@ -76,17 +77,17 @@ public class LePionDesTrousView extends Group {
         // First small arch:
         gc.arcTo(boardUnit * 5.5, cy, boardUnit * 7.5, y1, sr);
         gc.arcTo(boardUnit * 9.5, cy, boardUnit * 10., y0, sr);
-        gc.lineTo(boardUnit * 10., y0); // finish the first small arch
+        gc.lineTo(boardUnit * 10., y0); // finish the arch
         gc.lineTo(boardUnit * 11., y0);
         // Middle large arch:
         gc.arcTo(boardUnit * 11.5, y1, boardUnit * 14.5, boardUnit * 5.5, boardUnit * 24. / 5.);
         gc.arcTo(boardUnit * 17.5, y1, boardUnit * 18., y0, boardUnit * 24. / 5.);
-        gc.lineTo(boardUnit * 18., y0); // finish the middle large arch
+        gc.lineTo(boardUnit * 18., y0); // finish the arch
         gc.lineTo(boardUnit * 19., y0);
         // Second small arch:
         gc.arcTo(boardUnit * 19.5, cy, boardUnit * 21.5, y1, sr);
         gc.arcTo(boardUnit * 23.5, cy, boardUnit * 24., y0, sr);
-        gc.lineTo(boardUnit * 24., y0); // finish the second small arch
+        gc.lineTo(boardUnit * 24., y0); // finish the arch
         gc.lineTo(boardUnit * 29., y0);
         gc.stroke();                    // finish the bridge lower outline
         // Bridge top:
@@ -97,23 +98,22 @@ public class LePionDesTrousView extends Group {
         gc.lineTo(boardUnit * 23.5, 0);
         gc.stroke();
 
+        // Board title:
         gc.setFont(theme.getFont());
         gc.setFill(theme.getTextPaint());
         gc.fillText("Le pion des trous", boardUnit * 8.4, boardUnit * 2.);
 
-        gc.applyEffect(theme.getDropShadow());
-
-        return frill;
+        return board;
     }
 
     private Canvas initHoles(Canvas holes) {
-
         double du = boardUnit * 2.;
         double fu = boardUnit * 5.;
         double dx = boardUnit * 25.;
         double dy = boardUnit * 12.;
 
         GraphicsContext gc = holes.getGraphicsContext2D();
+        gc.setEffect(theme.getInnerShadow());
         gc.setFill(theme.getHolePaint());
 
         int boardSize = game.getBoardSize();
@@ -147,31 +147,28 @@ public class LePionDesTrousView extends Group {
         gc.fillOval(boardUnit * 19.5, fu, boardUnit, boardUnit);
         gc.fillOval(boardUnit * 22., fu, boardUnit, boardUnit);
 
-        gc.applyEffect(theme.getInnerShadow());
-
         return holes;
     }
 
     private Canvas initPawns(Canvas pawns) {
-        this.pawns = pawns;
-        this.pawns.setLayoutY(boardUnit * 11.); // push the pawns 'layer' below the scoreboard and decoration
+        pawns.setLayoutY(boardUnit * 11.); // push the pawns 'layer' below the scoreboard and decoration
 
         double du = boardUnit * 2.;
 
-        GraphicsContext gc = this.pawns.getGraphicsContext2D();
+        GraphicsContext gc = pawns.getGraphicsContext2D();
         gc.setEffect(theme.getDropShadow());
 
         int boardSize = game.getBoardSize();
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
                 if (!game.isEmpty(j, i)) {
-                    gc.setFill(theme.getOpponentPaint(game.getOpponentAt(j, i)));
+                    gc.setFill(theme.getPaint(game.getOpponentAt(j, i)));
                     gc.fillOval(boardUnit + j * du, boardUnit + i * du, boardUnit, boardUnit);
                 }
             }
         }
 
-        return this.pawns;
+        return pawns;
     }
 
     private Canvas initGlass(Canvas glass) {
@@ -181,6 +178,7 @@ public class LePionDesTrousView extends Group {
         return glass;
     }
 
+    /** Assumes the event's source is a rectangle with the edge a multiple of boardUnit. */
     private abstract class MouseEventHandler implements EventHandler<MouseEvent> {
 
         protected int lastCol = -1;
@@ -190,16 +188,10 @@ public class LePionDesTrousView extends Group {
         @Override
         public void handle(MouseEvent event) {
 
-            Object src = event.getSource();
-            if (!(src instanceof Canvas)) {
-                return;
-            }
-            Canvas canvas = (Canvas) src; // and assume the canvas is a square with the edge a multiple of boardUnit!
-
             int currCol = (int) ceil(event.getX() / boardUnit);
             int currRow = (int) ceil(event.getY() / boardUnit);
             if (currRow == 0 || currRow % 2 != 0 || currCol == 0 || currCol % 2 != 0) {
-                onHoleMiss(currCol, currRow, canvas);
+                onHoleMiss(currCol, currRow, event);
                 lastCol = lastRow = -1;
                 return;
             }
@@ -207,41 +199,41 @@ public class LePionDesTrousView extends Group {
             currCol = currCol / 2 - 1;
             currRow = currRow / 2 - 1;
             if (!game.isEmpty(currCol, currRow)) {
-                onPawn(currCol, currRow, canvas);
+                onPawn(currCol, currRow, event);
                 lastCol = lastRow = -1;
                 return;
             }
 
             if (currCol != lastCol || currRow != lastRow) {
-                onHole(currCol, currRow, canvas);
+                onHole(currCol, currRow, event);
                 lastCol = currCol;
                 lastRow = currRow;
             }
         }
 
-        protected void onHoleMiss(int currCol, int currRow, Canvas canvas) {}
+        protected void onHoleMiss(int currCol, int currRow, MouseEvent event) {}
 
-        protected abstract void onHole(int currCol, int currRow, Canvas canvas);
+        protected abstract void onHole(int currCol, int currRow, MouseEvent event);
 
-        protected void onPawn(int currCol, int currRow, Canvas canvas) { onHoleMiss(currCol, currRow, canvas); }
+        protected void onPawn(int currCol, int currRow, MouseEvent event) { onHoleMiss(currCol, currRow, event); }
     }
 
     private class HoverHandler extends MouseEventHandler {
 
         @Override
-        protected void onHoleMiss(int currCol, int currRow, Canvas canvas) {
-            canvas.setCursor(DEFAULT);
-            canvas.getGraphicsContext2D()
-                  .clearRect(boardUnit * (1 + lastCol * 2.), boardUnit * (1 + lastRow * 2.), boardUnit, boardUnit);
+        protected void onHoleMiss(int currCol, int currRow, MouseEvent event) {
+            glass.setCursor(DEFAULT);
+            glass.getGraphicsContext2D()
+                 .clearRect(boardUnit * (1 + lastCol * 2.), boardUnit * (1 + lastRow * 2.), boardUnit, boardUnit);
         }
 
         @Override
-        protected void onHole(int currCol, int currRow, Canvas canvas) {
-            onHoleMiss(currCol, currRow, canvas); // clear last hovered hole
+        protected void onHole(int currCol, int currRow, MouseEvent event) {
+            onHoleMiss(currCol, currRow, event); // clear last hovered hole
 
-            canvas.setCursor(HAND);
-            GraphicsContext gc = canvas.getGraphicsContext2D();
-            gc.setFill(theme.getOpponentTransparentPaint(game.getCurrentOpponent()));
+            glass.setCursor(HAND);
+            GraphicsContext gc = glass.getGraphicsContext2D();
+            gc.setFill(theme.getTransparentPaint(game.getCurrentOpponent()));
             gc.fillOval(boardUnit * (1 + currCol * 2.), boardUnit * (1 + currRow * 2.), boardUnit, boardUnit);
         }
     }
@@ -249,11 +241,11 @@ public class LePionDesTrousView extends Group {
     private class ClickHandler extends MouseEventHandler {
 
         @Override
-        protected void onHole(int currCol, int currRow, Canvas canvas) {
+        protected void onHole(int currCol, int currRow, MouseEvent event) {
             game.play(currCol, currRow);
 
             GraphicsContext gc = pawns.getGraphicsContext2D();
-            gc.setFill(theme.getOpponentPaint(game.getOpponentAt(currCol, currRow)));
+            gc.setFill(theme.getPaint(game.getOpponentAt(currCol, currRow)));
             gc.fillOval(boardUnit * (1 + currCol * 2.), boardUnit * (1 + currRow * 2.), boardUnit, boardUnit);
         }
     }

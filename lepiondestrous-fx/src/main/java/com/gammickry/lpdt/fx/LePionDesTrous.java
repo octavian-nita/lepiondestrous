@@ -1,10 +1,10 @@
 package com.gammickry.lpdt.fx;
 
 import com.gammickry.boardgame.MNBoard;
-import com.gammickry.boardgame.Opponent;
+import com.gammickry.boardgame.OpponentType;
 
-import static com.gammickry.boardgame.Opponent.LIGHT;
-import static com.gammickry.boardgame.Opponent.opponent;
+import static com.gammickry.boardgame.OpponentType.DARK;
+import static com.gammickry.boardgame.OpponentType.LIGHT;
 
 /**
  * @author Octavian Theodor NITA (http://github.com/octavian-nita)
@@ -12,11 +12,37 @@ import static com.gammickry.boardgame.Opponent.opponent;
  */
 public class LePionDesTrous {
 
-    private int boardSize;
+    private static class Player {
+
+        private int pawnsLeft = 42;
+
+        public final OpponentType type;
+
+        public Player(OpponentType type) {
+            if (type == null) {
+                throw new IllegalArgumentException("cannot use a null opponent type");
+            }
+            this.type = type;
+        }
+
+        public int pawnsLeft() { return pawnsLeft; }
+
+        public int play() {
+            if (pawnsLeft <= 0) {
+                throw new IllegalStateException("player '" + type + "' has no more pawns to play");
+            }
+            pawnsLeft--;
+            return type.piece();
+        }
+    }
 
     private MNBoard board;
 
-    private Opponent currentOpponent = LIGHT;
+    private int boardSize;
+
+    private int currentPlayer = 0;
+
+    private Player[] players = {new Player(LIGHT), new Player(DARK)};
 
     public LePionDesTrous() { this(14); }
 
@@ -32,12 +58,12 @@ public class LePionDesTrous {
 
     public boolean isEmpty(int col, int row) { return board.empty(col, row); }
 
-    public Opponent getCurrentOpponent() { return currentOpponent; }
+    public OpponentType getCurrentOpponent() { return players[currentPlayer].type; }
 
-    public Opponent getOpponentAt(int col, int row) { return opponent(board.at(col, row)); }
+    public OpponentType getOpponentAt(int col, int row) { return OpponentType.fromPiece(board.at(col, row)); }
 
     public void play(int col, int row) {
-        board.place(col, row, currentOpponent.value());
-        currentOpponent = currentOpponent.opponent();
+        board.place(col, row, players[currentPlayer].play());
+        currentPlayer = (currentPlayer + 1) % players.length;
     }
 }

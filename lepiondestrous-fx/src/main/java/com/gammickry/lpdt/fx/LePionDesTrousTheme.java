@@ -1,14 +1,15 @@
 package com.gammickry.lpdt.fx;
 
-import com.gammickry.boardgame.Opponent;
+import com.gammickry.boardgame.OpponentType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 
-import static com.gammickry.boardgame.Opponent.DARK;
-import static com.gammickry.boardgame.Opponent.LIGHT;
+import static com.gammickry.boardgame.OpponentType.DARK;
+import static com.gammickry.boardgame.OpponentType.LIGHT;
 import static javafx.scene.paint.Color.ANTIQUEWHITE;
+import static javafx.scene.paint.Color.WHITE;
 import static javafx.scene.paint.Color.web;
 import static javafx.scene.text.Font.loadFont;
 
@@ -42,16 +43,16 @@ public abstract class LePionDesTrousTheme {
 
     public abstract InnerShadow getInnerShadow();
 
-    public Paint getOpponentPaint(Opponent opponent) {
+    public Paint getPaint(OpponentType opponent) {
         return opponent == DARK ? getDarkPawnPaint() : opponent == LIGHT ? getLightPawnPaint() : null;
     }
 
-    public Paint getOpponentTransparentPaint(Opponent opponent) {
+    public Paint getTransparentPaint(OpponentType opponent) {
         return opponent == DARK ? getDarkPawnTransparentPaint()
                                 : opponent == LIGHT ? getLightPawnTransparentPaint() : null;
     }
 
-    public Paint getOpponentScorePaint(Opponent opponent) {
+    public Paint getScorePaint(OpponentType opponent) {
         return opponent == DARK ? getDarkScorePaint() : opponent == LIGHT ? getLightScorePaint() : null;
     }
 
@@ -92,12 +93,12 @@ public abstract class LePionDesTrousTheme {
         @Override
         public Paint getDarkScorePaint() { return darkScorePaint; }
 
-        private final Paint lightPawnPaint = web("#cfd8dc");
+        private final Paint lightPawnPaint = WHITE;
 
         @Override
         public Paint getLightPawnPaint() { return lightPawnPaint; }
 
-        private final Paint lightPawnTransparentPaint = web("#cfd8dc", 0.6);
+        private final Paint lightPawnTransparentPaint = web("#ffffff", 0.6);
 
         @Override
         public Paint getLightPawnTransparentPaint() { return lightPawnTransparentPaint; }
