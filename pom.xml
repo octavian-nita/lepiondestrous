@@ -10,18 +10,18 @@
   <packaging>pom</packaging>
 
   <name>Le pion des trous :: Parent Project</name>
-  <url>http://github.com/octavian-nita</url>
-
-  <modules>
-    <module>lepiondestrous-model</module>
-    <module>lepiondestrous-fx</module>
-    <module>lepiondestrous-opengl</module>
-  </modules>
+  <url>http://github.com/octavian-nita/lepiondestrous/</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
   </properties>
+
+  <modules>
+    <module>lepiondestrous-model</module>
+    <module>lepiondestrous-json</module>
+    <module>lepiondestrous-fx</module>
+  </modules>
 
   <build>
     <pluginManagement>

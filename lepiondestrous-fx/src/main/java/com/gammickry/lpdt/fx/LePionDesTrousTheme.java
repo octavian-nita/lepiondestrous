@@ -2,6 +2,7 @@ package com.gammickry.lpdt.fx;
 
 import com.gammickry.boardgame.OpponentType;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.Effect;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -39,9 +40,9 @@ public abstract class LePionDesTrousTheme {
 
     public abstract Paint getLightScorePaint();
 
-    public abstract DropShadow getDropShadow();
+    public abstract Effect getRaisedEffect();
 
-    public abstract InnerShadow getInnerShadow();
+    public abstract Effect getLoweredEffect();
 
     public Paint getPaint(OpponentType opponent) {
         return opponent == DARK ? getDarkPawnPaint() : opponent == LIGHT ? getLightPawnPaint() : null;
@@ -63,7 +64,7 @@ public abstract class LePionDesTrousTheme {
         @Override
         public Font getFont() { return font; }
 
-        private final Paint textPaint = web("#FFEB3B");
+        private final Paint textPaint = web("#ffc107");
 
         @Override
         public Paint getTextPaint() { return textPaint; }
@@ -98,7 +99,7 @@ public abstract class LePionDesTrousTheme {
         @Override
         public Paint getLightPawnPaint() { return lightPawnPaint; }
 
-        private final Paint lightPawnTransparentPaint = web("#ffffff", 0.6);
+        private final Paint lightPawnTransparentPaint = web("#fff", 0.6);
 
         @Override
         public Paint getLightPawnTransparentPaint() { return lightPawnTransparentPaint; }
@@ -108,22 +109,26 @@ public abstract class LePionDesTrousTheme {
         @Override
         public Paint getLightScorePaint() { return lightScorePaint; }
 
-        private final DropShadow dropShadow = new DropShadow(5, 0, 2, web("#000", 0.45));
-
-        {
-            dropShadow.setInput(new DropShadow(10, 0, 2, web("#000", 0.35)));
-        }
+        private final Effect raisedEffect;
 
         @Override
-        public DropShadow getDropShadow() { return dropShadow; }
+        public Effect getRaisedEffect() { return raisedEffect; }
 
-        private final InnerShadow innerShadow = new InnerShadow(5, 0, 2, web("#000", 0.45));
-
-        {
-            innerShadow.setInput(new InnerShadow(10, 0, 2, web("#000", 0.35)));
-        }
+        private final Effect loweredEffect;
 
         @Override
-        public InnerShadow getInnerShadow() { return innerShadow; }
+        public Effect getLoweredEffect() { return loweredEffect; }
+
+        {   // Initialization block:
+            DropShadow ds1 = new DropShadow(10, 0, 2, web("#000", 0.65));
+            DropShadow ds2 = new DropShadow(15, 0, 2, web("#000", 0.45));
+            ds2.setInput(ds1);
+            raisedEffect = ds2;
+
+            InnerShadow is1 = new InnerShadow(10, 0, 2, web("#000", 0.65));
+            InnerShadow is2 = new InnerShadow(15, 0, 2, web("#000", 0.45));
+            is2.setInput(is1);
+            loweredEffect = is2;
+        }
     };
 }

@@ -61,7 +61,7 @@ public class LePionDesTrousView extends Group {
         double cy = boardUnit * 7.5; // small arch control point y
 
         GraphicsContext gc = board.getGraphicsContext2D();
-        gc.setEffect(theme.getDropShadow());
+        gc.setEffect(theme.getRaisedEffect());
 
         // Board background:
         gc.setFill(theme.getBoardPaint());
@@ -113,7 +113,7 @@ public class LePionDesTrousView extends Group {
         double dy = boardUnit * 12.;
 
         GraphicsContext gc = holes.getGraphicsContext2D();
-        gc.setEffect(theme.getInnerShadow());
+        gc.setEffect(theme.getLoweredEffect());
         gc.setFill(theme.getHolePaint());
 
         int boardSize = game.getBoardSize();
@@ -156,7 +156,7 @@ public class LePionDesTrousView extends Group {
         double du = boardUnit * 2.;
 
         GraphicsContext gc = pawns.getGraphicsContext2D();
-        gc.setEffect(theme.getDropShadow());
+        gc.setEffect(theme.getRaisedEffect());
 
         int boardSize = game.getBoardSize();
         for (int i = 0; i < boardSize; i++) {

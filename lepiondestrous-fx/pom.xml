@@ -12,16 +12,14 @@
   <artifactId>lepiondestrous-fx</artifactId>
   <packaging>jar</packaging>
 
+  <name>Le pion des trous :: JavaFX GUI</name>
+
   <build>
     <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
-          </configuration>
-        </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
 
@@ -29,6 +27,11 @@
     <dependency>
       <groupId>com.gammickry</groupId>
       <artifactId>lepiondestrous-model</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.gammickry</groupId>
+      <artifactId>lepiondestrous-json</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>

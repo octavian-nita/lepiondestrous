@@ -84,6 +84,10 @@ public class MNBoard {
         }
 
         int loc = rows * row + col;
+        if (grid[loc] == EMPTY) {
+            throw new IllegalArgumentException("cannot displace an 'empty' location");
+        }
+
         int piece = grid[loc];
         grid[loc] = EMPTY;
 
