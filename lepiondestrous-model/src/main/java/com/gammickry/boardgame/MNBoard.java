@@ -14,15 +14,15 @@ import static java.lang.System.arraycopy;
  */
 public class MNBoard {
 
-    public static final int EMPTY = 0;
-
     protected final int cols;
 
     protected final int rows;
 
     protected final int[] grid;
 
-    public MNBoard(int cols, int rows) {
+    protected final int emptyValue;
+
+    public MNBoard(int cols, int rows, int emptyValue) {
         if (cols <= 0) {
             throw new IllegalArgumentException("the number of columns in a m×n board cannot be <= 0");
         }
@@ -32,9 +32,12 @@ public class MNBoard {
         this.cols = cols;
         this.rows = rows;
         this.grid = new int[this.rows * this.cols];
+        this.emptyValue = emptyValue;
     }
 
-    public MNBoard(int size) { this(size, size); }
+    public MNBoard(int cols, int rows) { this(cols, rows, 0); }
+
+    public MNBoard(int size) { this(size, size, 0); }
 
     public MNBoard(MNBoard board) {
         if (board == null) {
@@ -43,12 +46,11 @@ public class MNBoard {
         cols = board.cols;
         rows = board.rows;
         grid = new int[rows * cols];
+        emptyValue = board.emptyValue;
         arraycopy(board.grid, 0, grid, 0, grid.length);
     }
 
-    public final boolean onTheBoard(int col, int row) {
-        return 0 <= col && col < cols && 0 <= row && row < rows;
-    }
+    public final boolean onTheBoard(int col, int row) { return 0 <= col && col < cols && 0 <= row && row < rows; }
 
     public int at(int col, int row) {
         if (!onTheBoard(col, row)) {
@@ -62,14 +64,14 @@ public class MNBoard {
         if (!onTheBoard(col, row)) {
             throw new IllegalArgumentException("the specified location is off the board");
         }
-        return grid[rows * row + col] == EMPTY;
+        return grid[rows * row + col] == emptyValue;
     }
 
     public MNBoard place(int col, int row, int piece) {
         if (!onTheBoard(col, row)) {
             throw new IllegalArgumentException("the specified location is off the board");
         }
-        if (piece == EMPTY) {
+        if (piece == emptyValue) {
             throw new IllegalArgumentException("cannot place an 'empty' piece");
         }
 
@@ -84,12 +86,12 @@ public class MNBoard {
         }
 
         int loc = rows * row + col;
-        if (grid[loc] == EMPTY) {
+        if (grid[loc] == emptyValue) {
             throw new IllegalArgumentException("cannot displace an 'empty' location");
         }
 
         int piece = grid[loc];
-        grid[loc] = EMPTY;
+        grid[loc] = emptyValue;
 
         return piece;
     }

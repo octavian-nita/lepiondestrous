@@ -2,6 +2,7 @@ package com.gammickry.lpdt.fx;
 
 import com.gammickry.boardgame.MNBoard;
 import com.gammickry.boardgame.OpponentType;
+import com.gammickry.lpdt.Player;
 
 import static com.gammickry.boardgame.OpponentType.DARK;
 import static com.gammickry.boardgame.OpponentType.LIGHT;
@@ -11,30 +12,6 @@ import static com.gammickry.boardgame.OpponentType.LIGHT;
  * @version 1.0, May 19, 2015
  */
 public class LePionDesTrous {
-
-    private static class Player {
-
-        private int pawnsLeft = 42;
-
-        public final OpponentType type;
-
-        public Player(OpponentType type) {
-            if (type == null) {
-                throw new IllegalArgumentException("cannot use a null opponent type");
-            }
-            this.type = type;
-        }
-
-        public int pawnsLeft() { return pawnsLeft; }
-
-        public int play() {
-            if (pawnsLeft <= 0) {
-                throw new IllegalStateException("player '" + type + "' has no more pawns to play");
-            }
-            pawnsLeft--;
-            return type.piece();
-        }
-    }
 
     private MNBoard board;
 

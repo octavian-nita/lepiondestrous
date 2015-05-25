@@ -6,14 +6,6 @@ package com.gammickry.boardgame;
  */
 public enum OpponentType {
 
-    NONE {
-        @Override
-        public int piece() { return MNBoard.EMPTY; }
-
-        @Override
-        public OpponentType opponent() { return NONE; }
-    },
-
     LIGHT {
         @Override
         public int piece() { return 1; }
@@ -34,7 +26,5 @@ public enum OpponentType {
 
     public abstract OpponentType opponent();
 
-    private static final OpponentType[] legend = {NONE, LIGHT, DARK};
-
-    public static OpponentType fromPiece(int piece) { return legend[piece % legend.length]; }
+    public static OpponentType fromPiece(int piece) { return piece == 1 ? LIGHT : piece == 2 ? DARK : null; }
 }
