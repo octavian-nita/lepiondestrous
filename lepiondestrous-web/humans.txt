@@ -1,0 +1,14 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+
+    Octavian Theodor Nita -- Developer -- http://github.com/octavian-nita/
+
+# THANKS
+
+    Pierre Callens (https://www.facebook.com/pierre.callens.52?ref=br_rs) for creating this very nice board game
+
+# TECHNOLOGY COLOPHON
+
+    HTML5, CSS3
