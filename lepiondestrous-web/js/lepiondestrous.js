@@ -11,9 +11,21 @@ window.addEventListener('load', function (event) {
   'use strict';
 
   /** @constructor */
-  function GameView(gameOptions) {}
+  function GameView(parent, options) {
+    var width, height;
 
-  GameView.prototype.draw = function () {}
+    if (!(this instanceof GameView)) { return new GameView(parent, options); }
 
-  new GameView().draw();
+    if (!parent) { return; }
+    if (!options) { options = {}; }
+
+    width = parent.offsetWidth || 435;
+    height = parent.offsetHeight || 600;
+
+    // display vertical board and ignore orientation for the moment
+  }
+
+  GameView.prototype.draw = function () {};
+
+  GameView(document.getElementsByClassName('lepiondestrous')[0]).draw();
 }, false);
