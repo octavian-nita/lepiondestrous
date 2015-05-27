@@ -31,18 +31,31 @@ body {
   overflow: auto;
   margin: 0 auto;
   padding: 0 15px;
-  max-width: 1600px;
+  max-width: 1200px;
+  height: 100%;
   min-height: 100%;
 
   /* see http://demosthenes.info/blog/606/Molten-Leading-Exploring-The-CSS-Relationship-Between-Font-Size-Line-Height-and-Margin */
   font: 1.6rem/1.5 "Chantelli Antiqua", fantasy;
   -webkit-font-smoothing: subpixel-antialiased;
   -webkit-text-stroke: 1px rgba(16, 16, 16, 0.1);
-  zoom: 1;
+
+  /* see http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css */
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  transform-style: preserve-3d;
 }
 
 [role=main] {
   margin: 0 auto;
-  border: 1px solid #ccc;
-  box-shadow: 1px 1px 0 #fff, 2px 2px 0 #ccc;
+  border: 1px solid saddlebrown;
+  width: 435px;
+  max-width: 435px;
+  height: 600px;
+  max-height: 600px;
+
+  /* Vertical align */
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }
