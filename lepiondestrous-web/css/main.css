@@ -20,42 +20,41 @@
   url('../font/chantelli-antiqua.svg#chantelli-antiqua') format('svg');
 }
 
-/* see http://www.paulirish.com/2012/box-sizing-border-box-ftw; apply a natural box layout model to all elements */
+/* See http://www.paulirish.com/2012/box-sizing-border-box-ftw; apply a natural box layout model to all elements */
 *, *:before, *:after { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
-/* see http://camendesign.com/code/developpeurs_sans_frontieres to style html, body and limit page wrappers! */
-html { height: 100%; overflow: auto; background: #fff; color: #555; font-size: 62.5%; }
+/* See http://camendesign.com/code/developpeurs_sans_frontieres to style html, body and limit page wrappers */
+html { overflow: auto; height: 100%; background: #fff; color: #555; font-size: 62.5%; }
 
 body {
   position: relative;
   overflow: auto;
   margin: 0 auto;
-  padding: 0 15px;
-  max-width: 1200px;
+
+  /* Helps with vertical alignment: */
   height: 100%;
+  /* For background images applied to html and body: */
   min-height: 100%;
 
-  /* see http://demosthenes.info/blog/606/Molten-Leading-Exploring-The-CSS-Relationship-Between-Font-Size-Line-Height-and-Margin */
+  /* See http://demosthenes.info/blog/606/Molten-Leading-Exploring-The-CSS-Relationship-Between-Font-Size-Line-Height-and-Margin */
   font: 1.6rem/1.5 "Chantelli Antiqua", fantasy;
   -webkit-font-smoothing: subpixel-antialiased;
   -webkit-text-stroke: 1px rgba(16, 16, 16, 0.1);
 
-  /* see http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css */
+  /* See http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css */
   -webkit-transform-style: preserve-3d;
   -moz-transform-style: preserve-3d;
   transform-style: preserve-3d;
 }
 
-[role=main] {
+.lepiondestrous {
   margin: 0 auto;
-  border: 1px solid saddlebrown;
-  width: 435px;
-  max-width: 435px;
-  height: 600px;
-  max-height: 600px;
 
-  /* Vertical align */
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
+  /* Vertical align: */
+  position: relative; top: 50%; transform: translateY(-50%);
+
+  /* Size the game area / board: */
+  width: 320px; height: 568px;
+
+  max-width: 435px; max-height: 600px;
 }
