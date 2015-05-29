@@ -54,7 +54,6 @@ body {
   position: relative; top: 50%; transform: translateY(-50%);
 
   /* Size the game area / board: */
-  width: 320px; height: 568px;
-
-  max-width: 435px; max-height: 600px;
+  width: 320px; height: 568px; /* iPhone 5 portrait */
+  width: 568px; height: 320px; /* iPhone 5 landscape */
 }

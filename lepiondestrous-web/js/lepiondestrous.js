@@ -11,49 +11,69 @@ window.addEventListener('load', function (event) {
   'use strict';
 
   var
-    THEME = {
+    THEME = { // http://www.materialui.co/colors
       boardDark: '#795548',
-      boardLight: '#d7ccc8'
+      boardLight: '#8d6e63'
     },
-    BOARD_RATIO = 29 / 40;
+    BOARD_GEOMETRY = {
+      w: 29,
+      h: 40,
+      r: 20 / 40
+    };
 
   /** @constructor */
   function GameView(parent, options) {
-    var cnv, ctx, boundsRatio, edge;
+    var cnv, ctx, boundsRatio, gameArea, scoreAreas;
 
     if (!(this instanceof GameView)) { return new GameView(parent, options); }
 
     if (!parent) { return; }
     if (!options) { options = {}; }
 
-    boundsRatio = parent.offsetWidth / parent.offsetHeight;
-
     cnv = document.createElement('canvas');
     cnv.width = parent.offsetWidth;
     cnv.height = parent.offsetHeight;
 
-    ctx = cnv.getContext('2d');
-    //ctx.translate(0.5, 0.5);
+    gameArea = {};
+    scoreAreas = [];
+
+    boundsRatio = cnv.width / cnv.height;
+
+    if (BOARD_GEOMETRY.r > boundsRatio) { // http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html
+      gameArea.w = cnv.width;
+      gameArea.h = 40 * (cnv.width / 29);
+    } else {
+      gameArea.w = 29 * (cnv.height / 40);
+      gameArea.h = cnv.height - 10;
+    }
+
+    ctx = cnv.getContext('2d'); // consider http://www.mobtowers.com/html5-canvas-crisp-lines-every-time/
 
     ctx.fillStyle = THEME.boardLight;
     ctx.fillRect(0, 0, cnv.width, cnv.height);
 
+    ctx.fillStyle = THEME.boardDark;
     ctx.shadowOffsetX = 0;
+
+    ctx.save();
     ctx.shadowOffsetY = 2;
     ctx.shadowBlur = 10;
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+    ctx.fillRect(0, 0, gameArea.w, gameArea.h);
+    ctx.restore();
 
-    /*ctx.fillStyle = THEME.boardDark;
-    ctx.fillRect(0, 20, cnv.width, 120);
-    ctx.restore();*/
-
-    ctx.fillStyle = THEME.boardDark;
-    ctx.fillRect(50, 190, 150, 120);
+    ctx.save();
+    ctx.shadowOffsetY = 2;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+    ctx.fillRect(0, 0, gameArea.w, gameArea.h);
+    ctx.restore();
 
     parent.appendChild(cnv);
   }
 
   GameView.prototype.draw = function () {};
 
+  // Display the main game view:
   GameView(document.getElementsByClassName('lepiondestrous')[0]).draw();
 }, false);
