@@ -13,66 +13,68 @@ window.addEventListener('load', function (event) {
   var
     THEME = { // http://www.materialui.co/colors
       boardDark: '#795548',
-      boardLight: '#8d6e63'
-    },
-    BOARD_GEOMETRY = {
-      w: 29,
-      h: 40,
-      r: 20 / 40
+      boardLight: '#8d6e63',
+      raisedEffect: [
+        {offsetX: 0, offsetY: 2, blur: 10, color: 'rgba(0, 0, 0, 0.45)'},
+        {offsetX: 0, offsetY: 2, blur: 15, color: 'rgba(0, 0, 0, 0.65)'}
+      ],
+      loweredEffect: [
+        {},
+        {}
+      ]
     };
 
   /** @constructor */
   function GameView(parent, options) {
-    var cnv, ctx, boundsRatio, gameArea, scoreAreas;
-
     if (!(this instanceof GameView)) { return new GameView(parent, options); }
 
     if (!parent) { return; }
     if (!options) { options = {}; }
 
-    cnv = document.createElement('canvas');
-    cnv.width = parent.offsetWidth;
-    cnv.height = parent.offsetHeight;
+    var canvas, boundsRatio, boardWU = 29, boardHU = 40, boardRatio = boardWU / boardHU;
 
-    gameArea = {};
-    scoreAreas = [];
+    this.playArea = {};
+    this.scoreAreas = [];
 
-    boundsRatio = cnv.width / cnv.height;
+    canvas = document.createElement('canvas');
+    canvas.width = parent.offsetWidth;
+    canvas.height = parent.offsetHeight;
+    boundsRatio = canvas.width / canvas.height;
 
-    if (BOARD_GEOMETRY.r > boundsRatio) { // http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html
-      gameArea.w = cnv.width;
-      gameArea.h = 40 * (cnv.width / 29);
+    if (boardRatio > boundsRatio) { // http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html
+      this.playArea.edge = canvas.width;
+      this.playArea.x = 0;
+      //this.playArea.height = boardHU * (canvas.width / boardWU);
     } else {
-      gameArea.w = 29 * (cnv.height / 40);
-      gameArea.h = cnv.height - 10;
+      //this.playArea.width = boardWU * (canvas.height / boardHU);
+      this.playArea.edge = canvas.height;
+      this.playArea.y = 0;
     }
 
-    ctx = cnv.getContext('2d'); // consider http://www.mobtowers.com/html5-canvas-crisp-lines-every-time/
-
-    ctx.fillStyle = THEME.boardLight;
-    ctx.fillRect(0, 0, cnv.width, cnv.height);
-
-    ctx.fillStyle = THEME.boardDark;
-    ctx.shadowOffsetX = 0;
-
-    ctx.save();
-    ctx.shadowOffsetY = 2;
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-    ctx.fillRect(0, 0, gameArea.w, gameArea.h);
-    ctx.restore();
-
-    ctx.save();
-    ctx.shadowOffsetY = 2;
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-    ctx.fillRect(0, 0, gameArea.w, gameArea.h);
-    ctx.restore();
-
-    parent.appendChild(cnv);
+    this.draw(canvas);
+    parent.appendChild(canvas);
   }
 
-  GameView.prototype.draw = function () {};
+  /** Consider http://www.mobtowers.com/html5-canvas-crisp-lines-every-time/ when drawing. */
+  GameView.prototype.draw = function (canvas) {
+    if (!canvas) { return; }
+    var ctx = canvas.getContext('2d'), i, len, eff;
+
+    ctx.fillStyle = THEME.boardLight;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = THEME.boardDark;
+    eff = THEME.raisedEffect;
+    for (i = 0, len = eff.length; i < len; i++) {
+      ctx.save();
+      ctx.shadowOffsetX = eff[i].offsetX;
+      ctx.shadowOffsetY = eff[i].offsetY;
+      ctx.shadowBlur = eff[i].blur;
+      ctx.shadowColor = eff[i].color;
+      ctx.fillRect(0, 0, this.playArea.edge, this.playArea.edge);
+      ctx.restore();
+    }
+  };
 
   // Display the main game view:
   GameView(document.getElementsByClassName('lepiondestrous')[0]).draw();
