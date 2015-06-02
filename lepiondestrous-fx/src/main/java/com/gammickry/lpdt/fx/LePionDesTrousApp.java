@@ -24,7 +24,7 @@ public class LePionDesTrousApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        LePionDesTrousView lePionDesTrousView = new LePionDesTrousView(11);
+        LePionDesTrousView lePionDesTrousView = new LePionDesTrousView(15);
 
         stage.setScene(new Scene(new StackPane(lePionDesTrousView)));
         stage.setTitle("Le Pion Des Trous :: FX, v. 0.0.1");
