@@ -56,5 +56,5 @@ body {
   /* Size the game area / board: */
   width: 568px; height: 320px; /* iPhone 5 landscape */
   width: 320px; height: 568px; /* iPhone 5 portrait */
-  width: 600px; height: 800px; /* iPhone 5 portrait */
+  width: 550px; height: 750px; /* iPhone 5 portrait */
 }

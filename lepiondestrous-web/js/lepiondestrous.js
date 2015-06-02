@@ -26,24 +26,25 @@ window.addEventListener('load', function (event) {
     if (!parent) { return; }
     if (!options) { options = {}; }
 
-    var boardRatio = 11 / 19, boundsRatio = parent.offsetWidth / parent.offsetHeight, longEdge;
-    if (boardRatio < boundsRatio) { // http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html
-      return; // currently, we do not support 'landscape' layout
+    this.board = {};
+
+    var boardRatio = 14 / 19, boundsRatio = parent.offsetWidth / parent.offsetHeight;
+    if (boardRatio > boundsRatio) { // http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html
+      this.board.width = Math.min(parent.offsetWidth, 504);
+      this.board.height = this.board.width / boardRatio;
+    } else {
+      this.board.height = Math.min(parent.offsetWidth, 695);
+      this.board.width = this.board.height * boardRatio;
     }
 
-    longEdge = Math.min(parent.offsetWidth.width / boardRatio, 695);
-    this.board = {
-      orientation: 'portrait',
-      width: longEdge * boardRatio,
-      height: longEdge
-    };
     this.board.x = (parent.offsetWidth - this.board.width ) / 2;
     this.board.y = (parent.offsetHeight - this.board.height ) / 2;
-    this.board.unit = this.board.height / 40;
+    this.board.unit = this.board.height / 19;
 
     this.canvas = document.createElement('canvas');
     this.canvas.width = parent.offsetWidth;
     this.canvas.height = parent.offsetHeight;
+
     this.render();
     parent.appendChild(this.canvas);
   }
@@ -54,10 +55,10 @@ window.addEventListener('load', function (event) {
     var
       ctx = this.canvas.getContext('2d'),
       brd = this.board, u = brd.unit,
-      sr = 4 * u,
-      y0 = 11 * u,
-      y1 = 6.5 * u,
-      cy = 7.5 * u;
+      sr = 2 * u,
+      y0 = 5 * u,
+      y1 = 3 * u,
+      cy = 3.5 * u;
     ctx.save();
 
     ctx.fillStyle = T.boardLight;
@@ -77,7 +78,7 @@ window.addEventListener('load', function (event) {
     // Board decoration:
     ctx.beginPath();
     ctx.moveTo(brd.x, y0);
-    ctx.lineTo(5 * u, y0);
+    ctx.lineTo(2.5 * u, y0);
     // First small arch:
     ctx.arcTo(5.5 * u, cy, 7.5 * u, y1, sr);
     ctx.arcTo(9.5 * u, cy, 10 * u, y0, sr);
