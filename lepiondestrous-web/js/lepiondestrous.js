@@ -55,10 +55,10 @@ window.addEventListener('load', function (event) {
     var
       ctx = this.canvas.getContext('2d'),
       brd = this.board, u = brd.unit,
-      sr = 2 * u,
+      cr = 1.4 * u,
+      cy = 3.3 * u,
       y0 = 5 * u,
-      y1 = 3 * u,
-      cy = 3.5 * u;
+      y1 = 3 * u;
     ctx.save();
 
     ctx.fillStyle = T.boardLight;
@@ -73,36 +73,52 @@ window.addEventListener('load', function (event) {
     ctx.shadowColor = T.raisedEffect.color;
 
     ctx.fillRect(brd.x, brd.y, brd.width, brd.height);
-    ctx.translate(0, brd.y);
+    ctx.translate(brd.x, brd.y);
+
+    ctx.save();
+    ctx.strokeStyle = '#646464';
+    ctx.beginPath();
+    for (var i = 0; i < 13; i++) {
+      ctx.moveTo((i + 1) * u, 0);
+      ctx.lineTo((i + 1) * u, brd.height);
+    }
+    for (i = 0; i < 18; i++) {
+      ctx.moveTo(0, (i + 1) * u);
+      ctx.lineTo(brd.width, (i + 1) * u);
+    }
+    ctx.stroke();
+    ctx.restore();
 
     // Board decoration:
     ctx.beginPath();
-    ctx.moveTo(brd.x, y0);
+    ctx.moveTo(0, y0);
     ctx.lineTo(2.5 * u, y0);
+
     // First small arch:
-    ctx.arcTo(5.5 * u, cy, 7.5 * u, y1, sr);
-    ctx.arcTo(9.5 * u, cy, 10 * u, y0, sr);
-    ctx.lineTo(10 * u, y0); // finish the arch
-    ctx.lineTo(11 * u, y0);
+    ctx.arcTo(2.7 * u, cy, 3.5 * u, y1, cr);
+    ctx.arcTo(4.3 * u, cy, 4.5 * u, y0, cr);
+    ctx.lineTo(4.5 * u, y0); // finish the arch
+    ctx.lineTo(5.5 * u, y0);
     // Middle large arch:
-    ctx.arcTo(11.5 * u, y1, 14.5 * u, 5.5 * u, 24 * u / 5);
-    ctx.arcTo(17.5 * u, y1, 18 * u, y0, 24 * u / 5);
-    ctx.lineTo(18 * u, y0); // finish the arch
-    ctx.lineTo(19 * u, y0);
+    ctx.arcTo(5.9 * u, 3 * u, 7 * u, 2.5 * u, 2 * cr);
+    //ctx.arcTo(8.1 * u, 4 * u, 9.5 * u, y0, 2 * cr);
+    /*ctx.lineTo(9 * u, y0); // finish the arch
+    ctx.lineTo(10 * u, y0);*/
+
     // Second small arch:
-    ctx.arcTo(19.5 * u, cy, 21.5 * u, y1, sr);
-    ctx.arcTo(23.5 * u, cy, 24 * u, y0, sr);
-    ctx.lineTo(24 * u, y0); // finish the arch
-    ctx.lineTo(29 * u, y0);
+    /*ctx.arcTo(19.5 * u, cy, 21.5 * u, y1, sr);
+     ctx.arcTo(23.5 * u, cy, 24 * u, y0, sr);
+     ctx.lineTo(24 * u, y0); // finish the arch
+     ctx.lineTo(29 * u, y0);*/
     ctx.stroke();           // finish the bridge lower outline
 
     // Bridge top:
-    ctx.beginPath();
-    ctx.moveTo(5.5 * u, 0);
-    ctx.lineTo(5.5 * u, 3 * u);
-    ctx.lineTo(23.5 * u, 3 * u);
-    ctx.lineTo(23.5 * u, 0);
-    ctx.stroke();
+    /*ctx.beginPath();
+     ctx.moveTo(5.5 * u, 0);
+     ctx.lineTo(5.5 * u, 3 * u);
+     ctx.lineTo(23.5 * u, 3 * u);
+     ctx.lineTo(23.5 * u, 0);
+     ctx.stroke();*/
 
     /*ctx.lineWidth = 1;
      ctx.font = '20px \'Chantelli Antiqua\'';
