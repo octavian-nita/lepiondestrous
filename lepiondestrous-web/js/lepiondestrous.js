@@ -6,6 +6,7 @@ window.addEventListener('load', function (event) {
 
   var
     T = { // http://www.materialui.co/colors
+      label: 'Le pion des trous',
       text: '#ffc107',
       boardDark: '#795548',
       boardLight: '#8d6e63',
@@ -49,10 +50,8 @@ window.addEventListener('load', function (event) {
     var
       ctx = this.canvas.getContext('2d'),
       brd = this.board, u = brd.unit,
-      y0 = 5 * u,
-      y1 = 3 * u,
-      cr = 2 * u,
-      cy = 3.5 * u;
+      y0 = 5 * u, cr = 1.6 * u, cy = 3.4 * u,
+      tm;
     ctx.save();
 
     ctx.fillStyle = T.boardLight;
@@ -68,21 +67,22 @@ window.addEventListener('load', function (event) {
 
     ctx.fillRect(brd.x, brd.y, brd.width, brd.height);
     ctx.translate(brd.x, brd.y); // move the origin to the board top left corner
+    ctx.shadowBlur /= (brd.unit / 10);
 
     // [DEBUG grid]
-    ctx.save();
-    ctx.strokeStyle = '#646464';
-    ctx.beginPath();
-    for (var i = 0; i < 13; i++) {
-      ctx.moveTo((i + 1) * u, 0);
-      ctx.lineTo((i + 1) * u, brd.height);
-    }
-    for (i = 0; i < 18; i++) {
-      ctx.moveTo(0, (i + 1) * u);
-      ctx.lineTo(brd.width, (i + 1) * u);
-    }
-    ctx.stroke();
-    ctx.restore();
+    /*ctx.save();
+     ctx.strokeStyle = '#646464';
+     ctx.beginPath();
+     for (var i = 0; i < 13; i++) {
+     ctx.moveTo((i + 1) * u, 0);
+     ctx.lineTo((i + 1) * u, brd.height);
+     }
+     for (i = 0; i < 18; i++) {
+     ctx.moveTo(0, (i + 1) * u);
+     ctx.lineTo(brd.width, (i + 1) * u);
+     }
+     ctx.stroke();
+     ctx.restore();*/
     // [/DEBUG]
 
     // Board decoration:
@@ -91,36 +91,34 @@ window.addEventListener('load', function (event) {
     ctx.lineTo(2.5 * u, y0);
 
     // First small arch:
-    ctx.arcTo(2.7 * u, cy, 3.5 * u, y1, cr);
-    //ctx.lineTo(3.5 * u, y1);
-    ctx.arcTo(4.3 * u, cy, 4.5 * u, y0, cr);
+    ctx.arcTo(2.6 * u, cy, 3.5 * u, 3 * u, cr);
+    ctx.arcTo(4.4 * u, cy, 4.5 * u, y0, cr);
     ctx.lineTo(4.5 * u, y0); // finish the arch
     ctx.lineTo(5.5 * u, y0);
     // Middle large arch:
-    ctx.arcTo(5.7 * u, 2.9 * u, 7 * u, 2.5 * u, cr);
-    ctx.arcTo(8.3 * u, 2.9 * u, 8.5 * u, y0, cr);
+    ctx.arcTo(5.6 * u, 2.95 * u, 7 * u, 2.5 * u, cr + 0.5 * u);
+    ctx.arcTo(8.4 * u, 2.95 * u, 8.5 * u, y0, cr + 0.5 * u);
     ctx.lineTo(8.5 * u, y0); // finish the arch
     ctx.lineTo(9.5 * u, y0);
 
     // Second small arch:
-    /*ctx.arcTo(19.5 * u, cy, 21.5 * u, y1, sr);
-     ctx.arcTo(23.5 * u, cy, 24 * u, y0, sr);
-     ctx.lineTo(24 * u, y0); // finish the arch
-     ctx.lineTo(29 * u, y0);*/
-    ctx.stroke();           // finish the bridge lower outline
+    ctx.arcTo(9.6 * u, cy, 10.5 * u, 3 * u, cr);
+    ctx.arcTo(11.4 * u, cy, 11.5 * u, y0, cr);
+    ctx.lineTo(11.5 * u, y0); // finish the arch
+    ctx.lineTo(14 * u, y0);
+    ctx.stroke(); // finish the bridge lower outline
 
     // Bridge top:
-    /*ctx.beginPath();
-     ctx.moveTo(5.5 * u, 0);
-     ctx.lineTo(5.5 * u, 3 * u);
-     ctx.lineTo(23.5 * u, 3 * u);
-     ctx.lineTo(23.5 * u, 0);
-     ctx.stroke();*/
+    ctx.beginPath();
+    ctx.moveTo(3 * u, 0);
+    ctx.lineTo(3 * u, 2 * u);
+    ctx.lineTo(11 * u, 2 * u);
+    ctx.lineTo(11 * u, 0);
+    ctx.stroke();
 
-    /*ctx.lineWidth = 1;
-     ctx.font = '20px \'Chantelli Antiqua\'';
-     ctx.fillStyle = T.text;
-     ctx.fillText("Le pion des trous", 7.5 * u, 2 * u);*/
+    ctx.font = (brd.unit * 8 / 9) + 'px \'Chantelli Antiqua\'';
+    ctx.fillStyle = T.text;
+    ctx.fillText(T.label, (brd.width - ctx.measureText(T.label).width) / 2, 1.3 * u);
 
     ctx.restore();
   };
