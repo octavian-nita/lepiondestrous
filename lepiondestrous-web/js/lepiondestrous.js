@@ -41,6 +41,7 @@ window.addEventListener('load', function (event) {
     this.canvas.height = parent.offsetHeight; // ... its parent
 
     this.render();
+    parent.innerHTML = '';
     parent.appendChild(this.canvas);
   }
 
