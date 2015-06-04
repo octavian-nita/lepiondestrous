@@ -1,12 +1,6 @@
 /*jshint browser: true, devel: true, indent: 2, maxerr: 50, maxlen: 120 */
 /*global define: true, module: true, exports: true */
 
-//
-// 01. Define the game play (gameplay)
-// 02. Define the game view / graphics
-// 03. Instantiate the game view and render it
-//
-
 window.addEventListener('load', function (event) {
   'use strict';
 
@@ -42,8 +36,8 @@ window.addEventListener('load', function (event) {
     this.board.unit = this.board.height / 19;
 
     this.canvas = document.createElement('canvas');
-    this.canvas.width = parent.offsetWidth;
-    this.canvas.height = parent.offsetHeight;
+    this.canvas.width = parent.offsetWidth;   // the canvas fills
+    this.canvas.height = parent.offsetHeight; // ... its parent
 
     this.render();
     parent.appendChild(this.canvas);
@@ -55,10 +49,10 @@ window.addEventListener('load', function (event) {
     var
       ctx = this.canvas.getContext('2d'),
       brd = this.board, u = brd.unit,
-      cr = 1.4 * u,
-      cy = 3.3 * u,
       y0 = 5 * u,
-      y1 = 3 * u;
+      y1 = 3 * u,
+      cr = 2 * u,
+      cy = 3.5 * u;
     ctx.save();
 
     ctx.fillStyle = T.boardLight;
@@ -73,8 +67,9 @@ window.addEventListener('load', function (event) {
     ctx.shadowColor = T.raisedEffect.color;
 
     ctx.fillRect(brd.x, brd.y, brd.width, brd.height);
-    ctx.translate(brd.x, brd.y);
+    ctx.translate(brd.x, brd.y); // move the origin to the board top left corner
 
+    // [DEBUG grid]
     ctx.save();
     ctx.strokeStyle = '#646464';
     ctx.beginPath();
@@ -88,6 +83,7 @@ window.addEventListener('load', function (event) {
     }
     ctx.stroke();
     ctx.restore();
+    // [/DEBUG]
 
     // Board decoration:
     ctx.beginPath();
@@ -96,14 +92,15 @@ window.addEventListener('load', function (event) {
 
     // First small arch:
     ctx.arcTo(2.7 * u, cy, 3.5 * u, y1, cr);
+    //ctx.lineTo(3.5 * u, y1);
     ctx.arcTo(4.3 * u, cy, 4.5 * u, y0, cr);
     ctx.lineTo(4.5 * u, y0); // finish the arch
     ctx.lineTo(5.5 * u, y0);
     // Middle large arch:
-    ctx.arcTo(5.9 * u, 3 * u, 7 * u, 2.5 * u, 2 * cr);
-    //ctx.arcTo(8.1 * u, 4 * u, 9.5 * u, y0, 2 * cr);
-    /*ctx.lineTo(9 * u, y0); // finish the arch
-    ctx.lineTo(10 * u, y0);*/
+    ctx.arcTo(5.7 * u, 2.9 * u, 7 * u, 2.5 * u, cr);
+    ctx.arcTo(8.3 * u, 2.9 * u, 8.5 * u, y0, cr);
+    ctx.lineTo(8.5 * u, y0); // finish the arch
+    ctx.lineTo(9.5 * u, y0);
 
     // Second small arch:
     /*ctx.arcTo(19.5 * u, cy, 21.5 * u, y1, sr);
