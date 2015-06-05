@@ -9,15 +9,15 @@
  */
 
 @font-face {
-  font-family: 'Chantelli Antiqua';
+  font-family: "Chantelli Antiqua";
   font-weight: normal;
   font-style: normal;
-  src: url('../font/chantelli-antiqua.eot');
-  src: url('../font/chantelli-antiqua.eot?#iefix') format('embedded-opentype'),
-  url('../font/chantelli-antiqua.woff2') format('woff2'),
-  url('../font/chantelli-antiqua.woff') format('woff'),
-  url('../font/chantelli-antiqua.ttf') format('truetype'),
-  url('../font/chantelli-antiqua.svg#chantelli-antiqua') format('svg');
+  src: url("../font/chantelli-antiqua.eot");
+  src: url("../font/chantelli-antiqua.eot?#iefix") format("embedded-opentype"),
+  url("../font/chantelli-antiqua.woff2") format("woff2"),
+  url("../font/chantelli-antiqua.woff") format("woff"),
+  url("../font/chantelli-antiqua.ttf") format("truetype"),
+  url("../font/chantelli-antiqua.svg#chantelli-antiqua") format("svg");
 }
 
 /* See http://www.paulirish.com/2012/box-sizing-border-box-ftw; apply a natural box layout model to all elements */
@@ -64,5 +64,5 @@ body {
   width: 320px; height: 568px; /* iPhone 5 portrait */
   /*width: 550px; height: 750px;*/
   /* width: 100%; height: 100%; */
-  font-family: 'Chantelli Antiqua';
+  font-family: "Chantelli Antiqua";
 }
