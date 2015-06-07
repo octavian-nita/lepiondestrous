@@ -13,7 +13,7 @@ window.addEventListener('load', function (event) {
       textColor: '#ffc107',
       boardDark: '#795548',
       boardLight: '#8d6e63',
-      effectRaised: {offsetX: 0, offsetY: 2, blur: 15, color: 'rgba(0, 0, 0, 0.9)'},
+      effectRaised: {offsetX: 0, offsetY: 2, blur: 20, color: 'rgba(0, 0, 0, 0.9)'},
       effectLowered: {}
     };
 
@@ -109,7 +109,7 @@ window.addEventListener('load', function (event) {
 
     ctx.font = 0.8 + 'px ' + T.fontFamily;
     ctx.fillStyle = T.textColor;
-    ctx.fillText(R.gameTitle, (brd.width - ctx.measureText(R.gameTitle).width) / 2, 1.3);
+    ctx.fillText(R.gameTitle, brd.width / (brd.unit * 2) - ctx.measureText(R.gameTitle).width / 2, 1);
 
     ctx.restore();
   };
