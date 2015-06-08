@@ -64,7 +64,7 @@ window.addEventListener('load', function (/*event*/) {
     this._board.y = (parent.offsetHeight - this._board.height ) / 2;
     this._board.unit = this._board.height / (opts.board.heightUnits || O.board.heightUnits);
 
-    // Set up the canvas:
+    // Set up an over-sampled (2x) canvas:
     this._canvas.width = parent.offsetWidth * 2;
     this._canvas.height = parent.offsetHeight * 2;
     this._canvas.style.width = parent.offsetWidth + 'px';
@@ -145,7 +145,7 @@ window.addEventListener('load', function (/*event*/) {
     if (!this._canvas || !this._board) { return; }
     var
       ctx = this._canvas.getContext('2d'), brd = this._board, gameSize = O.board.widthUnits,
-      r = brd.unit - 10, i, j;
+      r = (brd.unit - 15) / brd.unit, i, j, pi2 = Math.PI * 2;
     ctx.save();
 
     ctx.translate(brd.x, brd.y);   // move the origin to the board top left corner
@@ -157,14 +157,13 @@ window.addEventListener('load', function (/*event*/) {
     //    ctx.shadowBlur = T.effectLowered.blur / (brd.unit / 15); // stronger shadow
     ctx.fillStyle = T.holeColor;
 
-    ctx.beginPath();
     for (i = 0; i < gameSize; i++) {
       for (j = 0; j < gameSize; j++) {
-        ctx.arc(j / 2, 6 + i / 2, r, 0, 2 * Math.PI);
-        break;
+        ctx.beginPath();
+        ctx.arc(j + 0.5, i + 5.5, r, 0, pi2);
+        ctx.fill();
       }
     }
-    ctx.fill();
 
     ctx.restore();
   };
