@@ -1,65 +1,93 @@
 /*jshint browser: true, devel: true, indent: 2, maxerr: 50, maxlen: 120 */
 /*global define: true, module: true, exports: true */
 
-window.addEventListener('load', function (event) {
+window.addEventListener('load', function (/*event*/) {
   'use strict';
 
   var
-    R = {
+
+    O = { // Game view default options
+      board: {
+        ratio: 14 / 19,
+        heightUnits: 19,
+        maxHeight: 695,
+        widthUnits: 14,
+        maxWidth: 504
+      }
+    },
+
+    R = { // Game resources
       gameTitle: 'Le pion des trous'
     },
-    T = { // http://www.materialui.co/colors
+
+    T = { // Game theme; http://www.materialui.co/colors
       fontFamily: '"Chantelli Antiqua"',
       textColor: '#ffc107',
+      holeColor: '#4e342e'/* '#5d4037'*/,
       boardDark: '#795548',
       boardLight: '#8d6e63',
       effectRaised: {offsetX: 0, offsetY: 2, blur: 20, color: 'rgba(0, 0, 0, 0.9)'},
-      effectLowered: {}
+      effectLowered: {offsetX: 0, offsetY: -2, blur: 20, color: 'rgba(0, 0, 0, 0.9)'}
     };
 
   /** @constructor */
-  function GameView(parent, options) {
-    if (!(this instanceof GameView)) { return new GameView(parent, options); }
+  function GameView(parent, opts) {
+    if (!(this instanceof GameView)) { return new GameView(parent, opts); }
 
     if (!parent) { return; }
-    if (!options) { options = {}; }
+    if (!opts) { opts = O; }
 
-    this.board = {};
+    /**
+     * Gameboard geometry (i.e. where the gameboard gets drawn, how large it is, etc.), in terms of parent dimensions.
+     *
+     * @type {{x: number, y: number, width: number, height: number, unit: number}}
+     */
+    this._board = {};
 
-    var boardRatio = 14 / 19, boundsRatio = parent.offsetWidth / parent.offsetHeight;
+    /**
+     * The canvas on which the game is drawn is over-sampled (2x) and fills its parent.
+     *
+     * @type {HTMLCanvasElement}
+     */
+    this._canvas = document.createElement('canvas');
+
+    // Set up the board geometry:
+    var boardRatio = opts.board.ratio || O.board.ratio, boundsRatio = parent.offsetWidth / parent.offsetHeight;
     if (boardRatio > boundsRatio) { // http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html
-      this.board.width = Math.min(parent.offsetWidth, 504);
-      this.board.height = this.board.width / boardRatio;
+      this._board.width = Math.min(parent.offsetWidth, (opts.board.maxWidth || O.board.maxWidth));
+      this._board.height = this._board.width / boardRatio;
     } else {
-      this.board.height = Math.min(parent.offsetWidth, 695);
-      this.board.width = this.board.height * boardRatio;
+      this._board.height = Math.min(parent.offsetWidth, opts.board.maxHeight || O.board.maxHeight);
+      this._board.width = this._board.height * boardRatio;
     }
+    this._board.x = (parent.offsetWidth - this._board.width ) / 2;
+    this._board.y = (parent.offsetHeight - this._board.height ) / 2;
+    this._board.unit = this._board.height / (opts.board.heightUnits || O.board.heightUnits);
 
-    this.board.x = (parent.offsetWidth - this.board.width ) / 2;
-    this.board.y = (parent.offsetHeight - this.board.height ) / 2;
-    this.board.unit = this.board.height / 19;
-
-    // The canvas is over-sampled and fills its parent:
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = parent.offsetWidth * 2;
-    this.canvas.height = parent.offsetHeight * 2;
-    this.canvas.style.width = parent.offsetWidth + 'px';
-    this.canvas.style.height = parent.offsetHeight + 'px';
-    this.canvas.getContext('2d').scale(2, 2);
+    // Set up the canvas:
+    this._canvas.width = parent.offsetWidth * 2;
+    this._canvas.height = parent.offsetHeight * 2;
+    this._canvas.style.width = parent.offsetWidth + 'px';
+    this._canvas.style.height = parent.offsetHeight + 'px';
+    this._canvas.getContext('2d').scale(2, 2);
 
     this.render();
     parent.innerHTML = ''; // empty parent content
-    parent.appendChild(this.canvas);
+    parent.appendChild(this._canvas);
   }
 
-  /** Consider http://www.mobtowers.com/html5-canvas-crisp-lines-every-time/ when drawing. */
   GameView.prototype.render = function () {
-    if (!this.canvas || !this.board) { return; }
-    var ctx = this.canvas.getContext('2d'), brd = this.board;
+    this._renderBoard();
+    this._renderHoles();
+  };
+
+  GameView.prototype._renderBoard = function () {
+    if (!this._canvas || !this._board) { return; }
+    var ctx = this._canvas.getContext('2d'), brd = this._board;
     ctx.save();
 
     ctx.fillStyle = T.boardLight;
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
 
     ctx.shadowOffsetX = T.effectRaised.offsetX;
     ctx.shadowOffsetY = T.effectRaised.offsetY;
@@ -91,7 +119,6 @@ window.addEventListener('load', function (event) {
     ctx.arcTo(8.4, 2.95, 8.5, 5, 1.6 + 0.5);
     ctx.lineTo(8.5, 5); // finish the arch
     ctx.lineTo(9.5, 5);
-
     // Second small arch:
     ctx.arcTo(9.6, 3.4, 10.5, 3, 1.6);
     ctx.arcTo(11.4, 3.4, 11.5, 5, 1.6);
@@ -110,6 +137,34 @@ window.addEventListener('load', function (event) {
     ctx.font = 0.8 + 'px ' + T.fontFamily;
     ctx.fillStyle = T.textColor;
     ctx.fillText(R.gameTitle, brd.width / (brd.unit * 2) - ctx.measureText(R.gameTitle).width / 2, 1);
+
+    ctx.restore();
+  };
+
+  GameView.prototype._renderHoles = function () {
+    if (!this._canvas || !this._board) { return; }
+    var
+      ctx = this._canvas.getContext('2d'), brd = this._board, gameSize = O.board.widthUnits,
+      r = brd.unit - 10, i, j;
+    ctx.save();
+
+    ctx.translate(brd.x, brd.y);   // move the origin to the board top left corner
+    ctx.scale(brd.unit, brd.unit); // draw the board elements in terms of units
+
+    //    ctx.shadowOffsetX = T.effectLowered.offsetX;
+    //    ctx.shadowOffsetY = T.effectLowered.offsetY;
+    //    ctx.shadowColor = T.effectLowered.color;
+    //    ctx.shadowBlur = T.effectLowered.blur / (brd.unit / 15); // stronger shadow
+    ctx.fillStyle = T.holeColor;
+
+    ctx.beginPath();
+    for (i = 0; i < gameSize; i++) {
+      for (j = 0; j < gameSize; j++) {
+        ctx.arc(j / 2, 6 + i / 2, r, 0, 2 * Math.PI);
+        break;
+      }
+    }
+    ctx.fill();
 
     ctx.restore();
   };
