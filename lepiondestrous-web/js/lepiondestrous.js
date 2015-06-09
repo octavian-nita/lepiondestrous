@@ -22,11 +22,11 @@ window.addEventListener('load', function (/*event*/) {
     T = { // Game theme; http://www.materialui.co/colors
       fontFamily: '"Chantelli Antiqua"',
       textColor: '#ffc107',
-      holeColor: '#4e342e',
+      holeDark: '#3e2723',
+      holeLight: '#5d4037',
       boardDark: '#795548',
       boardLight: '#8d6e63',
-      effectRaised: {offsetX: 0, offsetY: 2, blur: 20, color: 'rgba(0, 0, 0, 0.9)'},
-      effectLowered: {}
+      dropShadow: {offsetX: 0, offsetY: 2, blur: 20, color: 'rgba(0, 0, 0, 0.9)'}
     };
 
   /** @constructor */
@@ -89,10 +89,10 @@ window.addEventListener('load', function (/*event*/) {
     ctx.fillStyle = T.boardLight;
     ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
 
-    ctx.shadowOffsetX = T.effectRaised.offsetX;
-    ctx.shadowOffsetY = T.effectRaised.offsetY;
-    ctx.shadowColor = T.effectRaised.color;
-    ctx.shadowBlur = T.effectRaised.blur;
+    ctx.shadowOffsetX = T.dropShadow.offsetX;
+    ctx.shadowOffsetY = T.dropShadow.offsetY;
+    ctx.shadowColor = T.dropShadow.color;
+    ctx.shadowBlur = T.dropShadow.blur;
 
     ctx.fillStyle = T.boardDark;
     ctx.fillRect(brd.x, brd.y, brd.width, brd.height);
@@ -147,7 +147,7 @@ window.addEventListener('load', function (/*event*/) {
 
     var
       ctx = this._canvas.getContext('2d'), brd = this._board, gameSize = O.gameSize, pi2 = Math.PI * 2,
-      i, j, g, cx, cy;
+      i, j, cx, cy;
     ctx.save();
 
     ctx.translate(brd.x, brd.y);   // move the origin to the board top left corner
@@ -159,8 +159,8 @@ window.addEventListener('load', function (/*event*/) {
         cy = i + 5.5;
 
         ctx.fillStyle = ctx.createRadialGradient(cx, cy + 0.1, 0.1, cx, cy, 0.3);
-        ctx.fillStyle.addColorStop(0, '#4e342e');
-        ctx.fillStyle.addColorStop(1, '#3e2723');
+        ctx.fillStyle.addColorStop(0, T.holeLight);
+        ctx.fillStyle.addColorStop(1, T.holeDark);
 
         ctx.beginPath();
         ctx.arc(cx, cy, 0.3, 0, pi2);
