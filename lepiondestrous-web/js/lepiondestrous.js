@@ -39,7 +39,7 @@ window.addEventListener('load', function (/*event*/) {
     /**
      * Gameboard geometry (i.e. where the gameboard gets drawn, how large it is, etc.), in terms of parent dimensions.
      *
-     * @type {{x: number, y: number, width: number, height: number, unit: number}}
+     * @type {{x: number, y: number, width: number, height: number, unit: number, size: number}}
      */
     this._board = {};
 
@@ -54,7 +54,8 @@ window.addEventListener('load', function (/*event*/) {
     }
     this._board.x = (parent.offsetWidth - this._board.width ) / 2;
     this._board.y = (parent.offsetHeight - this._board.height) / 2;
-    this._board.unit = this._board.height * boardRatio / (opts.gameSize || O.board.gameSize);
+    this._board.size = opts.gameSize || O.gameSize;
+    this._board.unit = this._board.height * boardRatio / this._board.size;
 
     /**
      * The canvas on which the game is drawn is oversampled (2x) and fills its parent.
@@ -97,8 +98,8 @@ window.addEventListener('load', function (/*event*/) {
     ctx.fillStyle = T.boardDark;
     ctx.fillRect(brd.x, brd.y, brd.width, brd.height);
 
-    ctx.translate(brd.x, brd.y);   // move the origin to the board top left corner
-    ctx.scale(brd.unit, brd.unit); // draw the board elements in terms of units
+    ctx.translate(brd.x, brd.y);     // move the origin to the board top left corner
+    ctx.scale(brd.unit, brd.unit);   // draw the board decorations in terms of units
 
     ctx.shadowBlur /= brd.unit / 10; // stronger shadow
     ctx.strokeStyle = T.textColor;
@@ -146,24 +147,27 @@ window.addEventListener('load', function (/*event*/) {
     if (!this._canvas || !this._board) { return; }
 
     var
-      ctx = this._canvas.getContext('2d'), brd = this._board, gameSize = O.gameSize, pi2 = Math.PI * 2,
-      i, j, cx, cy;
+      ctx = this._canvas.getContext('2d'), brd = this._board, gameSize = brd.size,
+      r = 10, d = r * 2, delta = (brd.width - d * gameSize) / (d * gameSize + 1),
+      pi2 = Math.PI * 2, i, j, cx = 0, cy = 0;
     ctx.save();
 
-    ctx.translate(brd.x, brd.y);   // move the origin to the board top left corner
-    ctx.scale(brd.unit, brd.unit); // draw the board elements in terms of units
+    ctx.translate(brd.x + d, brd.y + brd.unit + d);
+    ctx.fillStyle = 'red';
+    ctx.fillRect(brd.x - 1, brd.y - 1, 2, 2);
 
-    for (i = 0; i < gameSize; i++) {
-      for (j = 0; j < gameSize; j++) {
-        cx = j + 0.5;
-        cy = i + 5.5;
+    for (i = 1; i <= gameSize; i++) {
+      cx = 0;
+      cy = i * (delta + r);
+      for (j = 1; j <= gameSize; j++) {
+        cx += j * (delta + r);
 
-        ctx.fillStyle = ctx.createRadialGradient(cx, cy + 0.1, 0.1, cx, cy, 0.3);
+        ctx.fillStyle = ctx.createRadialGradient(cx, cy + r / 3, r / 3, cx, cy, r);
         ctx.fillStyle.addColorStop(0, T.holeLight);
         ctx.fillStyle.addColorStop(1, T.holeDark);
 
         ctx.beginPath();
-        ctx.arc(cx, cy, 0.3, 0, pi2);
+        ctx.arc(cx, cy, r, 0, pi2);
         ctx.fill();
       }
     }
