@@ -30,11 +30,16 @@ window.addEventListener('load', function (/*event*/) {
     };
 
   /** @constructor */
-  function GameView(parent, opts) {
-    if (!(this instanceof GameView)) { return new GameView(parent, opts); }
-
+  function GameView(parent, options) {
+    if (!(this instanceof GameView)) { return new GameView(parent, options); }
     if (!parent) { return; }
-    if (!opts) { opts = O; }
+
+    var o = Object.create(O), i, keys, l;
+    if (options) {
+      for (i = 0, keys = Object.keys(options), l = keys.length; i < l; i++) {
+        o[keys[i]] = options[keys[i]];
+      }
+    }
 
     /**
      * Gameboard geometry (i.e. where the gameboard gets drawn, how large it is, etc.), in terms of parent dimensions.
@@ -44,18 +49,17 @@ window.addEventListener('load', function (/*event*/) {
     this._board = {};
 
     // Set up the board geometry (always vertical for the moment):
-    var boardRatio = opts.board.ratio || O.board.ratio, boundsRatio = parent.offsetWidth / parent.offsetHeight;
-    if (boardRatio > boundsRatio) { // http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html
-      this._board.width = Math.min(parent.offsetWidth, opts.board.maxWidth || O.board.maxWidth);
-      this._board.height = this._board.width / boardRatio;
+    if (o.board.ratio > parent.offsetWidth / parent.offsetHeight) { // http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html
+      this._board.width = Math.min(parent.offsetWidth, o.board.maxWidth);
+      this._board.height = this._board.width / o.board.ratio;
     } else {
-      this._board.height = Math.min(parent.offsetHeight, opts.board.maxHeight || O.board.maxHeight);
-      this._board.width = this._board.height * boardRatio;
+      this._board.height = Math.min(parent.offsetHeight, o.board.maxHeight);
+      this._board.width = this._board.height * o.board.ratio;
     }
     this._board.x = (parent.offsetWidth - this._board.width ) / 2;
     this._board.y = (parent.offsetHeight - this._board.height) / 2;
-    this._board.size = opts.gameSize || O.gameSize;
-    this._board.unit = this._board.height * boardRatio / this._board.size;
+    this._board.size = o.gameSize;
+    this._board.unit = this._board.height * o.board.ratio / this._board.size;
 
     /**
      * The canvas on which the game is drawn is oversampled (2x) and fills its parent.
@@ -101,11 +105,11 @@ window.addEventListener('load', function (/*event*/) {
     ctx.translate(brd.x, brd.y);     // move the origin to the board top left corner
     ctx.scale(brd.unit, brd.unit);   // draw the board decorations in terms of units
 
-    ctx.shadowBlur /= brd.unit / 10; // stronger shadow
+    ctx.shadowBlur /= brd.unit / 5; // stronger shadow
     ctx.strokeStyle = T.textColor;
-    ctx.lineWidth = 2 / brd.unit;    // the canvas is oversampled
+    ctx.lineWidth = 2 / brd.unit;    // remember the canvas is oversampled
 
-    ctx.translate(0, -0.2);
+    ctx.translate(0, -0.1);
     // Arch Bridge:
     ctx.beginPath();
     ctx.moveTo(0, 5);
@@ -126,7 +130,7 @@ window.addEventListener('load', function (/*event*/) {
     ctx.lineTo(11.5, 5); // finish the arch
     ctx.lineTo(14, 5);
     ctx.stroke();
-    ctx.translate(0, 0.2);
+    ctx.translate(0, 0.1);
 
     // Bridge top:
     ctx.beginPath();
@@ -147,24 +151,16 @@ window.addEventListener('load', function (/*event*/) {
     if (!this._canvas || !this._board) { return; }
 
     var
-      ctx = this._canvas.getContext('2d'), brd = this._board, gameSize = brd.size,
-      r = 10, d = r * 2, delta = (brd.width - d * gameSize) / (d * gameSize + 1),
-      pi2 = Math.PI * 2, i, j, cx = 0, cy = 0;
+      ctx = this._canvas.getContext('2d'), brd = this._board, brw = brd.width, pi2 = 2 * Math.PI,
+      dia = brd.unit * 2 / 3, r = dia / 2, d = (brd.width - dia * brd.size) / (brd.size + 1), cx, cy;
     ctx.save();
 
-    ctx.translate(brd.x + d, brd.y + brd.unit + d);
-    ctx.fillStyle = 'red';
-    ctx.fillRect(brd.x - 1, brd.y - 1, 2, 2);
-
-    for (i = 1; i <= gameSize; i++) {
-      cx = 0;
-      cy = i * (delta + r);
-      for (j = 1; j <= gameSize; j++) {
-        cx += j * (delta + r);
-
-        ctx.fillStyle = ctx.createRadialGradient(cx, cy + r / 3, r / 3, cx, cy, r);
-        ctx.fillStyle.addColorStop(0, T.holeLight);
-        ctx.fillStyle.addColorStop(1, T.holeDark);
+    ctx.translate(brd.x, brd.y + brd.height - brd.width);
+    for (cy = d + r; cy < brw; cy += d + dia) {
+      for (cx = d + r; cx < brw; cx += d + dia) {
+        ctx.fillStyle = ctx.createRadialGradient(cx, cy + r / 2, r - r / 4, cx, cy + r / 2, 0);
+        ctx.fillStyle.addColorStop(0, T.holeDark);
+        ctx.fillStyle.addColorStop(1, T.holeLight);
 
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, pi2);
