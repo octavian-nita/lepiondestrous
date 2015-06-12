@@ -49,6 +49,7 @@ body {
 
 .lepiondestrous {
   margin: 0 auto;
+  overflow: hidden;
 
   /* Vertical align: */
   position: relative; top: 50%;

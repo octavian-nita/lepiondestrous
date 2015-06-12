@@ -19,14 +19,14 @@ window.addEventListener('load', function (/*event*/) {
       gameTitle: 'Le pion des trous'
     },
 
-    T = { // Game theme; http://www.materialui.co/colors
+    T = { // Game color theme; http://www.materialui.co/colors
       fontFamily: '"Chantelli Antiqua"',
-      textColor: '#ffc107',
+      textColor: '#ffb300',
       holeDark: '#3e2723',
       holeLight: '#5d4037',
       boardDark: '#795548',
       boardLight: '#8d6e63',
-      dropShadow: {offsetX: 0, offsetY: 2, blur: 20, color: 'rgba(0, 0, 0, 0.9)'}
+      boardShadow: {offsetX: 0, offsetY: 2, blur: 20, color: 'rgba(0, 0, 0, 0.9)'}
     };
 
   /** @constructor */
@@ -48,8 +48,8 @@ window.addEventListener('load', function (/*event*/) {
      */
     this._board = {};
 
-    // Set up the board geometry (always vertical for the moment):
-    if (o.board.ratio > parent.offsetWidth / parent.offsetHeight) { // http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html
+    // Set up the board geometry (always vertical, http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html):
+    if (o.board.ratio > parent.offsetWidth / parent.offsetHeight) {
       this._board.width = Math.min(parent.offsetWidth, o.board.maxWidth);
       this._board.height = this._board.width / o.board.ratio;
     } else {
@@ -94,22 +94,21 @@ window.addEventListener('load', function (/*event*/) {
     ctx.fillStyle = T.boardLight;
     ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
 
-    ctx.shadowOffsetX = T.dropShadow.offsetX;
-    ctx.shadowOffsetY = T.dropShadow.offsetY;
-    ctx.shadowColor = T.dropShadow.color;
-    ctx.shadowBlur = T.dropShadow.blur;
+    ctx.shadowOffsetX = T.boardShadow.offsetX;
+    ctx.shadowOffsetY = T.boardShadow.offsetY;
+    ctx.shadowColor = T.boardShadow.color;
+    ctx.shadowBlur = T.boardShadow.blur;
 
     ctx.fillStyle = T.boardDark;
     ctx.fillRect(brd.x, brd.y, brd.width, brd.height);
 
-    ctx.translate(brd.x, brd.y);     // move the origin to the board top left corner
-    ctx.scale(brd.unit, brd.unit);   // draw the board decorations in terms of units
+    ctx.translate(brd.x, brd.y);    // move the origin to the board top left corner
+    ctx.scale(brd.unit, brd.unit);  // draw the board decorations in terms of units
 
     ctx.shadowBlur /= brd.unit / 5; // stronger shadow
     ctx.strokeStyle = T.textColor;
-    ctx.lineWidth = 2 / brd.unit;    // remember the canvas is oversampled
+    ctx.lineWidth = 2 / brd.unit;   // the canvas is oversampled and the board is scaled
 
-    ctx.translate(0, -0.1);
     // Arch Bridge:
     ctx.beginPath();
     ctx.moveTo(0, 5);
@@ -130,7 +129,6 @@ window.addEventListener('load', function (/*event*/) {
     ctx.lineTo(11.5, 5); // finish the arch
     ctx.lineTo(14, 5);
     ctx.stroke();
-    ctx.translate(0, 0.1);
 
     // Bridge top:
     ctx.beginPath();
@@ -151,24 +149,63 @@ window.addEventListener('load', function (/*event*/) {
     if (!this._canvas || !this._board) { return; }
 
     var
-      ctx = this._canvas.getContext('2d'), brd = this._board, brw = brd.width, pi2 = 2 * Math.PI,
-      dia = brd.unit * 2 / 3, r = dia / 2, d = (brd.width - dia * brd.size) / (brd.size + 1), cx, cy;
-    ctx.save();
+      cx = this._canvas.getContext('2d'), bd = this._board, bw = bd.width, pi2 = 2 * Math.PI,
+      dm = bd.unit * 1.5 / 3, r = dm / 2, d = (bd.width - dm * bd.size) / (bd.size + 1), x, y;
 
-    ctx.translate(brd.x, brd.y + brd.height - brd.width);
-    for (cy = d + r; cy < brw; cy += d + dia) {
-      for (cx = d + r; cx < brw; cx += d + dia) {
-        ctx.fillStyle = ctx.createRadialGradient(cx, cy + r / 2, r - r / 4, cx, cy + r / 2, 0);
-        ctx.fillStyle.addColorStop(0, T.holeDark);
-        ctx.fillStyle.addColorStop(1, T.holeLight);
-
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, pi2);
-        ctx.fill();
-      }
+    function hole(x, y, rd) {
+      cx.beginPath();
+      cx.arc(x, y, rd ? rd : r, 0, pi2);
+      cx.fill();
     }
 
-    ctx.restore();
+    function holeShadow(x, y, rd) {
+      cx.save();
+      cx.beginPath();
+      cx.arc(x, y, rd ? rd : r, 0, pi2);
+      cx.clip();
+      cx.beginPath();
+      cx.arc(x, y + cx.lineWidth, (rd ? rd : r) + cx.lineWidth, 0, pi2);
+      cx.stroke();
+      cx.restore();
+    }
+
+    cx.save();
+
+    // Playing holes:
+    cx.fillStyle = T.holeLight;
+
+    cx.translate(bd.x, bd.y);
+    hole(d + r, d + r / 2);
+    hole(d + r + d + dm, d + r / 2);
+    hole(d + r, d + r / 2 + d + dm);
+    hole(d + r + d + dm, d + r / 2 + d + dm);
+    hole(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 2);
+    hole(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 3);
+    hole(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 4);
+
+    cx.translate(0, bd.height - bd.width);
+    for (y = d + r; y < bw; y += d + dm) { for (x = d + r; x < bw; x += d + dm) { hole(x, y); } }
+
+    // Hole inner shadows:
+    cx.shadowOffsetX = T.boardShadow.offsetX;
+    cx.shadowOffsetY = T.boardShadow.offsetY;
+    cx.shadowColor = T.boardShadow.color;
+    cx.shadowBlur = T.boardShadow.blur;
+    cx.strokeStyle = T.holeDark;
+    cx.lineWidth = 4;
+
+    for (y = d + r; y < bw; y += d + dm) { for (x = d + r; x < bw; x += d + dm) { holeShadow(x, y); } }
+
+    cx.translate(0, -bd.height + bd.width);
+    holeShadow(d + r, d + r / 2);
+    holeShadow(d + r + d + dm, d + r / 2);
+    holeShadow(d + r, d + r / 2 + d + dm);
+    holeShadow(d + r + d + dm, d + r / 2 + d + dm);
+    holeShadow(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 2);
+    holeShadow(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 3);
+    holeShadow(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 4);
+
+    cx.restore();
   };
 
   // Create and display the game view:
