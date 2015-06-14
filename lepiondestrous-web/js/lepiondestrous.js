@@ -150,7 +150,7 @@ window.addEventListener('load', function (/*event*/) {
 
     var
       cx = this._canvas.getContext('2d'), bd = this._board, bw = bd.width, pi2 = 2 * Math.PI,
-      dm = bd.unit * 1.5 / 3, r = dm / 2, d = (bd.width - dm * bd.size) / (bd.size + 1), x, y;
+      dm = bd.unit * 1.5 / 3, r = dm / 2, dt = (bd.width - dm * bd.size) / (bd.size + 1), dr = dt + r, x, y;
 
     function hole(x, y, rd) {
       cx.beginPath();
@@ -175,16 +175,16 @@ window.addEventListener('load', function (/*event*/) {
     cx.fillStyle = T.holeLight;
 
     cx.translate(bd.x, bd.y);
-    hole(d + r, d + r / 2);
-    hole(d + r + d + dm, d + r / 2);
-    hole(d + r, d + r / 2 + d + dm);
-    hole(d + r + d + dm, d + r / 2 + d + dm);
-    hole(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 2);
-    hole(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 3);
-    hole(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 4);
+    hole(dr, dt + r / 2);
+    hole(dr + dt + dm, dt + r / 2);
+    hole(dr, dr + dt + dm);
+    hole(dr + dt + dm, dr + dt + dm);
+    hole(dr + (dt + dm) / 2, dr + (dt + dm) * 2);
+    hole(dr + (dt + dm) / 2, dr + (dt + dm) * 3);
+    hole(dr + (dt + dm) / 2, dr + (dt + dm) * 4);
 
     cx.translate(0, bd.height - bd.width);
-    for (y = d + r; y < bw; y += d + dm) { for (x = d + r; x < bw; x += d + dm) { hole(x, y); } }
+    for (y = dr; y < bw; y += dt + dm) { for (x = dr; x < bw; x += dt + dm) { hole(x, y); } }
 
     // Hole inner shadows:
     cx.shadowOffsetX = T.boardShadow.offsetX;
@@ -194,16 +194,16 @@ window.addEventListener('load', function (/*event*/) {
     cx.strokeStyle = T.holeDark;
     cx.lineWidth = 4;
 
-    for (y = d + r; y < bw; y += d + dm) { for (x = d + r; x < bw; x += d + dm) { holeShadow(x, y); } }
+    for (y = dr; y < bw; y += dt + dm) { for (x = dr; x < bw; x += dt + dm) { holeShadow(x, y); } }
 
     cx.translate(0, -bd.height + bd.width);
-    holeShadow(d + r, d + r / 2);
-    holeShadow(d + r + d + dm, d + r / 2);
-    holeShadow(d + r, d + r / 2 + d + dm);
-    holeShadow(d + r + d + dm, d + r / 2 + d + dm);
-    holeShadow(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 2);
-    holeShadow(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 3);
-    holeShadow(d + r + (d + dm) / 2, d + r / 2 + (d + dm) * 4);
+    holeShadow(dr, dr);
+    holeShadow(dr + dt + dm, dr);
+    holeShadow(dr, dr + dt + dm);
+    holeShadow(dr + dt + dm, dr + dt + dm);
+    holeShadow(dr + (dt + dm) / 2, dr + (dt + dm) * 2);
+    holeShadow(dr + (dt + dm) / 2, dr + (dt + dm) * 3);
+    holeShadow(dr + (dt + dm) / 2, dr + (dt + dm) * 4);
 
     cx.restore();
   };
