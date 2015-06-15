@@ -7,9 +7,7 @@ window.addEventListener('load', function (/*event*/) {
   var
 
     O = { // Game default options
-      gameSize: 14,
       board: {
-        ratio: 14 / 19,
         maxHeight: 695,
         maxWidth: 504
       }
@@ -27,7 +25,11 @@ window.addEventListener('load', function (/*event*/) {
       boardDark: '#795548',
       boardLight: '#8d6e63',
       boardShadow: {offsetX: 0, offsetY: 2, blur: 20, color: 'rgba(0, 0, 0, 0.9)'}
-    };
+    },
+
+    GAME_SIZE = 14,
+
+    BOARD_RATIO = 14 / 19;
 
   /** @constructor */
   function GameView(parent, options) {
@@ -49,17 +51,16 @@ window.addEventListener('load', function (/*event*/) {
     this._board = {};
 
     // Set up the board geometry (always vertical, http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html):
-    if (o.board.ratio > parent.offsetWidth / parent.offsetHeight) {
+    if (BOARD_RATIO > parent.offsetWidth / parent.offsetHeight) {
       this._board.width = Math.min(parent.offsetWidth, o.board.maxWidth);
-      this._board.height = this._board.width / o.board.ratio;
+      this._board.height = this._board.width / BOARD_RATIO;
     } else {
       this._board.height = Math.min(parent.offsetHeight, o.board.maxHeight);
-      this._board.width = this._board.height * o.board.ratio;
+      this._board.width = this._board.height * BOARD_RATIO;
     }
     this._board.x = (parent.offsetWidth - this._board.width ) / 2;
     this._board.y = (parent.offsetHeight - this._board.height) / 2;
-    this._board.size = o.gameSize;
-    this._board.unit = this._board.height * o.board.ratio / this._board.size;
+    this._board.unit = this._board.height * BOARD_RATIO / GAME_SIZE;
 
     /**
      * The canvas on which the game is drawn is oversampled (2x) and fills its parent.
@@ -148,10 +149,6 @@ window.addEventListener('load', function (/*event*/) {
   GameView.prototype._renderHoles = function () {
     if (!this._canvas || !this._board) { return; }
 
-    var
-      cx = this._canvas.getContext('2d'), bd = this._board, bw = bd.width, pi2 = 2 * Math.PI,
-      dm = bd.unit * 1.5 / 3, r = dm / 2, dt = (bd.width - dm * bd.size) / (bd.size + 1), dr = dt + r, x, y;
-
     function hole(x, y, rd) {
       cx.beginPath();
       cx.arc(x, y, rd ? rd : r, 0, pi2);
@@ -159,32 +156,55 @@ window.addEventListener('load', function (/*event*/) {
     }
 
     function holeShadow(x, y, rd) {
+      if (!rd) { rd = r; }
+
       cx.save();
       cx.beginPath();
-      cx.arc(x, y, rd ? rd : r, 0, pi2);
+      cx.arc(x, y, rd, 0, pi2);
       cx.clip();
       cx.beginPath();
-      cx.arc(x, y + cx.lineWidth, (rd ? rd : r) + cx.lineWidth, 0, pi2);
+      cx.arc(x, y + cx.lineWidth, rd + cx.lineWidth, 0, pi2);
       cx.stroke();
       cx.restore();
     }
 
+    function renderScoreboardHoles(fn, rd) {
+      if (!fn) { fn = hole; }
+      if (typeof fn !== 'function') { return; }
+      if (!rd) { rd = r; }
+
+      var x0 = dt + rd, y0 = dt + rd / 2, dm = 2 * rd, ds = dt + dm;
+
+      fn.call(null, x0, y0, rd);
+      fn.call(null, x0 + ds, y0, rd);
+      fn.call(null, x0, y0 + ds, rd);
+      fn.call(null, x0 + ds, y0 + ds, rd);
+      fn.call(null, x0 + ds / 2, y0 + 2 * ds, rd);
+      fn.call(null, x0 + ds / 2, y0 + 3 * ds, rd);
+      fn.call(null, x0 + ds / 2, y0 + 4 * ds, rd);
+
+      fn.call(null, bw - x0, y0, rd);
+      fn.call(null, bw - x0 - ds, y0, rd);
+      fn.call(null, bw - x0, y0 + ds, rd);
+      fn.call(null, bw - x0 - ds, y0 + ds, rd);
+      fn.call(null, bw - x0 - ds / 2, y0 + 2 * ds, rd);
+      fn.call(null, bw - x0 - ds / 2, y0 + 3 * ds, rd);
+      fn.call(null, bw - x0 - ds / 2, y0 + 4 * ds, rd);
+    }
+
+    var
+      cx = this._canvas.getContext('2d'), bd = this._board, bw = bd.width, pi2 = 2 * Math.PI,
+      dm = bd.unit * 1.5 / 3, r = dm / 2, dt = (bd.width - dm * GAME_SIZE) / (GAME_SIZE + 1), x, y;
     cx.save();
 
-    // Playing holes:
+    // Hole outlines:
     cx.fillStyle = T.holeLight;
 
     cx.translate(bd.x, bd.y);
-    hole(dr, dt + r / 2);
-    hole(dr + dt + dm, dt + r / 2);
-    hole(dr, dr + dt + dm);
-    hole(dr + dt + dm, dr + dt + dm);
-    hole(dr + (dt + dm) / 2, dr + (dt + dm) * 2);
-    hole(dr + (dt + dm) / 2, dr + (dt + dm) * 3);
-    hole(dr + (dt + dm) / 2, dr + (dt + dm) * 4);
+    renderScoreboardHoles();
 
     cx.translate(0, bd.height - bd.width);
-    for (y = dr; y < bw; y += dt + dm) { for (x = dr; x < bw; x += dt + dm) { hole(x, y); } }
+    for (y = dt + r; y < bw; y += dt + dm) { for (x = dt + r; x < bw; x += dt + dm) { hole(x, y); } }
 
     // Hole inner shadows:
     cx.shadowOffsetX = T.boardShadow.offsetX;
@@ -194,16 +214,10 @@ window.addEventListener('load', function (/*event*/) {
     cx.strokeStyle = T.holeDark;
     cx.lineWidth = 4;
 
-    for (y = dr; y < bw; y += dt + dm) { for (x = dr; x < bw; x += dt + dm) { holeShadow(x, y); } }
+    for (y = dt + r; y < bw; y += dt + dm) { for (x = dt + r; x < bw; x += dt + dm) { holeShadow(x, y); } }
 
     cx.translate(0, -bd.height + bd.width);
-    holeShadow(dr, dr);
-    holeShadow(dr + dt + dm, dr);
-    holeShadow(dr, dr + dt + dm);
-    holeShadow(dr + dt + dm, dr + dt + dm);
-    holeShadow(dr + (dt + dm) / 2, dr + (dt + dm) * 2);
-    holeShadow(dr + (dt + dm) / 2, dr + (dt + dm) * 3);
-    holeShadow(dr + (dt + dm) / 2, dr + (dt + dm) * 4);
+    renderScoreboardHoles(holeShadow);
 
     cx.restore();
   };
