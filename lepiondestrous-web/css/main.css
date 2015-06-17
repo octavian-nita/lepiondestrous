@@ -1,5 +1,9 @@
 @charset "utf-8";
 
+/* @fmt:off */
+/*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,section,summary{display:block}audio,canvas,progress,video{display:inline-block;vertical-align:baseline}audio:not([controls]){display:none;height:0}[hidden],template{display:none}a{background-color:transparent}a:active,a:hover{outline:0}abbr[title]{border-bottom:1px dotted}b,strong{font-weight:bold}dfn{font-style:italic}h1{font-size:2em;margin:.67em 0}mark{background:#ff0;color:#000}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-0.5em}sub{bottom:-0.25em}img{border:0}svg:not(:root){overflow:hidden}figure{margin:1em 40px}hr{box-sizing:content-box;height:0}pre{overflow:auto}code,kbd,pre,samp{font-family:monospace,monospace;font-size:1em}button,input,optgroup,select,textarea{color:inherit;font:inherit;margin:0}button{overflow:visible}button,select{text-transform:none}button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}button[disabled],html input[disabled]{cursor:default}button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}input{line-height:normal}input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{height:auto}input[type="search"]{-webkit-appearance:textfield;box-sizing:content-box}input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration{-webkit-appearance:none}fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}legend{border:0;padding:0}textarea{overflow:auto}optgroup{font-weight:bold}table{border-collapse:collapse;border-spacing:0}td,th{padding:0}
+/* @fmt:on */
+
 /*
  * 1. Positioning         (position, top, left, z-index, ...)
  * 2. Display & Box Model (box-sizing, display, overflow, border, height, width, margin, padding, ...)
@@ -20,10 +24,10 @@
   url("../font/chantelli-antiqua.svg#chantelli-antiqua") format("svg");
 }
 
-/* See http://www.paulirish.com/2012/box-sizing-border-box-ftw; apply a natural box layout model to all elements */
+/* http://www.paulirish.com/2012/box-sizing-border-box-ftw; apply a natural box layout model to all elements */
 *, *:before, *:after { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
-/* See http://camendesign.com/code/developpeurs_sans_frontieres to style html, body and limit page wrappers */
+/* http://camendesign.com/code/developpeurs_sans_frontieres; style html, body to limit page wrappers */
 html { overflow: auto; height: 100%; background: #fff; color: #555; font-size: 62.5%; }
 
 body {
@@ -36,12 +40,12 @@ body {
   /* For background images applied to html and body: */
   min-height: 100%;
 
-  /* See http://demosthenes.info/blog/606/Molten-Leading-Exploring-The-CSS-Relationship-Between-Font-Size-Line-Height-and-Margin */
+  /* http://demosthenes.info/blog/606/Molten-Leading-Exploring-The-CSS-Relationship-Between-Font-Size-Line-Height-and-Margin */
   font: 1.6rem/1.5 "Chantelli Antiqua", fantasy;
   -webkit-font-smoothing: subpixel-antialiased;
   -webkit-text-stroke: 1px rgba(16, 16, 16, 0.1);
 
-  /* See http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css */
+  /* http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css */
   -webkit-transform-style: preserve-3d;
   -moz-transform-style: preserve-3d;
   transform-style: preserve-3d;

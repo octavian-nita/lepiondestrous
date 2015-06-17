@@ -1,84 +1,59 @@
-/*jshint browser: true, devel: true, indent: 2, maxerr: 50, maxlen: 120 */
-/*global define: true, module: true, exports: true */
-
-window.addEventListener('load', function (/*event*/) {
+define(['./game', './gameTheme', './util'], function (Game, T, util) {
   'use strict';
 
-  var
-
-    O = { // Game default options
-      board: {
-        maxHeight: 695,
-        maxWidth: 504
-      }
-    },
-
-    R = { // Game resources
-      gameTitle: 'Le pion des trous'
-    },
-
-    T = { // Game color theme; http://www.materialui.co/colors
-      fontFamily: '"Chantelli Antiqua"',
-      textColor: '#ffb300',
-      holeDark: '#3e2723',
-      holeLight: '#5d4037',
-      boardDark: '#795548',
-      boardLight: '#8d6e63',
-      boardShadow: {offsetX: 0, offsetY: 2, blur: 20, color: 'rgba(0, 0, 0, 0.9)'}
-    },
-
-    GAME_SIZE = 14,
-
-    BOARD_RATIO = 14 / 19;
+  var O = { // Game view default options
+    board: {
+      maxHeight: 695,
+      maxWidth: 504
+    }
+  };
 
   /** @constructor */
   function GameView(parent, options) {
     if (!(this instanceof GameView)) { return new GameView(parent, options); }
     if (!parent) { return; }
 
-    var o = Object.create(O), i, keys, l;
-    if (options) {
-      for (i = 0, keys = Object.keys(options), l = keys.length; i < l; i++) {
-        o[keys[i]] = options[keys[i]];
-      }
-    }
+    Object.defineProperty(this, 'game', { value: new Game() });
 
     /**
      * Gameboard geometry (i.e. where the gameboard gets drawn, how large it is, etc.), in terms of parent dimensions.
      *
      * @type {{x: number, y: number, width: number, height: number, unit: number, size: number}}
      */
-    this._board = {};
-
-    // Set up the board geometry (always vertical, http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html):
-    if (BOARD_RATIO > parent.offsetWidth / parent.offsetHeight) {
-      this._board.width = Math.min(parent.offsetWidth, o.board.maxWidth);
-      this._board.height = this._board.width / BOARD_RATIO;
-    } else {
-      this._board.height = Math.min(parent.offsetHeight, o.board.maxHeight);
-      this._board.width = this._board.height * BOARD_RATIO;
-    }
-    this._board.x = (parent.offsetWidth - this._board.width ) / 2;
-    this._board.y = (parent.offsetHeight - this._board.height) / 2;
-    this._board.unit = this._board.height * BOARD_RATIO / GAME_SIZE;
+    Object.defineProperty(this, 'board', { value: {} });
 
     /**
      * The canvas on which the game is drawn is oversampled (2x) and fills its parent.
      *
      * @type {HTMLCanvasElement}
      */
-    this._canvas = document.createElement('canvas');
+    Object.defineProperty(this, 'canvas', { value: document.createElement('canvas') });
+
+    var o = util.extend({}, O, options), boardRatio;
+
+    // Set up the board geometry (always vertical, http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html):
+    boardRatio = this.game.size / (this.game.size + 5);
+    if (boardRatio > parent.offsetWidth / parent.offsetHeight) {
+      this.board.width = Math.min(parent.offsetWidth, o.board.maxWidth);
+      this.board.height = this.board.width / boardRatio;
+    } else {
+      this.board.height = Math.min(parent.offsetHeight, o.board.maxHeight);
+      this.board.width = this.board.height * boardRatio;
+    }
+    this.board.x = (parent.offsetWidth - this.board.width ) / 2;
+    this.board.y = (parent.offsetHeight - this.board.height) / 2;
+    this.board.unit = this.board.height * boardRatio / this.game.size;
 
     // Set up an oversampled (2x) canvas:
-    this._canvas.width = parent.offsetWidth * 2;
-    this._canvas.height = parent.offsetHeight * 2;
-    this._canvas.style.width = parent.offsetWidth + 'px';
-    this._canvas.style.height = parent.offsetHeight + 'px';
-    this._canvas.getContext('2d').scale(2, 2);
+    this.canvas.width = parent.offsetWidth * 2;
+    this.canvas.height = parent.offsetHeight * 2;
+    this.canvas.style.width = parent.offsetWidth + 'px';
+    this.canvas.style.height = parent.offsetHeight + 'px';
+    this.canvas.getContext('2d').scale(2, 2);
 
     this.render();
     parent.innerHTML = ''; // empty parent content
-    parent.appendChild(this._canvas);
+    parent.appendChild(this.canvas);
   }
 
   GameView.prototype.render = function () {
@@ -87,18 +62,18 @@ window.addEventListener('load', function (/*event*/) {
   };
 
   GameView.prototype._renderBoard = function () {
-    if (!this._canvas || !this._board) { return; }
+    if (!this.canvas || !this.board) { return; }
 
-    var ctx = this._canvas.getContext('2d'), brd = this._board;
+    var ctx = this.canvas.getContext('2d'), brd = this.board;
     ctx.save();
 
     ctx.fillStyle = T.boardLight;
-    ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    ctx.shadowOffsetX = T.boardShadow.offsetX;
-    ctx.shadowOffsetY = T.boardShadow.offsetY;
-    ctx.shadowColor = T.boardShadow.color;
-    ctx.shadowBlur = T.boardShadow.blur;
+    ctx.shadowOffsetX = T.dropShadow.offsetX;
+    ctx.shadowOffsetY = T.dropShadow.offsetY;
+    ctx.shadowColor = T.dropShadow.color;
+    ctx.shadowBlur = T.dropShadow.blur;
 
     ctx.fillStyle = T.boardDark;
     ctx.fillRect(brd.x, brd.y, brd.width, brd.height);
@@ -107,7 +82,7 @@ window.addEventListener('load', function (/*event*/) {
     ctx.scale(brd.unit, brd.unit);  // draw the board decorations in terms of units
 
     ctx.shadowBlur /= brd.unit / 5; // stronger shadow
-    ctx.strokeStyle = T.textColor;
+    ctx.strokeStyle = T.foreground;
     ctx.lineWidth = 2 / brd.unit;   // the canvas is oversampled and the board is scaled
 
     // Arch Bridge:
@@ -140,14 +115,14 @@ window.addEventListener('load', function (/*event*/) {
     ctx.stroke();
 
     ctx.font = 0.8 + 'px ' + T.fontFamily;
-    ctx.fillStyle = T.textColor;
-    ctx.fillText(R.gameTitle, brd.width / (brd.unit * 2) - ctx.measureText(R.gameTitle).width / 2, 1);
+    ctx.fillStyle = T.foreground;
+    ctx.fillText(this.game.name, brd.width / (brd.unit * 2) - ctx.measureText(this.game.name).width / 2, 1);
 
     ctx.restore();
   };
 
   GameView.prototype._renderHoles = function () {
-    if (!this._canvas || !this._board) { return; }
+    if (!this.canvas || !this.board) { return; }
 
     function hole(x, y, rd) {
       cx.beginPath();
@@ -193,8 +168,8 @@ window.addEventListener('load', function (/*event*/) {
     }
 
     var
-      cx = this._canvas.getContext('2d'), bd = this._board, bw = bd.width, pi2 = 2 * Math.PI,
-      dm = bd.unit * 1.5 / 3, r = dm / 2, dt = (bd.width - dm * GAME_SIZE) / (GAME_SIZE + 1), x, y;
+      cx = this.canvas.getContext('2d'), bd = this.board, bw = bd.width, pi2 = 2 * Math.PI, x, y,
+      dm = bd.unit * 1.5 / 3, r = dm / 2, dt = (bd.width - dm * this.game.size) / (this.game.size + 1);
     cx.save();
 
     // Hole outlines:
@@ -207,10 +182,10 @@ window.addEventListener('load', function (/*event*/) {
     for (y = dt + r; y < bw; y += dt + dm) { for (x = dt + r; x < bw; x += dt + dm) { hole(x, y); } }
 
     // Hole inner shadows:
-    cx.shadowOffsetX = T.boardShadow.offsetX;
-    cx.shadowOffsetY = T.boardShadow.offsetY;
-    cx.shadowColor = T.boardShadow.color;
-    cx.shadowBlur = T.boardShadow.blur;
+    cx.shadowOffsetX = T.dropShadow.offsetX;
+    cx.shadowOffsetY = T.dropShadow.offsetY;
+    cx.shadowColor = T.dropShadow.color;
+    cx.shadowBlur = T.dropShadow.blur;
     cx.strokeStyle = T.holeDark;
     cx.lineWidth = 4;
 
@@ -222,6 +197,5 @@ window.addEventListener('load', function (/*event*/) {
     cx.restore();
   };
 
-  // Create and display the game view:
-  GameView(document.getElementsByClassName('lepiondestrous')[0]);
-}, false);
+  return GameView;
+});
