@@ -22,13 +22,6 @@ define(['./game', './gameTheme', './util'], function (Game, T, util) {
      */
     Object.defineProperty(this, 'board', { value: {} });
 
-    /**
-     * The canvas on which the game is drawn is oversampled (2x) and fills its parent.
-     *
-     * @type {HTMLCanvasElement}
-     */
-    Object.defineProperty(this, 'canvas', { value: document.createElement('canvas') });
-
     var o = util.extend({}, O, options), boardRatio;
 
     // Set up the board geometry (always vertical, http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html):
@@ -43,6 +36,13 @@ define(['./game', './gameTheme', './util'], function (Game, T, util) {
     this.board.x = (parent.offsetWidth - this.board.width ) / 2;
     this.board.y = (parent.offsetHeight - this.board.height) / 2;
     this.board.unit = this.board.height * boardRatio / this.game.size;
+
+    /**
+     * The canvas on which the game is drawn is oversampled (2x) and fills its parent.
+     *
+     * @type {HTMLCanvasElement}
+     */
+    Object.defineProperty(this, 'canvas', { value: document.createElement('canvas') });
 
     // Set up an oversampled (2x) canvas:
     this.canvas.width = parent.offsetWidth * 2;

@@ -5,10 +5,10 @@ define(function () {
     if (arguments.length <= 1) { return target; }
     if (!target) { target = {}; }
 
-    var i, l = arguments.length, source, j, kl, ks;
-    for (i = 1; i < l; i++) {
+    var i, sl, j, kl, source, keys;
+    for (i = 1, sl = arguments.length; i < sl; i++) {
       if (typeof (source = arguments[i]) === 'object') {
-        for (j = 0, ks = Object.keys(source), kl = ks.length; j < kl; j++) { target[ks[j]] = source[ks[j]]; }
+        for (j = 0, kl = (keys = Object.keys(source)).length; j < kl; j++) { target[keys[j]] = source[keys[j]]; }
       }
     }
 
