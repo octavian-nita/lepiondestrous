@@ -49,6 +49,7 @@ define(['./game', './gameTheme', './util'], function (Game, T, util) {
     this.canvas.height = parent.offsetHeight * 2;
     this.canvas.style.width = parent.offsetWidth + 'px';
     this.canvas.style.height = parent.offsetHeight + 'px';
+    this.canvas.style.background = T.boardLight;
     this.canvas.getContext('2d').scale(2, 2);
 
     this.render();
@@ -66,9 +67,6 @@ define(['./game', './gameTheme', './util'], function (Game, T, util) {
 
     var ctx = this.canvas.getContext('2d'), brd = this.board;
     ctx.save();
-
-    ctx.fillStyle = T.boardLight;
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     ctx.shadowOffsetX = T.dropShadow.offsetX;
     ctx.shadowOffsetY = T.dropShadow.offsetY;
