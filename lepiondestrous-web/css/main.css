@@ -68,6 +68,6 @@ body {
   width: 568px; height: 320px; /* iPhone 5 landscape */
   width: 320px; height: 568px; /* iPhone 5 portrait */
   /*width: 550px; height: 750px;*/
-  /*width: 100%; height: 100%;*/
+  width: 100%; height: 100%;
   font-family: "Chantelli Antiqua";
 }
