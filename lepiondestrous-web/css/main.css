@@ -32,7 +32,7 @@ html { overflow: auto; height: 100%; background: #fff; color: #555; font-size: 6
 
 body {
   position: relative;
-  overflow: auto;
+  overflow: hidden; /* we 'translateY' for vertical align so 'auto' might generate scroll bars */
   margin: 0 auto;
 
   /* Helps with vertical alignment: */
@@ -53,7 +53,6 @@ body {
 
 .lepiondestrous {
   margin: 0 auto;
-  overflow: hidden;
 
   /* Vertical align: */
   position: relative; top: 50%;

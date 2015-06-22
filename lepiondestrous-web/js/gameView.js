@@ -1,4 +1,4 @@
-define(['./game', './gameTheme', './util'], function (Game, T, util) {
+define(['./game', './gameTheme'], function (Game, T) {
   'use strict';
 
   var O = { // Game view default options
@@ -22,7 +22,10 @@ define(['./game', './gameTheme', './util'], function (Game, T, util) {
      */
     Object.defineProperty(this, 'board', { value: {} });
 
-    var o = util.extend({}, O, options), boardRatio;
+    var o = Object.create(O), i, keys, l, boardRatio;
+    if (options) {
+      for (i = 0, keys = Object.keys(options), l = keys.length; i < l; i++) { o[keys[i]] = options[keys[i]]; }
+    }
 
     // Set up the board geometry (always vertical, http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html):
     boardRatio = this.game.size / (this.game.size + 5);

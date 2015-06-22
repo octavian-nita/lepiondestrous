@@ -6,10 +6,12 @@ define(function () {
     if (!(this instanceof Board)) { return new Board(cols, rows); }
 
     cols = cols === undefined ? 14 : Number(cols);
-    if (cols <= 0) { throw new Error('the number of columns in a board cannot be less than or equal to 0'); }
+    if (cols <= 0 ||
+        isNaN(cols)) { throw new Error('the number of columns in a board should be a strictly positive number'); }
 
     rows = rows === undefined ? cols : Number(rows);
-    if (rows <= 0) { throw new Error('the number of rows in a board cannot be less than or equal to 0'); }
+    if (rows <= 0 ||
+        isNaN(rows)) { throw new Error('the number of rows in a board should be a strictly positive number'); }
 
     /** @readonly */
     Object.defineProperty(this, 'cols', { enumerable: true, value: cols });
@@ -86,6 +88,10 @@ define(function () {
   function Game() {
     if (!(this instanceof Game)) { return new Game(); }
 
+    var players = {};
+    players[Player.LIGHT] = new Player(Player.LIGHT);
+    players[Player.DARK] = new Player(Player.DARK);
+
     /** @readonly */
     Object.defineProperty(this, 'name', { enumerable: true, value: 'Le pion des trous' });
 
@@ -96,12 +102,20 @@ define(function () {
     Object.defineProperty(this, 'board', { enumerable: true, value: new Board(this.size) });
 
     /** @readonly */
-    Object.defineProperty(this, 'players',
-                          { enumerable: true, value: [new Player(Player.LIGHT), new Player(Player.DARK)] });
+    Object.defineProperty(this, 'players', { enumerable: true, value: Object.freeze(players) });
 
     /** @protected */
-    this._currentPlayer = 0;
+    this._currentPlayer = Player.LIGHT;
   }
+
+  Game.prototype.currentPlayer = function () { return this.players[this._currentPlayer]; };
+
+  Game.prototype.playerAt = function (col, row) { return this.players[this.board.at(col, row)]; };
+
+  Game.prototype.play = function (col, row) {
+    this.board.place(col, row, this.currentPlayer().play());
+    this._currentPlayer = this._currentPlayer === Player.LIGHT ? Player.DARK : Player.LIGHT;
+  };
 
   return Game;
 });
