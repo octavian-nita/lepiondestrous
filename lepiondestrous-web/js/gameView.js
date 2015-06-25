@@ -1,34 +1,15 @@
-define(['./game', './gameTheme'], function (Game, T) {
+define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   'use strict';
 
-  var O = { // Game view default options
-    board: {
-      maxHeight: 695,
-      maxWidth: 504
-    }
-  };
+  var
+    O = { // Game view default options
+      board: {
+        maxHeight: 695,
+        maxWidth: 504
+      }
+    },
 
-  /**
-   * @return {HTMLCanvasElement} an oversampled (2x) canvas element sized to fill the <code>container</code> if provided
-   *         or to fill 300px × 150px otherwise
-   */
-  function createLayer(container, zIndex) {
-    var width = container && container.offsetWidth || 300,
-        height = container && container.offsetHeight || 150,
-        canvas = document.createElement('canvas'), style = canvas.style;
-
-    style.position = 'absolute';
-    style.zIndex = zIndex || 0;
-    style.background = 'transparent';
-    style.width = width + 'px';
-    style.height = height + 'px';
-
-    canvas.width = width * 2;
-    canvas.height = height * 2;
-    canvas.getContext('2d').scale(2, 2);
-
-    return canvas;
-  }
+    g = new Gfx();
 
   /** @constructor */
   function GameView(container, options) {
@@ -36,10 +17,6 @@ define(['./game', './gameTheme'], function (Game, T) {
     if (!container) { return; }
 
     Object.defineProperty(this, 'game', { value: new Game() });
-    this.game.play(3, 3);
-    /*this.game.play(3, 4);
-     this.game.play(4, 4);
-     this.game.play(5, 5);*/
 
     /**
      * Gameboard geometry (i.e. where the gameboard gets drawn, how large it is, etc.), in terms of container dimensions.
@@ -69,7 +46,7 @@ define(['./game', './gameTheme'], function (Game, T) {
     this.board.holeDiameter = this.board.unit * 1.5 / 3;
     this.board.holeDelta = (this.board.width - this.board.holeDiameter * this.game.size) / (this.game.size + 1);
 
-    this.render(layers = [createLayer(container), createLayer(container, 1), createLayer(container, 2)]);
+    this.render(layers = [Gfx.createLayer(container), Gfx.createLayer(container, 1), Gfx.createLayer(container, 2)]);
 
     container.innerHTML = ''; // empty container content
     for (i = 0, l = layers.length; i < l; i++) { container.appendChild(layers[i]); }
@@ -143,52 +120,28 @@ define(['./game', './gameTheme'], function (Game, T) {
   GameView.prototype._renderHoles = function (cx) {
     if (!cx || !this.board) { return; }
 
-    function hole(x, y, r) {
-      cx.beginPath();
-      cx.arc(x, y, r ? r : hr, 0, _2pi);
-      cx.fill();
+    function renderScoreboardHoles(asShadows) {
+      var fn = asShadows ? g.innerShadowCircle : g.circle, x0 = dt + r, y0 = dt + r / 2, ds = dt + r * 2;
+
+      fn.call(g, x0, y0, r);
+      fn.call(g, x0 + ds, y0, r);
+      fn.call(g, x0, y0 + ds, r);
+      fn.call(g, x0 + ds, y0 + ds, r);
+      fn.call(g, x0 + ds / 2, y0 + 2 * ds, r);
+      fn.call(g, x0 + ds / 2, y0 + 3 * ds, r);
+      fn.call(g, x0 + ds / 2, y0 + 4 * ds, r);
+
+      fn.call(g, w - x0, y0, r);
+      fn.call(g, w - x0 - ds, y0, r);
+      fn.call(g, w - x0, y0 + ds, r);
+      fn.call(g, w - x0 - ds, y0 + ds, r);
+      fn.call(g, w - x0 - ds / 2, y0 + 2 * ds, r);
+      fn.call(g, w - x0 - ds / 2, y0 + 3 * ds, r);
+      fn.call(g, w - x0 - ds / 2, y0 + 4 * ds, r);
     }
 
-    function holeShadow(x, y, r) {
-      if (!r) { r = hr; }
-
-      cx.save();
-      cx.beginPath();
-      cx.arc(x, y, r, 0, _2pi);
-      cx.clip();
-      cx.beginPath();
-      cx.arc(x, y + cx.lineWidth, r + cx.lineWidth, 0, _2pi);
-      cx.stroke();
-      cx.restore();
-    }
-
-    function renderScoreboardHoles(fn, rd) {
-      if (!fn) { fn = hole; }
-      if (typeof fn !== 'function') { return; }
-      if (!rd) { rd = hr; }
-
-      var x0 = dt + rd, y0 = dt + rd / 2, ds = dt + rd * 2;
-
-      fn.call(null, x0, y0, rd);
-      fn.call(null, x0 + ds, y0, rd);
-      fn.call(null, x0, y0 + ds, rd);
-      fn.call(null, x0 + ds, y0 + ds, rd);
-      fn.call(null, x0 + ds / 2, y0 + 2 * ds, rd);
-      fn.call(null, x0 + ds / 2, y0 + 3 * ds, rd);
-      fn.call(null, x0 + ds / 2, y0 + 4 * ds, rd);
-
-      fn.call(null, bw - x0, y0, rd);
-      fn.call(null, bw - x0 - ds, y0, rd);
-      fn.call(null, bw - x0, y0 + ds, rd);
-      fn.call(null, bw - x0 - ds, y0 + ds, rd);
-      fn.call(null, bw - x0 - ds / 2, y0 + 2 * ds, rd);
-      fn.call(null, bw - x0 - ds / 2, y0 + 3 * ds, rd);
-      fn.call(null, bw - x0 - ds / 2, y0 + 4 * ds, rd);
-    }
-
-    var bw = this.board.width, hd = this.board.holeDiameter, hr = hd / 2, dt = this.board.holeDelta,
-        _2pi = 2 * Math.PI, x, y;
-    cx.save();
+    var w = this.board.width, d = this.board.holeDiameter, r = d / 2, dt = this.board.holeDelta, x, y;
+    g.use(cx);
 
     // Hole outlines:
     cx.fillStyle = T.holeLight;
@@ -197,7 +150,7 @@ define(['./game', './gameTheme'], function (Game, T) {
     renderScoreboardHoles();
 
     cx.translate(0, this.board.height - this.board.width);
-    for (y = dt + hr; y < bw; y += dt + hd) { for (x = dt + hr; x < bw; x += dt + hd) { hole(x, y); } }
+    for (y = dt + r; y < w; y += dt + d) { for (x = dt + r; x < w; x += dt + d) { g.circle(x, y, r); } }
 
     // Hole inner shadows:
     cx.shadowOffsetX = T.dropShadow.offsetX;
@@ -207,39 +160,42 @@ define(['./game', './gameTheme'], function (Game, T) {
     cx.strokeStyle = T.holeDark;
     cx.lineWidth = 4;
 
-    for (y = dt + hr; y < bw; y += dt + hd) { for (x = dt + hr; x < bw; x += dt + hd) { holeShadow(x, y); } }
+    for (y = dt + r; y < w; y += dt + d) { for (x = dt + r; x < w; x += dt + d) { g.innerShadowCircle(x, y, r); } }
 
     cx.translate(0, -this.board.height + this.board.width);
-    renderScoreboardHoles(holeShadow);
+    renderScoreboardHoles(true);
 
-    cx.restore();
+    g.end();
   };
 
   GameView.prototype._renderPawns = function (cx) {
     if (!cx || !this.board || !this.game) { return; }
 
-    var i, j, game = this.game, size = game.size, _2pi = 2 * Math.PI;
-    cx.save();
+    this.game.play(3, 3);
+    /*this.game.play(3, 4);
+     this.game.play(4, 4);
+     this.game.play(5, 5);*/
 
-    cx.shadowOffsetX = T.dropShadow.offsetX;
-    cx.shadowOffsetY = T.dropShadow.offsetY;
-    cx.shadowColor = T.dropShadow.color;
-    //cx.shadowBlur = T.dropShadow.blur;
-    cx.shadowBlur /= this.board.unit / 5; // stronger shadow
+    var i, j, brd = this.board, r = brd.holeDiameter / 2, game = this.game, size = game.size;
+    g.use(cx);
 
-    cx.translate(this.board.x, this.board.y + this.board.height - this.board.width);
+    /*cx.shadowOffsetX = T.dropShadow.offsetX;
+     cx.shadowOffsetY = T.dropShadow.offsetY;
+     cx.shadowColor = T.dropShadow.color;
+     //cx.shadowBlur = T.dropShadow.blur;
+     cx.shadowBlur /= this.board.unit / 5; // stronger shadow*/
+
+    cx.translate(brd.x + brd.holeDelta, brd.y + brd.height - brd.width + brd.holeDelta);
 
     for (i = 0; i < size; i++) {
       for (j = 0; j < size; j++) {
         if (!game.board.empty(i, j)) {
-          /*cx.beginPath();
-           cx.arc(j, i, this.board.holeDiameter / 2, 0, _2pi);
-           cx.fill();*/
+          g.circle(i, j, r);
         }
       }
     }
 
-    cx.restore();
+    g.end();
   };
 
   return GameView;
