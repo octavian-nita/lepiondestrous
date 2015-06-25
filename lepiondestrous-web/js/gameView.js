@@ -172,25 +172,34 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     if (!cx || !this.board || !this.game) { return; }
 
     this.game.play(3, 3);
-    /*this.game.play(3, 4);
-     this.game.play(4, 4);
-     this.game.play(5, 5);*/
+    this.game.play(3, 4);
+    this.game.play(4, 4);
+    this.game.play(5, 5);
 
-    var i, j, brd = this.board, r = brd.holeDiameter / 2, game = this.game, size = game.size;
+    var row, col, brd = this.board, dia = brd.holeDiameter, rad = dia / 2, dta = this.board.holeDelta,
+        game = this.game, size = game.size, player;
     g.use(cx);
 
-    /*cx.shadowOffsetX = T.dropShadow.offsetX;
-     cx.shadowOffsetY = T.dropShadow.offsetY;
-     cx.shadowColor = T.dropShadow.color;
-     //cx.shadowBlur = T.dropShadow.blur;
-     cx.shadowBlur /= this.board.unit / 5; // stronger shadow*/
+    cx.shadowOffsetX = T.dropShadow.offsetX;
+    cx.shadowOffsetY = T.dropShadow.offsetY;
+    cx.shadowColor = T.dropShadow.color;
+    //cx.shadowBlur = T.dropShadow.blur;
+    cx.shadowBlur /= this.board.unit / 5; // stronger shadow
 
-    cx.translate(brd.x + brd.holeDelta, brd.y + brd.height - brd.width + brd.holeDelta);
+    cx.translate(brd.x + dta + rad, dta + rad + brd.y + brd.height - brd.width);
 
-    for (i = 0; i < size; i++) {
-      for (j = 0; j < size; j++) {
-        if (!game.board.empty(i, j)) {
-          g.circle(i, j, r);
+    for (row = 0; row < size; row++) {
+      for (col = 0; col < size; col++) {
+        console.log(game.playerAt(col, row));
+        switch (game.playerAt(col, row)) {
+        case 2:
+          cx.fillStyle = T.darkPawn;
+          g.circle((col - 1) * (dta + dia), (row - 1) * (dta + dia), rad);
+          break;
+        case 1:
+          cx.fillStyle = T.lightPawn;
+          g.circle((col - 1) * (dta + dia), (row - 1) * (dta + dia), rad);
+          break;
         }
       }
     }
@@ -199,4 +208,5 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   };
 
   return GameView;
-});
+})
+;
