@@ -8,10 +8,10 @@ define(function () {
     holeDark: '#3e2723',
     holeLight: '#5d4037',
 
-    darkPawn: '#d32f2f',
-    lightPawn: 'white',
+    pawnDark: '#d32f2f',
+    pawnLight: 'white',
 
-    dropShadow: {offsetX: 0, offsetY: 2, blur: 20, color: 'rgba(0, 0, 0, 0.9)'},
+    dropShadow: { offsetX: 0, offsetY: 5, blur: 20, color: 'rgba(0, 0, 0, 0.9)' },
 
     fontFamily: '"Chantelli Antiqua"',
     foreground: '#ffb300'

@@ -3,19 +3,21 @@ define(function () {
 
   function Gfx() {
     if (!(this instanceof Gfx)) { return new Gfx(); }
-    this._contexts = [];
+
+    /** @protected */
+    this._contexts = [];        // intended to be used as a stack of 2D rendering contexts
   }
 
   Gfx.prototype.use = function (ctx) {
     if (ctx) {
-      this._contexts.push(ctx);
-      ctx.save();
+      this._contexts.push(ctx); // becomes the current 2D rendering context this instance will draw on
+      ctx.save();               // many times, one temporarily sets attributes on the context one uses
     }
   };
 
   Gfx.prototype.end = function () {
     var ctx = this._contexts.pop();
-    ctx && ctx.restore();
+    ctx && ctx.restore();       // upon 'un-using' a context, restore its previous state
   };
 
   Gfx.prototype.circle = function (x, y, r, fn) {
@@ -25,7 +27,7 @@ define(function () {
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Gfx.TWO_PI);
 
-    // Finishing context method call:
+    // Finishing context method call; optionally, one can use 'fill' (the default), 'clip', etc.:
     if (fn && typeof ctx[fn] === 'function') {
       // (see https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#3-managing-arguments)
       args = new Array(arguments.length - 4);
@@ -36,11 +38,11 @@ define(function () {
     }
   };
 
-  Gfx.prototype.innerShadowCircle = function (x, y, r) {
+  Gfx.prototype.innerShadowCircle = function (x, y, r) { // a bit harder to generalize an 'inner-shadow' routine...
     var ctx = this._contexts[this._contexts.length - 1];
     if (!ctx) { return; }
 
-    ctx.save();
+    ctx.save(); // in order to restore the clipping region since the technique is based on manipulating it
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Gfx.TWO_PI);
     ctx.clip();
@@ -51,6 +53,7 @@ define(function () {
   };
 
   /**
+   * @static
    * @return {HTMLCanvasElement} an oversampled (2x) canvas element sized to fill the provided <code>container</code> or
    *         to 300px × 150px if no container is provided, pre-styled to be used as a {@link https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#Use_multiple_layered_canvases_for_complex_scenes. layer}
    */
@@ -72,6 +75,7 @@ define(function () {
     return canvas;
   };
 
+  /** @static */
   Gfx.TWO_PI = 2 * Math.PI;
 
   return Gfx;

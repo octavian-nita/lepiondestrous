@@ -70,27 +70,13 @@ define(function () {
     return this.piece;
   };
 
-  /**
-   * @const {1}
-   * @readonly
-   * @static
-   */
-  Object.defineProperty(Player, 'LIGHT', { enumerable: true, value: 1 });
-
-  /**
-   * @const {2}
-   * @readonly
-   * @static
-   */
-  Object.defineProperty(Player, 'DARK', { enumerable: true, value: 2 });
-
   /** @constructor */
   function Game() {
     if (!(this instanceof Game)) { return new Game(); }
 
     var players = {};
-    players[Player.LIGHT] = new Player(Player.LIGHT);
-    players[Player.DARK] = new Player(Player.DARK);
+    players[Game.PLAYER_LIGHT] = new Player(Game.PLAYER_LIGHT);
+    players[Game.PLAYER_DARK] = new Player(Game.PLAYER_DARK);
 
     /** @readonly */
     Object.defineProperty(this, 'name', { enumerable: true, value: 'Le pion des trous' });
@@ -105,16 +91,28 @@ define(function () {
     Object.defineProperty(this, 'players', { enumerable: true, value: Object.freeze(players) });
 
     /** @protected */
-    this._currentPlayer = Player.LIGHT;
+    this._currentPlayer = Game.PLAYER_LIGHT;
   }
+
+  /**
+   * @const {1}
+   * @readonly
+   * @static
+   */
+  Object.defineProperty(Game, 'PLAYER_LIGHT', { enumerable: true, value: 1 });
+
+  /**
+   * @const {2}
+   * @readonly
+   * @static
+   */
+  Object.defineProperty(Game, 'PLAYER_DARK', { enumerable: true, value: 2 });
 
   Game.prototype.currentPlayer = function () { return this.players[this._currentPlayer]; };
 
-  Game.prototype.playerAt = function (col, row) { return this.players[this.board.at(col, row)]; };
-
   Game.prototype.play = function (col, row) {
     this.board.place(col, row, this.currentPlayer().play());
-    this._currentPlayer = this._currentPlayer === Player.LIGHT ? Player.DARK : Player.LIGHT;
+    this._currentPlayer = this._currentPlayer === Game.PLAYER_LIGHT ? Game.PLAYER_DARK : Game.PLAYER_LIGHT;
   };
 
   return Game;

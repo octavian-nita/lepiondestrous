@@ -1,15 +1,22 @@
 define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   'use strict';
 
-  var
-    O = { // Game view default options
-      board: {
-        maxHeight: 695,
-        maxWidth: 504
-      }
-    },
+  var O = { // Game view default options
+        board: {
+          maxHeight: 695,
+          maxWidth: 504
+        }
+      },
 
-    g = new Gfx();
+      g = new Gfx();
+
+  function shadow(cx) {
+    if (!cx) { return; }
+    cx.shadowOffsetX = T.dropShadow.offsetX;
+    cx.shadowOffsetY = T.dropShadow.offsetY;
+    cx.shadowColor = T.dropShadow.color;
+    cx.shadowBlur = T.dropShadow.blur;
+  }
 
   /** @constructor */
   function GameView(container, options) {
@@ -66,10 +73,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     var brd = this.board;
     cx.save();
 
-    cx.shadowOffsetX = T.dropShadow.offsetX;
-    cx.shadowOffsetY = T.dropShadow.offsetY;
-    cx.shadowColor = T.dropShadow.color;
-    cx.shadowBlur = T.dropShadow.blur;
+    shadow(cx);
 
     cx.fillStyle = T.boardDark;
     cx.fillRect(brd.x, brd.y, brd.width, brd.height);
@@ -77,7 +81,6 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     cx.translate(brd.x, brd.y);    // move the origin to the board top left corner
     cx.scale(brd.unit, brd.unit);  // draw the board decorations in terms of units
 
-    cx.shadowBlur /= brd.unit / 5; // stronger shadow
     cx.strokeStyle = T.foreground;
     cx.lineWidth = 2 / brd.unit;   // the canvas is oversampled and the board is scaled
 
@@ -153,10 +156,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     for (y = dt + r; y < w; y += dt + d) { for (x = dt + r; x < w; x += dt + d) { g.circle(x, y, r); } }
 
     // Hole inner shadows:
-    cx.shadowOffsetX = T.dropShadow.offsetX;
-    cx.shadowOffsetY = T.dropShadow.offsetY;
-    cx.shadowColor = T.dropShadow.color;
-    cx.shadowBlur = T.dropShadow.blur;
+    shadow(cx);
     cx.strokeStyle = T.holeDark;
     cx.lineWidth = 4;
 
@@ -176,31 +176,18 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     this.game.play(4, 4);
     this.game.play(5, 5);
 
-    var row, col, brd = this.board, dia = brd.holeDiameter, rad = dia / 2, dta = this.board.holeDelta,
-        game = this.game, size = game.size, player;
+    var row, col, game = this.game, size = game.size, piece,
+        rad = this.board.holeDiameter / 2, dta = this.board.holeDiameter + this.board.holeDelta;
     g.use(cx);
 
-    cx.shadowOffsetX = T.dropShadow.offsetX;
-    cx.shadowOffsetY = T.dropShadow.offsetY;
-    cx.shadowColor = T.dropShadow.color;
-    //cx.shadowBlur = T.dropShadow.blur;
-    cx.shadowBlur /= this.board.unit / 5; // stronger shadow
-
-    cx.translate(brd.x + dta + rad, dta + rad + brd.y + brd.height - brd.width);
+    shadow(cx);
+    cx.translate(this.board.x + dta - rad, this.board.y + this.board.height - this.board.width + dta - rad);
 
     for (row = 0; row < size; row++) {
       for (col = 0; col < size; col++) {
-        console.log(game.playerAt(col, row));
-        switch (game.playerAt(col, row)) {
-        case 2:
-          cx.fillStyle = T.darkPawn;
-          g.circle((col - 1) * (dta + dia), (row - 1) * (dta + dia), rad);
-          break;
-        case 1:
-          cx.fillStyle = T.lightPawn;
-          g.circle((col - 1) * (dta + dia), (row - 1) * (dta + dia), rad);
-          break;
-        }
+        piece = game.board.at(col, row);
+        cx.fillStyle = piece === Game.PLAYER_LIGHT ? T.pawnLight : T.pawnDark;
+        if (piece) { g.circle((col - 1) * dta, (row - 1) * dta, rad); }
       }
     }
 
@@ -208,5 +195,4 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   };
 
   return GameView;
-})
-;
+});
