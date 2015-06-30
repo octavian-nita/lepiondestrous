@@ -1,12 +1,12 @@
 define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   'use strict';
 
-  var O = { // Game view default options
-        board: {
-          maxHeight: 695,
-          maxWidth: 504
-        }
-      },
+  var O = Object.freeze({ // Game view default options
+                          board: {
+                            maxHeight: 695,
+                            maxWidth: 504
+                          }
+                        }),
 
       g = new Gfx();
 
@@ -23,39 +23,47 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     if (!(this instanceof GameView)) { return new GameView(container, options); }
     if (!container) { return; }
 
-    Object.defineProperty(this, 'game', { value: new Game() });
+    var opts = Object.create(O), i, keys, l, boardRatio, layers;
+    if (options) { // compute view options
+      for (i = 0, keys = Object.keys(options), l = keys.length; i < l; i++) { opts[keys[i]] = options[keys[i]]; }
+    }
 
     /**
-     * Gameboard geometry (i.e. where the gameboard gets drawn, how large it is, etc.), in terms of container dimensions.
+     * Game model.
+     *
+     * @protected
+     */
+    this._game = new Game();
+
+    /**
+     * Gameboard geometry (where the gameboard gets drawn, how large it is, etc.), in terms of container dimensions.
      *
      * @type {{x: number, y: number, width: number, height: number, unit: number,
      *         holeDiameter: number, holeDelta: number}}
+     * @protected
      */
-    Object.defineProperty(this, 'board', { value: {} });
-
-    var o = Object.create(O), i, keys, l, boardRatio, layers;
-    if (options) {
-      for (i = 0, keys = Object.keys(options), l = keys.length; i < l; i++) { o[keys[i]] = options[keys[i]]; }
-    }
+    this._board = {};
 
     // Set up the board geometry (always vertical, http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html):
-    boardRatio = this.game.size / (this.game.size + 5);
+    boardRatio = this._game.size / (this._game.size + 5);
     if (boardRatio > container.offsetWidth / container.offsetHeight) {
-      this.board.width = Math.min(container.offsetWidth, o.board.maxWidth);
-      this.board.height = this.board.width / boardRatio;
+      this._board.width = Math.min(container.offsetWidth, opts.board.maxWidth);
+      this._board.height = this._board.width / boardRatio;
     } else {
-      this.board.height = Math.min(container.offsetHeight, o.board.maxHeight);
-      this.board.width = this.board.height * boardRatio;
+      this._board.height = Math.min(container.offsetHeight, opts.board.maxHeight);
+      this._board.width = this._board.height * boardRatio;
     }
-    this.board.x = (container.offsetWidth - this.board.width ) / 2;
-    this.board.y = (container.offsetHeight - this.board.height) / 2;
-    this.board.unit = this.board.height * boardRatio / this.game.size;
-    this.board.holeDiameter = this.board.unit * 1.5 / 3;
-    this.board.holeDelta = (this.board.width - this.board.holeDiameter * this.game.size) / (this.game.size + 1);
+    this._board.x = (container.offsetWidth - this._board.width ) / 2;
+    this._board.y = (container.offsetHeight - this._board.height) / 2;
+    this._board.unit = this._board.height * boardRatio / this._game.size;
+    this._board.holeDiameter = this._board.unit * 1.5 / 3;
+    this._board.holeDelta = (this._board.width - this._board.holeDiameter * this._game.size) / (this._game.size + 1);
 
+    // Render the game view, off-screen:
     this.render(layers = [Gfx.createLayer(container), Gfx.createLayer(container, 1), Gfx.createLayer(container, 2)]);
 
-    container.innerHTML = ''; // empty container content
+    // Set up the parent / container element
+    container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
     for (i = 0, l = layers.length; i < l; i++) { container.appendChild(layers[i]); }
   }
 
@@ -64,13 +72,14 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     this._renderBoard(cx0);
     this._renderHoles(cx0);
     this._renderPawns(layers[1].getContext('2d'));
+    this._renderGlass(layers[2].getContext('2d'));
   };
 
   GameView.prototype._renderBoard = function (cx) {
-    if (!cx || !this.board) { return; }
+    if (!cx || !this._board) { return; }
     cx.canvas.style.background = T.boardLight;
 
-    var brd = this.board;
+    var brd = this._board;
     cx.save();
 
     shadow(cx);
@@ -115,13 +124,13 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
 
     cx.font = 0.8 + 'px ' + T.fontFamily;
     cx.fillStyle = T.foreground;
-    cx.fillText(this.game.name, brd.width / (brd.unit * 2) - cx.measureText(this.game.name).width / 2, 1);
+    cx.fillText(this._game.name, brd.width / (brd.unit * 2) - cx.measureText(this._game.name).width / 2, 1);
 
     cx.restore();
   };
 
   GameView.prototype._renderHoles = function (cx) {
-    if (!cx || !this.board) { return; }
+    if (!cx || !this._board) { return; }
 
     function renderScoreboardHoles(asShadows) {
       var fn = asShadows ? g.innerShadowCircle : g.circle, x0 = dt + r, y0 = dt + r / 2, ds = dt + r * 2;
@@ -143,16 +152,16 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
       fn.call(g, w - x0 - ds / 2, y0 + 4 * ds, r);
     }
 
-    var w = this.board.width, d = this.board.holeDiameter, r = d / 2, dt = this.board.holeDelta, x, y;
+    var w = this._board.width, d = this._board.holeDiameter, r = d / 2, dt = this._board.holeDelta, x, y;
     g.use(cx);
 
     // Hole outlines:
     cx.fillStyle = T.holeLight;
 
-    cx.translate(this.board.x, this.board.y);
+    cx.translate(this._board.x, this._board.y);
     renderScoreboardHoles();
 
-    cx.translate(0, this.board.height - this.board.width);
+    cx.translate(0, this._board.height - this._board.width);
     for (y = dt + r; y < w; y += dt + d) { for (x = dt + r; x < w; x += dt + d) { g.circle(x, y, r); } }
 
     // Hole inner shadows:
@@ -162,36 +171,59 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
 
     for (y = dt + r; y < w; y += dt + d) { for (x = dt + r; x < w; x += dt + d) { g.innerShadowCircle(x, y, r); } }
 
-    cx.translate(0, -this.board.height + this.board.width);
+    cx.translate(0, -this._board.height + this._board.width);
     renderScoreboardHoles(true);
 
     g.end();
   };
 
   GameView.prototype._renderPawns = function (cx) {
-    if (!cx || !this.board || !this.game) { return; }
+    if (!cx || !this._board || !this._game) { return; }
 
-    this.game.play(3, 3);
-    this.game.play(3, 4);
-    this.game.play(4, 4);
-    this.game.play(5, 5);
-
-    var row, col, game = this.game, size = game.size, piece,
-        rad = this.board.holeDiameter / 2, dta = this.board.holeDiameter + this.board.holeDelta;
+    var row, col, game = this._game, size = game.size, piece,
+        rad = this._board.holeDiameter / 2, dta = this._board.holeDiameter + this._board.holeDelta;
     g.use(cx);
 
     shadow(cx);
-    cx.translate(this.board.x + dta - rad, this.board.y + this.board.height - this.board.width + dta - rad);
-
+    cx.translate(this._board.x + dta - rad, this._board.y + this._board.height - this._board.width + dta - rad);
     for (row = 0; row < size; row++) {
       for (col = 0; col < size; col++) {
-        piece = game.board.at(col, row);
-        cx.fillStyle = piece === Game.PLAYER_LIGHT ? T.pawnLight : T.pawnDark;
-        if (piece) { g.circle((col - 1) * dta, (row - 1) * dta, rad); }
+        piece = game.pieceAt(col, row);
+        if (piece) {
+          cx.fillStyle = piece === Game.PIECE_LIGHT ? T.pawnLight : T.pawnDark;
+          g.circle((col - 1) * dta, (row - 1) * dta, rad);
+        }
       }
     }
 
     g.end();
+  };
+
+  GameView.prototype._renderGlass = function (cx) {
+    if (!cx || !this._board || !this._game) { return; }
+
+    g.use(cx);
+
+    // TODO: clear all previously attached events
+    cx.canvas.addEventListener('mousemove', new HoleEventListener(), true);
+
+    g.end();
+  };
+
+  function HoleEventListener() {
+    if (!(this instanceof HoleEventListener)) { return new HoleEventListener(); }
+
+    /* @protected */
+    this._lastCol = -1;
+
+    /* @protected */
+    this._lastRow = -1;
+  }
+
+  HoleEventListener.prototype.handleEvent = function (event) {
+    if (!(event instanceof MouseEvent)) { return; }
+
+    console.log('Mouse event!');
   };
 
   return GameView;
