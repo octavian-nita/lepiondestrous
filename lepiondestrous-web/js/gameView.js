@@ -210,6 +210,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     g.end();
   };
 
+  /** @implements {EventListener} */
   function HoleEventListener() {
     if (!(this instanceof HoleEventListener)) { return new HoleEventListener(); }
 
@@ -222,6 +223,8 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
 
   HoleEventListener.prototype.handleEvent = function (event) {
     if (!(event instanceof MouseEvent)) { return; }
+
+    var currCol, currRow;
 
     console.log('Mouse event!');
   };

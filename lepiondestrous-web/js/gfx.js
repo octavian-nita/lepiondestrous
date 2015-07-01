@@ -76,6 +76,16 @@ define(function () {
   };
 
   /** @static */
+  Gfx.windowToCanvas = function (canvas, x, y) {
+    if (!canvas) { return; }
+    var bounds = canvas.getBoundingClientRect();
+    return {
+      x: x - bounds.left * (canvas.width / bounds.width),
+      y: y - bounds.top * (canvas.height / bounds.height)
+    };
+  };
+
+  /** @static */
   Gfx.TWO_PI = 2 * Math.PI;
 
   return Gfx;
