@@ -57,7 +57,7 @@ define(function () {
    * @return {HTMLCanvasElement} an oversampled (2x) canvas element sized to fill the provided <code>container</code> or
    *         to 300px × 150px if no container is provided, pre-styled to be used as a {@link https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#Use_multiple_layered_canvases_for_complex_scenes. layer}
    */
-  Gfx.createLayer = function (container, zIndex) {
+  Gfx.createLayer = function (container, zIndex, className) {
     var width = container && container.offsetWidth || 300,
         height = container && container.offsetHeight || 150,
         canvas = document.createElement('canvas'), style = canvas.style;
@@ -72,16 +72,21 @@ define(function () {
     canvas.height = height * 2;
     canvas.getContext('2d').scale(2, 2);
 
+    className && (canvas.className = className + '');
     return canvas;
   };
 
   /** @static */
-  Gfx.windowToCanvas = function (canvas, x, y) {
-    if (!canvas) { return; }
-    var bounds = canvas.getBoundingClientRect();
-    return {
-      x: x - bounds.left * (canvas.width / bounds.width),
-      y: y - bounds.top * (canvas.height / bounds.height)
+  Gfx.windowToElement = function (element, clientXOrEvent, clientY) {
+    var bounds = element && element.getBoundingClientRect();
+    if (!bounds || !clientXOrEvent) { return; }
+
+    return typeof clientXOrEvent === 'object' ? {
+      x: (clientXOrEvent.clientX - bounds.left) * (element.width / bounds.width),
+      y: (clientXOrEvent.clientY - bounds.top) * (element.height / bounds.height)
+    } : {
+      x: (clientXOrEvent - bounds.left) * (element.width / bounds.width),
+      y: (clientY - bounds.top) * (element.height / bounds.height)
     };
   };
 

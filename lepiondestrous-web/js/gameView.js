@@ -59,20 +59,30 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     this._board.holeDiameter = this._board.unit * 1.5 / 3;
     this._board.holeDelta = (this._board.width - this._board.holeDiameter * this._game.size) / (this._game.size + 1);
 
-    // Render the game view, off-screen:
-    this.render(layers = [Gfx.createLayer(container), Gfx.createLayer(container, 1), Gfx.createLayer(container, 2)]);
+    // Build a map of layers; as layers have the z-index set already, we don't really care about the order in which they
+    // are stored in the map:
+    layers = Object.create(null);
+    layers.board = Gfx.createLayer(container, 0, 'board');
+    layers.pawns = Gfx.createLayer(container, 1, 'pawns');
+    layers.glass = Gfx.createLayer(container, 2, 'glass');
+    Object.freeze(layers);
 
-    // Set up the parent / container element
+    // Render the game view off-screen:
+    this.render(layers);
+
+    // Use onmouse... in order to replace eventual previously-added hole listeners
+    layers.glass.addEventListener('mousemove', new HoleEventListener(layers.glass), true);
+
+    // Set up the parent / container element:
     container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
-    for (i = 0, l = layers.length; i < l; i++) { container.appendChild(layers[i]); }
+    for (i = 0, keys = Object.keys(layers), l = keys.length; i < l; i++) { container.appendChild(layers[keys[i]]); }
   }
 
   GameView.prototype.render = function (layers) {
-    var cx0 = layers[0].getContext('2d');
+    var cx0 = layers.board.getContext('2d');
     this._renderBoard(cx0);
     this._renderHoles(cx0);
-    this._renderPawns(layers[1].getContext('2d'));
-    this._renderGlass(layers[2].getContext('2d'));
+    this._renderPawns(layers.pawns.getContext('2d'));
   };
 
   GameView.prototype._renderBoard = function (cx) {
@@ -199,20 +209,19 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     g.end();
   };
 
-  GameView.prototype._renderGlass = function (cx) {
-    if (!cx || !this._board || !this._game) { return; }
-
-    g.use(cx);
-
-    // TODO: clear all previously attached events
-    cx.canvas.addEventListener('mousemove', new HoleEventListener(), true);
-
-    g.end();
-  };
-
   /** @implements {EventListener} */
-  function HoleEventListener() {
+  function HoleEventListener(canvas) {
     if (!(this instanceof HoleEventListener)) { return new HoleEventListener(); }
+    if (!canvas) { return; }
+
+    /* @protected */
+    this._canvas = canvas;
+
+    /* @protected */
+    this._lastX = -1;
+
+    /* @protected */
+    this._lastY = -1;
 
     /* @protected */
     this._lastCol = -1;
@@ -222,11 +231,16 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   }
 
   HoleEventListener.prototype.handleEvent = function (event) {
-    if (!(event instanceof MouseEvent)) { return; }
+    if (!event) { return; }
 
-    var currCol, currRow;
+    var curr = Gfx.windowToElement(this._canvas, event), currCol, currRow;
 
-    console.log('Mouse event!');
+    // Avoid issue http://code.google.com/p/chromium/issues/detail?id=161464
+    if (curr.x === this._lastX && curr.y === this._lastY) { return; }
+    this._lastX = curr.x;
+    this._lastY = curr.y;
+
+    console.log('Mouse event at ' + this._lastX + ', ' + this._lastY);
   };
 
   return GameView;
