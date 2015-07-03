@@ -7,7 +7,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
                             maxWidth: 504
                           }
                         }),
-
+      OVERSAMPLING = 2,
       g = new Gfx();
 
   function shadow(cx) {
@@ -62,16 +62,16 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     // Build a map of layers; as layers have the z-index set already, we don't really care about the order in which they
     // are stored in the map:
     layers = Object.create(null);
-    layers.board = Gfx.createLayer(container, 0, 'board');
-    layers.pawns = Gfx.createLayer(container, 1, 'pawns');
-    layers.glass = Gfx.createLayer(container, 2, 'glass');
+    layers.board = Gfx.createLayer(container, 0, OVERSAMPLING, 'board');
+    layers.pawns = Gfx.createLayer(container, 1, OVERSAMPLING, 'pawns');
+    layers.glass = Gfx.createLayer(container, 2, OVERSAMPLING, 'glass');
     Object.freeze(layers);
 
     // Render the game view off-screen:
     this.render(layers);
 
     // Use onmouse... in order to replace eventual previously-added hole listeners
-    layers.glass.addEventListener('mousemove', new HoleEventListener(layers.glass), true);
+    layers.glass.addEventListener('mousemove', new HoleEventListener(this), true);
 
     // Set up the parent / container element:
     container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
@@ -209,18 +209,25 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     g.end();
   };
 
-  /** @implements {EventListener} */
-  function HoleEventListener(canvas) {
-    if (!(this instanceof HoleEventListener)) { return new HoleEventListener(); }
-    if (!canvas) { return; }
+  /**
+   * @constructor
+   * @implements {EventListener}
+   */
+  function HoleEventListener(gameView) {
+    if (!(this instanceof HoleEventListener)) { return new HoleEventListener(gameView); }
 
-    /* @protected */
-    this._canvas = canvas;
-
-    /* @protected */
+    /*
+     * Helps avoiding issue http://code.google.com/p/chromium/issues/detail?id=161464
+     *
+     * @protected
+     */
     this._lastX = -1;
 
-    /* @protected */
+    /*
+     * Helps avoiding issue http://code.google.com/p/chromium/issues/detail?id=161464
+     *
+     * @protected
+     */
     this._lastY = -1;
 
     /* @protected */
@@ -228,19 +235,39 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
 
     /* @protected */
     this._lastRow = -1;
+
+    /* @protected */
+    this._gameView = gameView;
   }
 
   HoleEventListener.prototype.handleEvent = function (event) {
-    if (!event) { return; }
+    var canvas = event && event.target, coords, currCol, currRow,
+        unit = this._gameView._board.holeDelta + this._gameView._board.holeDiameter,
+        side = this._gameView._board.holeDelta + this._gameView._game.size * unit;
+    if (!(canvas instanceof HTMLCanvasElement)) { return; }
 
-    var curr = Gfx.windowToElement(this._canvas, event), currCol, currRow;
+    coords = Gfx.windowToElement(canvas, event);
+    coords.x /= OVERSAMPLING;            // the canvas is oversampled
+    coords.y /= OVERSAMPLING;
+    coords.x -= this._gameView._board.x; // translate mouse coordinates to the beginning of the playable area
+    coords.y -= this._gameView._board.y + this._gameView._board.height - this._gameView._board.width;
+    if (coords.x <= 0 || coords.x >= side || coords.y <= 0 || coords.y >= side ||
+        coords.x === this._lastX && coords.y === this._lastY) { return; }
+    this._lastX = coords.x;
+    this._lastY = coords.y;
 
-    // Avoid issue http://code.google.com/p/chromium/issues/detail?id=161464
-    if (curr.x === this._lastX && curr.y === this._lastY) { return; }
-    this._lastX = curr.x;
-    this._lastY = curr.y;
+    currCol = Math.ceil((this._lastX - this._gameView._board.holeDelta) / unit);
+    currRow = Math.ceil(this._lastY / unit);
 
-    console.log('Mouse event at ' + this._lastX + ', ' + this._lastY);
+    console.log('Fired at', currCol, currRow);
+  };
+
+  HoleEventListener.prototype._onHoleMiss = function (currCol, currRow, event) {};
+
+  HoleEventListener.prototype._onHole = function (currCol, currRow, event) {};
+
+  HoleEventListener.prototype._onPawn = function (currCol, currRow, event) {
+    this._onHoleMiss(currCol, currRow, event);
   };
 
   return GameView;

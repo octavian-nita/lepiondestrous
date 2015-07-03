@@ -54,10 +54,11 @@ define(function () {
 
   /**
    * @static
-   * @return {HTMLCanvasElement} an oversampled (2x) canvas element sized to fill the provided <code>container</code> or
-   *         to 300px × 150px if no container is provided, pre-styled to be used as a {@link https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#Use_multiple_layered_canvases_for_complex_scenes. layer}
+   * @return {HTMLCanvasElement} an eventually oversampled canvas element, sized to fill the provided
+   *         <code>container</code> or to 300px × 150px if no container is provided and pre-styled to be used as a
+   *         {@link https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#Use_multiple_layered_canvases_for_complex_scenes. layer}
    */
-  Gfx.createLayer = function (container, zIndex, className) {
+  Gfx.createLayer = function (container, zIndex, oversampling, className) {
     var width = container && container.offsetWidth || 300,
         height = container && container.offsetHeight || 150,
         canvas = document.createElement('canvas'), style = canvas.style;
@@ -68,9 +69,10 @@ define(function () {
     style.width = width + 'px';
     style.height = height + 'px';
 
-    canvas.width = width * 2;
-    canvas.height = height * 2;
-    canvas.getContext('2d').scale(2, 2);
+    oversampling = Number(oversampling) || 1;
+    canvas.width = width * oversampling;
+    canvas.height = height * oversampling;
+    canvas.getContext('2d').scale(oversampling, oversampling);
 
     className && (canvas.className = className + '');
     return canvas;
