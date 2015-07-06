@@ -58,10 +58,10 @@ define(function () {
    *         <code>container</code> or to 300px × 150px if no container is provided and pre-styled to be used as a
    *         {@link https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#Use_multiple_layered_canvases_for_complex_scenes. layer}
    */
-  Gfx.createLayer = function (container, zIndex, oversampling, className) {
+  Gfx.createLayer = function (container, zIndex, className) {
     var width = container && container.offsetWidth || 300,
         height = container && container.offsetHeight || 150,
-        canvas = document.createElement('canvas'), style = canvas.style;
+        canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversample || 1;
 
     style.position = 'absolute';
     style.zIndex = zIndex || 0;
@@ -69,30 +69,40 @@ define(function () {
     style.width = width + 'px';
     style.height = height + 'px';
 
-    oversampling = Number(oversampling) || 1;
-    canvas.width = width * oversampling;
-    canvas.height = height * oversampling;
-    canvas.getContext('2d').scale(oversampling, oversampling);
+    canvas.width = width * oversample;
+    canvas.height = height * oversample;
+    canvas.getContext('2d').scale(oversample, oversample);
 
     className && (canvas.className = className + '');
     return canvas;
   };
 
   /** @static */
-  Gfx.windowToElement = function (element, clientXOrEvent, clientY) {
-    var bounds = element && element.getBoundingClientRect();
+  Gfx.windowToElement = function (element, clientXOrEvent, clientY, considerOversampling) {
+    var bounds = element && element.getBoundingClientRect(),
+        oversample = considerOversampling && Gfx.canvasOversample || 1;
     if (!bounds || !clientXOrEvent) { return; }
 
     return typeof clientXOrEvent === 'object' ? {
-      x: (clientXOrEvent.clientX - bounds.left) * (element.width / bounds.width),
-      y: (clientXOrEvent.clientY - bounds.top) * (element.height / bounds.height)
+      x: (clientXOrEvent.clientX - bounds.left) * oversample,
+      y: (clientXOrEvent.clientY - bounds.top) * oversample
     } : {
-      x: (clientXOrEvent - bounds.left) * (element.width / bounds.width),
-      y: (clientY - bounds.top) * (element.height / bounds.height)
+      x: (clientXOrEvent - bounds.left) * oversample,
+      y: (clientY - bounds.top) * oversample
     };
   };
 
-  /** @static */
+  /**
+   * @static
+   * @type {number}
+   */
+  Gfx.canvasOversample = 2;
+
+  /**
+   * @static
+   * @const
+   * @type {number}
+   */
   Gfx.TWO_PI = 2 * Math.PI;
 
   return Gfx;

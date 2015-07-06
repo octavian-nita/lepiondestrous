@@ -7,7 +7,6 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
                             maxWidth: 504
                           }
                         }),
-      OVERSAMPLING = 2,
       g = new Gfx();
 
   function shadow(cx) {
@@ -62,9 +61,9 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     // Build a map of layers; as layers have the z-index set already, we don't really care about the order in which they
     // are stored in the map:
     layers = Object.create(null);
-    layers.board = Gfx.createLayer(container, 0, OVERSAMPLING, 'board');
-    layers.pawns = Gfx.createLayer(container, 1, OVERSAMPLING, 'pawns');
-    layers.glass = Gfx.createLayer(container, 2, OVERSAMPLING, 'glass');
+    layers.board = Gfx.createLayer(container, 0, 'board');
+    layers.pawns = Gfx.createLayer(container, 1, 'pawns');
+    layers.glass = Gfx.createLayer(container, 2, 'glass');
     Object.freeze(layers);
 
     // Render the game view off-screen:
@@ -101,7 +100,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     cx.scale(brd.unit, brd.unit);  // draw the board decorations in terms of units
 
     cx.strokeStyle = T.foreground;
-    cx.lineWidth = 2 / brd.unit;   // the canvas is oversampled and the board is scaled
+    cx.lineWidth = Gfx.canvasOversample / brd.unit;   // the canvas is oversampled and the board is scaled
 
     // Arch Bridge:
     cx.beginPath();
@@ -132,7 +131,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     cx.lineTo(11, 0);
     cx.stroke();
 
-    cx.font = 0.8 + 'px ' + T.fontFamily;
+    cx.font = 0.7 + 'px ' + T.fontFamily;
     cx.fillStyle = T.foreground;
     cx.fillText(this._game.name, brd.width / (brd.unit * 2) - cx.measureText(this._game.name).width / 2, 1);
 
@@ -247,8 +246,6 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     if (!(canvas instanceof HTMLCanvasElement)) { return; }
 
     coords = Gfx.windowToElement(canvas, event);
-    coords.x /= OVERSAMPLING;            // the canvas is oversampled
-    coords.y /= OVERSAMPLING;
     coords.x -= this._gameView._board.x; // translate mouse coordinates to the beginning of the playable area
     coords.y -= this._gameView._board.y + this._gameView._board.height - this._gameView._board.width;
     if (coords.x <= 0 || coords.x >= side || coords.y <= 0 || coords.y >= side ||
@@ -259,7 +256,8 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     currCol = Math.ceil((this._lastX - this._gameView._board.holeDelta) / unit);
     currRow = Math.ceil(this._lastY / unit);
 
-    console.log('Fired at', currCol, currRow);
+
+    console.log(Math.ceil(Math.abs(this._lastX - this._gameView._board.holeDelta) % unit));
   };
 
   HoleEventListener.prototype._onHoleMiss = function (currCol, currRow, event) {};
