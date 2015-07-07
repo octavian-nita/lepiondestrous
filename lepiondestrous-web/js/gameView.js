@@ -70,7 +70,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     this.render(layers);
 
     // Use onmouse... in order to replace eventual previously-added hole listeners
-    layers.glass.addEventListener('mousemove', new BoardEventListener(this), true);
+    layers.glass.addEventListener('mousemove', new HoleHoverListener(this), true);
 
     // Set up the parent / container element:
     container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
@@ -142,7 +142,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     if (!cx || !this._board) { return; }
 
     function renderScoreboardHoles(asShadows) {
-      var fn = asShadows ? g.innerShadowCircle : g.circle, x0 = dt + r, y0 = dt + r / 2, ds = dt + r * 2;
+      var fn = asShadows ? g.innerShadowCircle : g.circle, x0 = delta + r, y0 = delta + r / 2, ds = delta + r * 2;
 
       fn.call(g, x0, y0, r);
       fn.call(g, x0 + ds, y0, r);
@@ -161,7 +161,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
       fn.call(g, w - x0 - ds / 2, y0 + 4 * ds, r);
     }
 
-    var w = this._board.width, d = this._board.holeDiameter, r = d / 2, dt = this._board.holeDelta, x, y;
+    var w = this._board.width, d = this._board.holeDiameter, r = d / 2, delta = this._board.holeDelta, x, y;
     g.use(cx);
 
     // Hole outlines:
@@ -171,14 +171,18 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     renderScoreboardHoles();
 
     cx.translate(0, this._board.height - this._board.width);
-    for (y = dt + r; y < w; y += dt + d) { for (x = dt + r; x < w; x += dt + d) { g.circle(x, y, r); } }
+    for (y = delta + r; y < w; y += delta + d) { for (x = delta + r; x < w; x += delta + d) { g.circle(x, y, r); } }
 
     // Hole inner shadows:
     shadow(cx);
     cx.strokeStyle = T.holeDark;
     cx.lineWidth = 4;
 
-    for (y = dt + r; y < w; y += dt + d) { for (x = dt + r; x < w; x += dt + d) { g.innerShadowCircle(x, y, r); } }
+    for (y = delta + r; y < w; y += delta + d) {
+      for (x = delta + r; x < w; x += delta + d) {
+        g.innerShadowCircle(x, y, r);
+      }
+    }
 
     cx.translate(0, -this._board.height + this._board.width);
     renderScoreboardHoles(true);
@@ -190,17 +194,16 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     if (!cx || !this._board || !this._game) { return; }
 
     var row, col, game = this._game, size = game.size, piece,
-        rad = this._board.holeDiameter / 2, dta = this._board.holeDiameter + this._board.holeDelta;
+        r = this._board.holeDiameter / 2, unit = this._board.holeDelta + this._board.holeDiameter;
     g.use(cx);
 
     shadow(cx);
-    cx.translate(this._board.x + dta - rad, this._board.y + this._board.height - this._board.width + dta - rad);
+    cx.translate(this._board.x + unit - r, this._board.y + this._board.height - this._board.width + unit - r);
     for (row = 0; row < size; row++) {
       for (col = 0; col < size; col++) {
-        piece = game.pieceAt(col, row);
-        if (piece) {
+        if (piece = game.pieceAt(col, row)) {
           cx.fillStyle = piece === Game.PIECE_LIGHT ? T.pawnLight : T.pawnDark;
-          g.circle((col - 1) * dta, (row - 1) * dta, rad);
+          g.circle(col * unit, row * unit, r);
         }
       }
     }
@@ -216,10 +219,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     if (!(this instanceof BoardEventListener)) { return new BoardEventListener(gameView); }
 
     /* @protected */
-    this._x = -1;
-
-    /* @protected */
-    this._y = -1;
+    this._gameView = gameView;
 
     /* @protected */
     this._prevCol = -1;
@@ -228,7 +228,10 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     this._prevRow = -1;
 
     /* @protected */
-    this._gameView = gameView;
+    this._x = -1;
+
+    /* @protected */
+    this._y = -1;
   }
 
   BoardEventListener.prototype.handleEvent = function (event) {
@@ -243,34 +246,49 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     coords.x -= this._gameView._board.x;
     coords.y -= this._gameView._board.y + this._gameView._board.height - this._gameView._board.width;
 
-    // Only treat events on holes and pawns (see also http://code.google.com/p/chromium/issues/detail?id=161464):
+    // Handle event only when on holes or pawns (see also http://code.google.com/p/chromium/issues/detail?id=161464):
     if (coords.x <= 0 || coords.x >= side || coords.y <= 0 || coords.y >= side || // coords off the board
-        coords.x % unit < delta || coords.y % unit < delta ||                     // coords not in a hole
         coords.x === this._x && coords.y === this._y) { return; }                 // coords haven't changed
+
+    this._x = coords.x;
+    this._y = coords.y;
+    if (this._x % unit < delta || this._y % unit < delta) {                       // coords out of any hole
+      typeof this._onHoleMiss === 'function' && this._onHoleMiss(event);
+      this._prevCol = this._prevRow = -1;
+      return;
+    }
 
     currCol = Math.floor(coords.x / unit);
     currRow = Math.floor(coords.y / unit);
     if (currCol === this._prevCol && currRow === this._prevRow) { return; }       // same hole or pawn
 
-    this._x = coords.x;
-    this._y = coords.y;
     if (this._gameView._game.emptyAt(currCol, currRow)) {
-      this._onHole(currCol, currRow, event);
-      this._prevCol = currCol;
-      this._prevRow = currRow;
+      typeof this._onHole === 'function' && this._onHole(currCol, currRow, event);
     } else {
-      this._onPawn(currCol, currRow, event);
-      this._prevCol = this._prevRow = -1;
+      typeof this._onPawn === 'function' && this._onPawn(currCol, currRow, event);
     }
+
+    this._prevCol = currCol;
+    this._prevRow = currRow;
   };
 
-  BoardEventListener.prototype._onHole = function (currCol, currRow, event) {
-    console.log('hole(' + currCol + ', ' + currRow + ')');
+  /**
+   * @constructor
+   * @extends {BoardEventListener}
+   */
+  function HoleHoverListener(gameView) {
+    if (!(this instanceof HoleHoverListener)) { return new HoleHoverListener(gameView); }
+    BoardEventListener.call(this, gameView);
+  }
+
+  HoleHoverListener.prototype = Object.create(BoardEventListener.prototype);
+  HoleHoverListener.prototype.constructor = HoleHoverListener;
+
+  HoleHoverListener.prototype._onHole = function (currCol, currRow, event) {
+    event && (event.target.style.cursor = 'pointer');
   };
 
-  BoardEventListener.prototype._onPawn = function (currCol, currRow, event) {
-    console.log('pawn(' + currCol + ', ' + currRow + ')');
-  };
+  HoleHoverListener.prototype._onHoleMiss = function (event) { event && (event.target.style.cursor = 'default'); };
 
   return GameView;
 });

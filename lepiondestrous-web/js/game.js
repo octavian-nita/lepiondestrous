@@ -28,7 +28,7 @@ define(function () {
     return this._grid[this.rows * row + col];
   };
 
-  Board.prototype.empty = function (col, row) { return this.at(col, row) === undefined; };
+  Board.prototype.empty = function (col, row) { return !this.at(col, row); };
 
   Board.prototype.place = function (col, row, piece) {
     if (piece === undefined) { throw new Error('cannot place an empty piece'); }
