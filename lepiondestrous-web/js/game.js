@@ -106,6 +106,8 @@ define(function () {
 
   Game.prototype.pieceAt = function (col, row) { return this._board.at(col, row); };
 
+  Game.prototype.emptyAt = function (col, row) { return this._board.empty(col, row); };
+
   Game.prototype.play = function (col, row) {
     if (!this._board.empty(col, row)) { return console.trace('the specified location is already taken'); }
 

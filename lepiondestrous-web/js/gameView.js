@@ -70,7 +70,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     this.render(layers);
 
     // Use onmouse... in order to replace eventual previously-added hole listeners
-    layers.glass.addEventListener('mousemove', new HoleEventListener(this), true);
+    layers.glass.addEventListener('mousemove', new BoardEventListener(this), true);
 
     // Set up the parent / container element:
     container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
@@ -212,60 +212,64 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
    * @constructor
    * @implements {EventListener}
    */
-  function HoleEventListener(gameView) {
-    if (!(this instanceof HoleEventListener)) { return new HoleEventListener(gameView); }
-
-    /*
-     * Helps avoiding issue http://code.google.com/p/chromium/issues/detail?id=161464
-     *
-     * @protected
-     */
-    this._lastX = -1;
-
-    /*
-     * Helps avoiding issue http://code.google.com/p/chromium/issues/detail?id=161464
-     *
-     * @protected
-     */
-    this._lastY = -1;
+  function BoardEventListener(gameView) {
+    if (!(this instanceof BoardEventListener)) { return new BoardEventListener(gameView); }
 
     /* @protected */
-    this._lastCol = -1;
+    this._x = -1;
 
     /* @protected */
-    this._lastRow = -1;
+    this._y = -1;
+
+    /* @protected */
+    this._prevCol = -1;
+
+    /* @protected */
+    this._prevRow = -1;
 
     /* @protected */
     this._gameView = gameView;
   }
 
-  HoleEventListener.prototype.handleEvent = function (event) {
-    var canvas = event && event.target, coords, currCol, currRow,
-        unit = this._gameView._board.holeDelta + this._gameView._board.holeDiameter,
-        side = this._gameView._board.holeDelta + this._gameView._game.size * unit;
+  BoardEventListener.prototype.handleEvent = function (event) {
+    var canvas = event && event.target,
+        delta = this._gameView._board.holeDelta,
+        unit = delta + this._gameView._board.holeDiameter,
+        side = delta + this._gameView._game.size * unit, coords, currCol, currRow;
     if (!(canvas instanceof HTMLCanvasElement)) { return; }
 
+    // Obtain and translate mouse coordinates to the beginning of the playable area:
     coords = Gfx.windowToElement(canvas, event);
-    coords.x -= this._gameView._board.x; // translate mouse coordinates to the beginning of the playable area
+    coords.x -= this._gameView._board.x;
     coords.y -= this._gameView._board.y + this._gameView._board.height - this._gameView._board.width;
-    if (coords.x <= 0 || coords.x >= side || coords.y <= 0 || coords.y >= side ||
-        coords.x === this._lastX && coords.y === this._lastY) { return; }
-    this._lastX = coords.x;
-    this._lastY = coords.y;
 
-    currCol = Math.ceil((this._lastX - this._gameView._board.holeDelta) / unit);
-    currRow = Math.ceil(this._lastY / unit);
+    // Only treat events on holes and pawns (see also http://code.google.com/p/chromium/issues/detail?id=161464):
+    if (coords.x <= 0 || coords.x >= side || coords.y <= 0 || coords.y >= side || // coords off the board
+        coords.x % unit < delta || coords.y % unit < delta ||                     // coords not in a hole
+        coords.x === this._x && coords.y === this._y) { return; }                 // coords haven't changed
 
+    currCol = Math.floor(coords.x / unit);
+    currRow = Math.floor(coords.y / unit);
+    if (currCol === this._prevCol && currRow === this._prevRow) { return; }       // same hole or pawn
 
-    console.log(Math.ceil(Math.abs(this._lastX - this._gameView._board.holeDelta) % unit));
+    this._x = coords.x;
+    this._y = coords.y;
+    if (this._gameView._game.emptyAt(currCol, currRow)) {
+      this._onHole(currCol, currRow, event);
+      this._prevCol = currCol;
+      this._prevRow = currRow;
+    } else {
+      this._onPawn(currCol, currRow, event);
+      this._prevCol = this._prevRow = -1;
+    }
   };
 
-  HoleEventListener.prototype._onHoleMiss = function (currCol, currRow, event) {};
+  BoardEventListener.prototype._onHole = function (currCol, currRow, event) {
+    console.log('hole(' + currCol + ', ' + currRow + ')');
+  };
 
-  HoleEventListener.prototype._onHole = function (currCol, currRow, event) {};
-
-  HoleEventListener.prototype._onPawn = function (currCol, currRow, event) {
-    this._onHoleMiss(currCol, currRow, event);
+  BoardEventListener.prototype._onPawn = function (currCol, currRow, event) {
+    console.log('pawn(' + currCol + ', ' + currRow + ')');
   };
 
   return GameView;
