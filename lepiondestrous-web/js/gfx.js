@@ -15,6 +15,8 @@ define(function () {
     }
   };
 
+  Gfx.prototype.ctx = function () { return this._contexts[this._contexts.length - 1]; };
+
   Gfx.prototype.end = function () {
     var ctx = this._contexts.pop();
     ctx && ctx.restore();       // upon 'un-using' a context, restore its previous state
@@ -60,8 +62,8 @@ define(function () {
    */
   Gfx.createLayer = function (container, zIndex, className) {
     var width = container && container.offsetWidth || 300,
-        height = container && container.offsetHeight || 150,
-        canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversample || 1;
+      height = container && container.offsetHeight || 150,
+      canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversample || 1;
 
     style.position = 'absolute';
     style.zIndex = zIndex || 0;
@@ -80,7 +82,7 @@ define(function () {
   /** @static */
   Gfx.windowToElement = function (element, clientXOrEvent, clientY, considerOversampling) {
     var bounds = element && element.getBoundingClientRect(),
-        oversample = considerOversampling && Gfx.canvasOversample || 1;
+      oversample = considerOversampling && Gfx.canvasOversample || 1;
     if (!bounds || !clientXOrEvent) { return; }
 
     return typeof clientXOrEvent === 'object' ? {

@@ -9,12 +9,12 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
                         }),
       g = new Gfx();
 
-  function shadow(cx) {
-    if (!cx) { return; }
-    cx.shadowOffsetX = T.dropShadow.offsetX;
-    cx.shadowOffsetY = T.dropShadow.offsetY;
-    cx.shadowColor = T.dropShadow.color;
-    cx.shadowBlur = T.dropShadow.blur;
+  function shadow(context) {
+    if (!context) { return; }
+    context.shadowOffsetX = T.dropShadow.offsetX;
+    context.shadowOffsetY = T.dropShadow.offsetY;
+    context.shadowColor = T.dropShadow.color;
+    context.shadowBlur = T.dropShadow.blur;
   }
 
   /** @constructor */
@@ -36,6 +36,8 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
 
     /**
      * Gameboard geometry (where the gameboard gets drawn, how large it is, etc.), in terms of container dimensions.
+     * Refactoring hint: extract in a separate class and include methods for most computations as well as translating a
+     * graphics context to various points of interest.
      *
      * @type {{x: number, y: number, width: number, height: number, unit: number,
      *         holeDiameter: number, holeDelta: number}}
@@ -58,8 +60,8 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     this._board.holeDiameter = this._board.unit * 1.5 / 3;
     this._board.holeDelta = (this._board.width - this._board.holeDiameter * this._game.size) / (this._game.size + 1);
 
-    // Build a map of layers; as layers have the z-index set already, we don't really care about the order in which they
-    // are stored in the map:
+    // Build a map of layers; since these have the z-index set already,
+    // we don't care about the order in which they are stored in the map:
     layers = Object.create(null);
     layers.board = Gfx.createLayer(container, 0, 'board');
     layers.pawns = Gfx.createLayer(container, 1, 'pawns');
@@ -78,9 +80,9 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   }
 
   GameView.prototype.render = function (layers) {
-    var cx0 = layers.board.getContext('2d');
-    this._renderBoard(cx0);
-    this._renderHoles(cx0);
+    var boardContext = layers.board.getContext('2d');
+    this._renderBoard(boardContext);
+    this._renderHoles(boardContext);
     this._renderPawns(layers.pawns.getContext('2d'));
   };
 
@@ -235,10 +237,12 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   }
 
   BoardEventListener.prototype.handleEvent = function (event) {
-    var canvas = event && event.target,
-        delta = this._gameView._board.holeDelta,
-        unit = delta + this._gameView._board.holeDiameter,
-        side = delta + this._gameView._game.size * unit, coords, currCol, currRow;
+    var
+      canvas = event && event.target,
+      delta = this._gameView._board.holeDelta,
+      unit = delta + this._gameView._board.holeDiameter,
+      side = delta + this._gameView._game.size * unit,
+      coords, currCol, currRow;
     if (!(canvas instanceof HTMLCanvasElement)) { return; }
 
     // Obtain and translate mouse coordinates to the beginning of the playable area:
@@ -285,10 +289,33 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   HoleHoverListener.prototype.constructor = HoleHoverListener;
 
   HoleHoverListener.prototype._onHole = function (currCol, currRow, event) {
-    event && (event.target.style.cursor = 'pointer');
+    var canvas = event && event.target, cx = canvas && canvas.getContext('2d'),
+        board = this._gameView._board, r = board.holeDiameter / 2,
+        unit = board.holeDelta + board.holeDiameter;
+    if (!(canvas instanceof HTMLCanvasElement)) { return; }
+
+    canvas.style.cursor = 'pointer';
+
+    g.use(cx);
+    cx.fillStyle = this._gameView._game.currentPiece() === Game.PIECE_LIGHT ?
+      T.pawnLightTransparent : T.pawnDarkTransparent;
+    g.circle(currCol * unit + board.x + unit - r,
+             currRow * unit + board.y + board.height - board.width + unit - r, r);
+    g.end();
   };
 
-  HoleHoverListener.prototype._onHoleMiss = function (event) { event && (event.target.style.cursor = 'default'); };
+  HoleHoverListener.prototype._onHoleMiss = function (event) {
+    var canvas = event && event.target, cx = canvas && canvas.getContext('2d'),
+        board = this._gameView._board, r = board.holeDiameter / 2,
+        unit = board.holeDelta + board.holeDiameter;
+    if (!(canvas instanceof HTMLCanvasElement)) { return; }
+
+    canvas.style.cursor = 'default';
+
+    cx.clearRect(this._prevCol * unit + board.x + unit - board.holeDiameter - 1,
+                 this._prevRow * unit + board.y + board.height - board.width + unit - board.holeDiameter - 1,
+                 board.holeDiameter + 2, board.holeDiameter + 2);
+  };
 
   return GameView;
 });
