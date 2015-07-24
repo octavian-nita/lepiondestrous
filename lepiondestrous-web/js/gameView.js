@@ -5,7 +5,8 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
                           board: {
                             maxHeight: 695,
                             maxWidth: 504
-                          }
+                          },
+                          gameSize: 14
                         }),
       g = new Gfx();
 
@@ -17,15 +18,93 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     context.shadowBlur = T.dropShadow.blur;
   }
 
+  /**
+   * Gameboard geometry (where the gameboard gets drawn, how large it is, etc.), in terms of a container's dimensions.
+   *
+   * @constructor
+   */
+  function BoardGeometry(container, options) {
+    if (!(this instanceof BoardGeometry)) { return new BoardGeometry(container, options); }
+    if (!container) { return; }
+
+    var opts = Object.create(O), i, keys, l, boardRatio;
+    if (options) { // compute view options
+      for (i = 0, keys = Object.keys(options), l = keys.length; i < l; i++) { opts[keys[i]] = options[keys[i]]; }
+    }
+
+    // Set up the board geometry (always vertical, http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html):
+    boardRatio = opts.gameSize / (opts.gameSize + 5);
+    if (boardRatio > container.offsetWidth / container.offsetHeight) {
+
+      /**
+       * The width of the board, in pixels.
+       *
+       * @type {number}
+       */
+      this.width = Math.min(container.offsetWidth, opts.board.maxWidth);
+
+      /**
+       * The height of the board, in pixels.
+       *
+       * @type {number}
+       */
+      this.height = this.width / boardRatio;
+
+    } else {
+      this.height = Math.min(container.offsetHeight, opts.board.maxHeight);
+      this.width = this.height * boardRatio;
+    }
+
+    /**
+     * The leftmost coordinate of the board, within its parent container.
+     *
+     * @type {number}
+     */
+    this.x = (container.offsetWidth - this.width ) / 2;
+
+    /**
+     * The topmost coordinate of the board, within its parent container.
+     *
+     * @type {number}
+     */
+    this.y = (container.offsetHeight - this.height) / 2;
+
+    /**
+     * The board is drawn based on a unit.
+     *
+     * @type {number}
+     */
+    this.unit = this.height * boardRatio / opts.gameSize;
+
+    /**
+     * The board has <code>opts.gameSize</code> × <code>opts.gameSize</code> play holes of a certain diameter,
+     * less than or equal to the board unit.
+     *
+     * @type {number}
+     */
+    this.holeDiameter = this.unit * 1.5 / 3;
+
+    /**
+     * A hole's radius, stored for convenience.
+     *
+     * @type {number}
+     */
+    this.holeRadius = this.holeDiameter / 2;
+
+    /**
+     * The space between two consecutive holes.
+     *
+     * @type {number}
+     */
+    this.holeDelta = (this.width - this.holeDiameter * opts.gameSize) / (opts.gameSize + 1);
+
+    Object.freeze(this);
+  }
+
   /** @constructor */
   function GameView(container, options) {
     if (!(this instanceof GameView)) { return new GameView(container, options); }
     if (!container) { return; }
-
-    var opts = Object.create(O), i, keys, l, boardRatio, layers;
-    if (options) { // compute view options
-      for (i = 0, keys = Object.keys(options), l = keys.length; i < l; i++) { opts[keys[i]] = options[keys[i]]; }
-    }
 
     /**
      * Game model.
@@ -35,33 +114,16 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     this._game = new Game();
 
     /**
-     * Gameboard geometry (where the gameboard gets drawn, how large it is, etc.), in terms of container dimensions.
-     * Refactoring hint: extract in a separate class and include methods for most computations as well as translating a
-     * graphics context to various points of interest.
+     * Gameboard geometry.
      *
-     * @type {{x: number, y: number, width: number, height: number, unit: number,
-     *         holeDiameter: number, holeDelta: number}}
      * @protected
      */
-    this._board = {};
+    this._board = new BoardGeometry(container, options);
 
-    // Set up the board geometry (always vertical, http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html):
-    boardRatio = this._game.size / (this._game.size + 5);
-    if (boardRatio > container.offsetWidth / container.offsetHeight) {
-      this._board.width = Math.min(container.offsetWidth, opts.board.maxWidth);
-      this._board.height = this._board.width / boardRatio;
-    } else {
-      this._board.height = Math.min(container.offsetHeight, opts.board.maxHeight);
-      this._board.width = this._board.height * boardRatio;
-    }
-    this._board.x = (container.offsetWidth - this._board.width ) / 2;
-    this._board.y = (container.offsetHeight - this._board.height) / 2;
-    this._board.unit = this._board.height * boardRatio / this._game.size;
-    this._board.holeDiameter = this._board.unit * 1.5 / 3;
-    this._board.holeDelta = (this._board.width - this._board.holeDiameter * this._game.size) / (this._game.size + 1);
+    var i, keys, l, layers;
 
     // Build a map of layers; since these have the z-index set already,
-    // we don't care about the order in which they are stored in the map:
+    // we don't care about the order in which they are stored in a map:
     layers = Object.create(null);
     layers.board = Gfx.createLayer(container, 0, 'board');
     layers.pawns = Gfx.createLayer(container, 1, 'pawns');
@@ -71,8 +133,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     // Render the game view off-screen:
     this.render(layers);
 
-    // Use onmouse... in order to replace eventual previously-added hole listeners
-    layers.glass.addEventListener('mousemove', new HoleHoverListener(this), true);
+    layers.glass.addEventListener('mousemove', new HoleHoverListener(this));
 
     // Set up the parent / container element:
     container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
@@ -196,7 +257,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     if (!cx || !this._board || !this._game) { return; }
 
     var row, col, game = this._game, size = game.size, piece,
-        r = this._board.holeDiameter / 2, unit = this._board.holeDelta + this._board.holeDiameter;
+        r = this._board.holeRadius, unit = this._board.holeDelta + this._board.holeDiameter;
     g.use(cx);
 
     shadow(cx);
@@ -290,27 +351,27 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
 
   HoleHoverListener.prototype._onHole = function (currCol, currRow, event) {
     var canvas = event && event.target, cx = canvas && canvas.getContext('2d'),
-        board = this._gameView._board, r = board.holeDiameter / 2,
-        unit = board.holeDelta + board.holeDiameter;
+        board = this._gameView._board, unit = board.holeDelta + board.holeDiameter;
     if (!(canvas instanceof HTMLCanvasElement)) { return; }
 
     canvas.style.cursor = 'pointer';
+    console.log('ON-HOLE');
 
     g.use(cx);
     cx.fillStyle = this._gameView._game.currentPiece() === Game.PIECE_LIGHT ?
       T.pawnLightTransparent : T.pawnDarkTransparent;
-    g.circle(currCol * unit + board.x + unit - r,
-             currRow * unit + board.y + board.height - board.width + unit - r, r);
+    g.circle(currCol * unit + board.x + unit - board.holeRadius,
+             currRow * unit + board.y + board.height - board.width + unit - board.holeRadius, board.holeRadius);
     g.end();
   };
 
   HoleHoverListener.prototype._onHoleMiss = function (event) {
     var canvas = event && event.target, cx = canvas && canvas.getContext('2d'),
-        board = this._gameView._board, r = board.holeDiameter / 2,
-        unit = board.holeDelta + board.holeDiameter;
-    if (!(canvas instanceof HTMLCanvasElement)) { return; }
+        board = this._gameView._board, unit = board.holeDelta + board.holeDiameter;
+    if (!(canvas instanceof HTMLCanvasElement) || (this._prevCol === -1 && this._prevRow === -1)) { return; }
 
     canvas.style.cursor = 'default';
+    console.log('ON-HOLE-MISS');
 
     cx.clearRect(this._prevCol * unit + board.x + unit - board.holeDiameter - 1,
                  this._prevRow * unit + board.y + board.height - board.width + unit - board.holeDiameter - 1,
