@@ -19,7 +19,8 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   }
 
   /**
-   * Gameboard geometry (where the gameboard gets drawn, how large it is, etc.), in terms of a container's dimensions.
+   * Gameboard geometry (where within a parent container the gameboard is drawn, how large it is, etc.),
+   * in terms of a container's dimensions.
    *
    * @constructor
    */
@@ -70,7 +71,14 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     this.y = (container.offsetHeight - this.height) / 2;
 
     /**
-     * The board is drawn based on a unit.
+     * The topmost coordinate of the board's playable area, within its parent container.
+     *
+     * @type {number}
+     */
+    this.playAreaY = this.y + this.height - this.width;
+
+    /**
+     * The board is drawn based on units.
      *
      * @type {number}
      */
@@ -97,6 +105,13 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
      * @type {number}
      */
     this.holeDelta = (this.width - this.holeDiameter * opts.gameSize) / (opts.gameSize + 1);
+
+    /**
+     * The space between two consecutive hole centers.
+     *
+     * @type {number}
+     */
+    this.holeCenterDelta = this.holeDelta + this.holeDiameter;
 
     Object.freeze(this);
   }
@@ -151,19 +166,18 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     if (!cx || !this._board) { return; }
     cx.canvas.style.background = T.boardLight;
 
-    var brd = this._board;
     cx.save();
 
     shadow(cx);
 
     cx.fillStyle = T.boardDark;
-    cx.fillRect(brd.x, brd.y, brd.width, brd.height);
+    cx.fillRect(this._board.x, this._board.y, this._board.width, this._board.height);
 
-    cx.translate(brd.x, brd.y);    // move the origin to the board top left corner
-    cx.scale(brd.unit, brd.unit);  // draw the board decorations in terms of units
+    cx.translate(this._board.x, this._board.y);    // move the origin to the board top left corner
+    cx.scale(this._board.unit, this._board.unit);  // draw the board decorations in terms of units
 
     cx.strokeStyle = T.foreground;
-    cx.lineWidth = Gfx.canvasOversample / brd.unit;   // the canvas is oversampled and the board is scaled
+    cx.lineWidth = Gfx.canvasOversample / this._board.unit;  // the canvas is oversampled and the board is scaled
 
     // Arch Bridge:
     cx.beginPath();
@@ -196,7 +210,8 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
 
     cx.font = 0.7 + 'px ' + T.fontFamily;
     cx.fillStyle = T.foreground;
-    cx.fillText(this._game.name, brd.width / (brd.unit * 2) - cx.measureText(this._game.name).width / 2, 1);
+    cx.fillText(this._game.name, this._board.width / (this._board.unit * 2) - cx.measureText(this._game.name).width / 2,
+                1);
 
     cx.restore();
   };
@@ -256,17 +271,18 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   GameView.prototype._renderPawns = function (cx) {
     if (!cx || !this._board || !this._game) { return; }
 
-    var row, col, game = this._game, size = game.size, piece,
-        r = this._board.holeRadius, unit = this._board.holeDelta + this._board.holeDiameter;
+    var game = this._game, size = game.size, r = this._board.holeRadius,
+        centerDelta = this._board.holeCenterDelta, row, col, piece;
     g.use(cx);
 
     shadow(cx);
-    cx.translate(this._board.x + unit - r, this._board.y + this._board.height - this._board.width + unit - r);
+    cx.translate(this._board.x + this._board.holeDelta + r,
+                 this._board.y + this._board.holeDelta + r + this._board.height - this._board.width);
     for (row = 0; row < size; row++) {
       for (col = 0; col < size; col++) {
         if (piece = game.pieceAt(col, row)) {
           cx.fillStyle = piece === Game.PIECE_LIGHT ? T.pawnLight : T.pawnDark;
-          g.circle(col * unit, row * unit, r);
+          g.circle(col * centerDelta, row * centerDelta, r);
         }
       }
     }
@@ -298,33 +314,31 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   }
 
   BoardEventListener.prototype.handleEvent = function (event) {
-    var
-      canvas = event && event.target,
-      delta = this._gameView._board.holeDelta,
-      unit = delta + this._gameView._board.holeDiameter,
-      side = delta + this._gameView._game.size * unit,
-      coords, currCol, currRow;
-    if (!(canvas instanceof HTMLCanvasElement)) { return; }
+    var board = this._gameView._board, coords, currCol, currRow;
 
     // Obtain and translate mouse coordinates to the beginning of the playable area:
-    coords = Gfx.windowToElement(canvas, event);
-    coords.x -= this._gameView._board.x;
-    coords.y -= this._gameView._board.y + this._gameView._board.height - this._gameView._board.width;
+    coords = Gfx.windowToElement(event && event.target, event);
+    if (!coords) { return; }
+    coords.x -= board.x;
+    coords.y -= board.playAreaY;
 
-    // Handle event only when on holes or pawns (see also http://code.google.com/p/chromium/issues/detail?id=161464):
-    if (coords.x <= 0 || coords.x >= side || coords.y <= 0 || coords.y >= side || // coords off the board
-        coords.x === this._x && coords.y === this._y) { return; }                 // coords haven't changed
+    // Handle the event only on the playable area (see also http://code.google.com/p/chromium/issues/detail?id=161464)
+    if (coords.x <= 0 || coords.x >= board.width ||
+        coords.y <= 0 || coords.y >= board.width ||                 // coords off the playable area
+        coords.x === this._x && coords.y === this._y) { return; }   // coords haven't changed
 
+    // Handle the event only on holes or pawns:
     this._x = coords.x;
     this._y = coords.y;
-    if (this._x % unit < delta || this._y % unit < delta) {                       // coords out of any hole
+    if (this._x % board.holeCenterDelta < board.holeDelta ||
+        this._y % board.holeCenterDelta < board.holeDelta) { // coords out of any hole
       typeof this._onHoleMiss === 'function' && this._onHoleMiss(event);
       this._prevCol = this._prevRow = -1;
       return;
     }
 
-    currCol = Math.floor(coords.x / unit);
-    currRow = Math.floor(coords.y / unit);
+    currCol = Math.floor(coords.x / board.holeCenterDelta);
+    currRow = Math.floor(coords.y / board.holeCenterDelta);
     if (currCol === this._prevCol && currRow === this._prevRow) { return; }       // same hole or pawn
 
     if (this._gameView._game.emptyAt(currCol, currRow)) {
@@ -350,32 +364,33 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
   HoleHoverListener.prototype.constructor = HoleHoverListener;
 
   HoleHoverListener.prototype._onHole = function (currCol, currRow, event) {
-    var canvas = event && event.target, cx = canvas && canvas.getContext('2d'),
-        board = this._gameView._board, unit = board.holeDelta + board.holeDiameter;
+    var board = this._gameView._board, canvas = event && event.target, cx;
     if (!(canvas instanceof HTMLCanvasElement)) { return; }
 
     canvas.style.cursor = 'pointer';
-    console.log('ON-HOLE');
 
-    g.use(cx);
+    g.use(cx = canvas.getContext('2d'));
+    if (this._prevCol !== -1 && this._prevRow !== -1) {
+      cx.clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
+                   this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
+                   board.holeDiameter + 2, board.holeDiameter + 2);
+    }
     cx.fillStyle = this._gameView._game.currentPiece() === Game.PIECE_LIGHT ?
       T.pawnLightTransparent : T.pawnDarkTransparent;
-    g.circle(currCol * unit + board.x + unit - board.holeRadius,
-             currRow * unit + board.y + board.height - board.width + unit - board.holeRadius, board.holeRadius);
+    g.circle(currCol * board.holeCenterDelta + board.x + board.holeDelta + board.holeRadius,
+             currRow * board.holeCenterDelta + board.playAreaY + board.holeDelta + board.holeRadius,
+             board.holeRadius);
     g.end();
   };
 
   HoleHoverListener.prototype._onHoleMiss = function (event) {
-    var canvas = event && event.target, cx = canvas && canvas.getContext('2d'),
-        board = this._gameView._board, unit = board.holeDelta + board.holeDiameter;
+    var board = this._gameView._board, canvas = event && event.target;
     if (!(canvas instanceof HTMLCanvasElement) || (this._prevCol === -1 && this._prevRow === -1)) { return; }
 
     canvas.style.cursor = 'default';
-    console.log('ON-HOLE-MISS');
-
-    cx.clearRect(this._prevCol * unit + board.x + unit - board.holeDiameter - 1,
-                 this._prevRow * unit + board.y + board.height - board.width + unit - board.holeDiameter - 1,
-                 board.holeDiameter + 2, board.holeDiameter + 2);
+    canvas.getContext('2d').clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
+                                      this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
+                                      board.holeDiameter + 2, board.holeDiameter + 2);
   };
 
   return GameView;

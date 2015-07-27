@@ -44,10 +44,6 @@ define(function () {
     return piece;
   };
 
-  Board.prototype.move = function (fromCol, fromRow, toCol, toRow) {
-    this.place(toCol, toRow, this.displace(fromCol, fromRow));
-  };
-
   /** @constructor */
   function Player(piece) {
     if (!(this instanceof Player)) { return new Player(piece); }

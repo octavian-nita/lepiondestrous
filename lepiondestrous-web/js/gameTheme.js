@@ -1,7 +1,7 @@
 define(function () {
   'use strict';
 
-  return { // The game's default color theme
+  return { // The game's color theme
     boardDark: '#795548',
     boardLight: '#8d6e63',
 

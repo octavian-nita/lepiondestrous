@@ -62,8 +62,8 @@ define(function () {
    */
   Gfx.createLayer = function (container, zIndex, className) {
     var width = container && container.offsetWidth || 300,
-      height = container && container.offsetHeight || 150,
-      canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversample || 1;
+        height = container && container.offsetHeight || 150,
+        canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversample || 1;
 
     style.position = 'absolute';
     style.zIndex = zIndex || 0;
@@ -80,9 +80,9 @@ define(function () {
   };
 
   /** @static */
-  Gfx.windowToElement = function (element, clientXOrEvent, clientY, considerOversampling) {
+  Gfx.windowToElement = function (element, clientXOrEvent, clientY, isOversampled) {
     var bounds = element && element.getBoundingClientRect(),
-      oversample = considerOversampling && Gfx.canvasOversample || 1;
+        oversample = isOversampled && Gfx.canvasOversample || 1;
     if (!bounds || !clientXOrEvent) { return; }
 
     return typeof clientXOrEvent === 'object' ? {
