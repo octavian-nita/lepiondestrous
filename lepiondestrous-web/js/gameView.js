@@ -149,6 +149,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     this.render(layers);
 
     layers.glass.addEventListener('mousemove', new HoleHoverListener(this));
+    layers.glass.addEventListener('click', new HoleClickListener(this));
 
     // Set up the parent / container element:
     container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
@@ -343,12 +344,9 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
 
     if (this._gameView._game.emptyAt(currCol, currRow)) {
       typeof this._onHole === 'function' && this._onHole(currCol, currRow, event);
-    } else {
-      typeof this._onPawn === 'function' && this._onPawn(currCol, currRow, event);
+      this._prevCol = currCol;
+      this._prevRow = currRow;
     }
-
-    this._prevCol = currCol;
-    this._prevRow = currRow;
   };
 
   /**
@@ -391,6 +389,35 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     canvas.getContext('2d').clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
                                       this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
                                       board.holeDiameter + 2, board.holeDiameter + 2);
+  };
+
+  /**
+   * @constructor
+   * @extends {BoardEventListener}
+   */
+  function HoleClickListener(gameView) {
+    if (!(this instanceof HoleClickListener)) { return new HoleClickListener(gameView); }
+    BoardEventListener.call(this, gameView);
+  }
+
+  HoleClickListener.prototype = Object.create(BoardEventListener.prototype);
+  HoleClickListener.prototype.constructor = HoleClickListener;
+
+  HoleClickListener.prototype._onHole = function (currCol, currRow, event) {
+    var game = this._gameView._game, board = this._gameView._board, canvas = event && event.target, cx;
+    if (!(canvas instanceof HTMLCanvasElement)) { return; }
+
+    game.play(currCol, currRow);
+
+    canvas.style.cursor = 'pointer';
+
+    g.use(cx = canvas.getContext('2d'));
+    shadow(cx);
+    cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PIECE_LIGHT ? T.pawnLight : T.pawnDark;
+    g.circle(currCol * board.holeCenterDelta + board.x + board.holeDelta + board.holeRadius,
+             currRow * board.holeCenterDelta + board.playAreaY + board.holeDelta + board.holeRadius,
+             board.holeRadius);
+    g.end();
   };
 
   return GameView;
