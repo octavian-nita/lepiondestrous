@@ -1,4 +1,4 @@
-define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
+define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
   'use strict';
 
   var O = Object.freeze({ // Game view default options
@@ -135,7 +135,7 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
      */
     this._board = new BoardGeometry(container, options);
 
-    var i, keys, l, layers;
+    var i, keys, l, layers, holeListener = new BoardEventListener(this);
 
     // Build a map of layers; since these have the z-index set already,
     // we don't care about the order in which they are stored in a map:
@@ -148,10 +148,11 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     // Render the game view off-screen:
     this.render(layers);
 
-    layers.glass.addEventListener('mousemove', new HoleHoverListener(this));
-    layers.glass.addEventListener('click', new HoleClickListener(this));
+    // Set up event listeners:
+    layers.glass.addEventListener('mousedown', holeListener);
+    layers.glass.addEventListener('mousemove', holeListener);
 
-    // Set up the parent / container element:
+    // Set up parent container:
     container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
     for (i = 0, keys = Object.keys(layers), l = keys.length; i < l; i++) { container.appendChild(layers[keys[i]]); }
   }
@@ -306,41 +307,33 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
 
     /* @protected */
     this._prevRow = -1;
-
-    /* @protected */
-    this._x = -1;
-
-    /* @protected */
-    this._y = -1;
   }
 
   BoardEventListener.prototype.handleEvent = function (event) {
-    var board = this._gameView._board, coords, currCol, currRow;
+    var board = this._gameView._board, currCol, currRow, currXY;
 
-    // Obtain and translate mouse coordinates to the beginning of the playable area:
-    coords = Gfx.windowToElement(event && event.target, event);
-    if (!coords) { return; }
-    coords.x -= board.x;
-    coords.y -= board.playAreaY;
+    // Obtain and translate event coordinates to the beginning of the playable area:
+    currXY = Gfx.windowToElement(event && event.target, event);
+    if (!currXY) { return; }
+    currXY.x -= board.x;
+    currXY.y -= board.playAreaY;
 
     // Handle the event only on the playable area (see also http://code.google.com/p/chromium/issues/detail?id=161464)
-    if (coords.x <= 0 || coords.x >= board.width ||
-        coords.y <= 0 || coords.y >= board.width ||                 // coords off the playable area
-        coords.x === this._x && coords.y === this._y) { return; }   // coords haven't changed
+    if (currXY.x <= 0 || currXY.x >= board.width ||
+        currXY.y <= 0 || currXY.y >= board.width) { return; }
 
     // Handle the event only on holes or pawns:
-    this._x = coords.x;
-    this._y = coords.y;
-    if (this._x % board.holeCenterDelta < board.holeDelta ||
-        this._y % board.holeCenterDelta < board.holeDelta) { // coords out of any hole
+    if (currXY.x % board.holeCenterDelta < board.holeDelta ||
+        currXY.y % board.holeCenterDelta < board.holeDelta) {
       typeof this._onHoleMiss === 'function' && this._onHoleMiss(event);
       this._prevCol = this._prevRow = -1;
       return;
     }
 
-    currCol = Math.floor(coords.x / board.holeCenterDelta);
-    currRow = Math.floor(coords.y / board.holeCenterDelta);
-    if (currCol === this._prevCol && currRow === this._prevRow) { return; }       // same hole or pawn
+    // Handle anew the event only when moving to different holes / pawns:
+    currCol = Math.floor(currXY.x / board.holeCenterDelta);
+    currRow = Math.floor(currXY.y / board.holeCenterDelta);
+    if (currCol === this._prevCol && currRow === this._prevRow && event.type === 'mousemove') { return; }
 
     if (this._gameView._game.emptyAt(currCol, currRow)) {
       typeof this._onHole === 'function' && this._onHole(currCol, currRow, event);
@@ -349,75 +342,46 @@ define(['./gfx', './game', './gameTheme'], function (Gfx, Game, T) {
     }
   };
 
-  /**
-   * @constructor
-   * @extends {BoardEventListener}
-   */
-  function HoleHoverListener(gameView) {
-    if (!(this instanceof HoleHoverListener)) { return new HoleHoverListener(gameView); }
-    BoardEventListener.call(this, gameView);
-  }
-
-  HoleHoverListener.prototype = Object.create(BoardEventListener.prototype);
-  HoleHoverListener.prototype.constructor = HoleHoverListener;
-
-  HoleHoverListener.prototype._onHole = function (currCol, currRow, event) {
-    var board = this._gameView._board, canvas = event && event.target, cx;
-    if (!(canvas instanceof HTMLCanvasElement)) { return; }
-
-    canvas.style.cursor = 'pointer';
-
-    g.use(cx = canvas.getContext('2d'));
-    if (this._prevCol !== -1 && this._prevRow !== -1) {
-      cx.clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
-                   this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
-                   board.holeDiameter + 2, board.holeDiameter + 2);
-    }
-    cx.fillStyle = this._gameView._game.currentPiece() === Game.PIECE_LIGHT ?
-      T.pawnLightTransparent : T.pawnDarkTransparent;
-    g.circle(currCol * board.holeCenterDelta + board.x + board.holeDelta + board.holeRadius,
-             currRow * board.holeCenterDelta + board.playAreaY + board.holeDelta + board.holeRadius,
-             board.holeRadius);
-    g.end();
-  };
-
-  HoleHoverListener.prototype._onHoleMiss = function (event) {
-    var board = this._gameView._board, canvas = event && event.target;
-    if (!(canvas instanceof HTMLCanvasElement) || (this._prevCol === -1 && this._prevRow === -1)) { return; }
-
-    canvas.style.cursor = 'default';
-    canvas.getContext('2d').clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
-                                      this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
-                                      board.holeDiameter + 2, board.holeDiameter + 2);
-  };
-
-  /**
-   * @constructor
-   * @extends {BoardEventListener}
-   */
-  function HoleClickListener(gameView) {
-    if (!(this instanceof HoleClickListener)) { return new HoleClickListener(gameView); }
-    BoardEventListener.call(this, gameView);
-  }
-
-  HoleClickListener.prototype = Object.create(BoardEventListener.prototype);
-  HoleClickListener.prototype.constructor = HoleClickListener;
-
-  HoleClickListener.prototype._onHole = function (currCol, currRow, event) {
+  BoardEventListener.prototype._onHole = function (currCol, currRow, event) {
     var game = this._gameView._game, board = this._gameView._board, canvas = event && event.target, cx;
     if (!(canvas instanceof HTMLCanvasElement)) { return; }
 
-    game.play(currCol, currRow);
-
     canvas.style.cursor = 'pointer';
-
     g.use(cx = canvas.getContext('2d'));
-    shadow(cx);
-    cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PIECE_LIGHT ? T.pawnLight : T.pawnDark;
+
+    if (event.type === 'mousedown') {
+
+      game.play(currCol, currRow);
+
+      cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PIECE_LIGHT ? T.pawnLight : T.pawnDark;
+      shadow(cx);
+
+    } else {
+
+      cx.fillStyle = game.currentPiece() === Game.PIECE_LIGHT ? T.pawnLightTransparent : T.pawnDarkTransparent;
+      if (this._prevCol !== -1 && this._prevRow !== -1 && game.emptyAt(this._prevCol, this._prevRow)) {
+        cx.clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
+                     this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
+                     board.holeDiameter + 2, board.holeDiameter + 2);
+      }
+
+    }
+
     g.circle(currCol * board.holeCenterDelta + board.x + board.holeDelta + board.holeRadius,
              currRow * board.holeCenterDelta + board.playAreaY + board.holeDelta + board.holeRadius,
-             board.holeRadius);
-    g.end();
+             board.holeRadius).end();
+  };
+
+  BoardEventListener.prototype._onHoleMiss = function (event) {
+    var board = this._gameView._board, canvas = event && event.target;
+    if (!(canvas instanceof HTMLCanvasElement)) { return; }
+
+    canvas.style.cursor = 'default';
+    if (this._prevCol !== -1 && this._prevRow !== -1 && this._gameView._game.emptyAt(this._prevCol, this._prevRow)) {
+      canvas.getContext('2d').clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
+                                        this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
+                                        board.holeDiameter + 2, board.holeDiameter + 2);
+    }
   };
 
   return GameView;

@@ -13,18 +13,20 @@ define(function () {
       this._contexts.push(ctx); // becomes the current 2D rendering context this instance will draw on
       ctx.save();               // many times, one temporarily sets attributes on the context one uses
     }
+    return this;
   };
-
-  Gfx.prototype.ctx = function () { return this._contexts[this._contexts.length - 1]; };
 
   Gfx.prototype.end = function () {
     var ctx = this._contexts.pop();
     ctx && ctx.restore();       // upon 'un-using' a context, restore its previous state
+    return this;
   };
+
+  Gfx.prototype.ctx = function () { return this._contexts[this._contexts.length - 1]; };
 
   Gfx.prototype.circle = function (x, y, r, fn) {
     var ctx = this._contexts[this._contexts.length - 1], args, i, l;
-    if (!ctx) { return; }
+    if (!ctx) { return this; }
 
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Gfx.TWO_PI);
@@ -34,15 +36,17 @@ define(function () {
       // (see https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#3-managing-arguments)
       args = new Array(arguments.length - 4);
       for (i = 0, l = args.length; i < l; ++i) { args[i] = arguments[i + 4]; }
-      return ctx[fn].apply(ctx, args);
+      ctx[fn].apply(ctx, args);
     } else {
-      return ctx.fill();
+      ctx.fill();
     }
+
+    return this;
   };
 
   Gfx.prototype.innerShadowCircle = function (x, y, r) { // a bit harder to generalize an 'inner-shadow' routine...
     var ctx = this._contexts[this._contexts.length - 1];
-    if (!ctx) { return; }
+    if (!ctx) { return this; }
 
     ctx.save(); // in order to restore the clipping region since the technique is based on manipulating it
     ctx.beginPath();
@@ -52,6 +56,8 @@ define(function () {
     ctx.arc(x, y + ctx.lineWidth, r + ctx.lineWidth, 0, Gfx.TWO_PI);
     ctx.stroke();
     ctx.restore();
+
+    return this;
   };
 
   /**
