@@ -1,29 +1,54 @@
 define(function () {
   'use strict';
 
+  /**
+   * More or less fluent API for commonly used 2D rendering context drawing operations.
+   *
+   * @constructor
+   */
   function Gfx() {
     if (!(this instanceof Gfx)) { return new Gfx(); }
 
-    /** @protected */
-    this._contexts = [];        // intended to be used as a stack of 2D rendering contexts
+    /**
+     * Intended to be (internally) used as a stack of 2D rendering contexts, to allow reusing the same Gfx instance.
+     *
+     * @protected
+     */
+    this._contexts = [];
   }
 
+  /**
+   * @param {CanvasRenderingContext2D} ctx its state is saved and it becomes the current rendering context
+   *                                       <code>this</code> instance will draw on
+   * @return {Gfx}
+   */
   Gfx.prototype.use = function (ctx) {
     if (ctx) {
-      this._contexts.push(ctx); // becomes the current 2D rendering context this instance will draw on
-      ctx.save();               // many times, one temporarily sets attributes on the context one uses
+      this._contexts.push(ctx);
+      ctx.save();
     }
     return this;
   };
 
+  /**
+   * If available, the last used rendering context is discarded and its state restored.
+   *
+   * @return {Gfx}
+   */
   Gfx.prototype.end = function () {
     var ctx = this._contexts.pop();
-    ctx && ctx.restore();       // upon 'un-using' a context, restore its previous state
+    if (ctx) { ctx.restore(); }
     return this;
   };
 
+  /** @return {CanvasRenderingContext2D} the rendering context <code>this</code> instance currently draws on */
   Gfx.prototype.ctx = function () { return this._contexts[this._contexts.length - 1]; };
 
+  /**
+   * @param {function} [fn='fill'] rendering context function to draw / end the arc path used to define the circle
+   *                               (e.g. <code>'clip'</code>)
+   * @return {Gfx}
+   */
   Gfx.prototype.circle = function (x, y, r, fn) {
     var ctx = this._contexts[this._contexts.length - 1], args, i, l;
     if (!ctx) { return this; }
@@ -44,6 +69,7 @@ define(function () {
     return this;
   };
 
+  /** @return {Gfx} */
   Gfx.prototype.innerShadowCircle = function (x, y, r) { // a bit harder to generalize an 'inner-shadow' routine...
     var ctx = this._contexts[this._contexts.length - 1];
     if (!ctx) { return this; }
@@ -81,7 +107,7 @@ define(function () {
     canvas.height = height * oversample;
     canvas.getContext('2d').scale(oversample, oversample);
 
-    className && (canvas.className = className + '');
+    if (className) { canvas.className = className + ''; }
     return canvas;
   };
 
@@ -103,13 +129,14 @@ define(function () {
   /**
    * @static
    * @type {number}
+   * @default 2
    */
   Gfx.canvasOversample = 2;
 
   /**
    * @static
-   * @const
-   * @type {number}
+   * @const {number}
+   * @default 2 * Math.PI
    */
   Gfx.TWO_PI = 2 * Math.PI;
 

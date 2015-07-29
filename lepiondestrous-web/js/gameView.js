@@ -61,7 +61,7 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
      *
      * @type {number}
      */
-    this.x = (container.offsetWidth - this.width ) / 2;
+    this.x = (container.offsetWidth - this.width) / 2;
 
     /**
      * The topmost coordinate of the board, within its parent container.
@@ -112,8 +112,6 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
      * @type {number}
      */
     this.holeCenterDelta = this.holeDelta + this.holeDiameter;
-
-    Object.freeze(this);
   }
 
   /** @constructor */
