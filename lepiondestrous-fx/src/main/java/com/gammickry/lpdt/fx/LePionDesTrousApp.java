@@ -1,10 +1,10 @@
 package com.gammickry.lpdt.fx;
 
+import com.gammickry.lpdt.fx.poc.LePionDesTrousView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;

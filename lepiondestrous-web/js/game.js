@@ -107,10 +107,12 @@ define(function () {
   Game.prototype.currentPiece = function () { return this._players[this._current].piece; };
 
   Game.prototype.play = function (col, row) {
-    if (!this._board.empty(col, row)) { return console.trace('the specified location is already taken'); }
+    if (!this._board.empty(col, row)) { return 'LOCATION_OCCUPIED'; }
 
     var player = this._players[this._current];
     if (player) {
+      if (player._pawnsLeft === 0) { return 'NO_MORE_PAWNS'; }
+
       this._board.place(col, row, player.play());
       this._current = this._current === Game.PIECE_LIGHT ? Game.PIECE_DARK : Game.PIECE_LIGHT;
     }

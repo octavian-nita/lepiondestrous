@@ -1,4 +1,4 @@
-package com.gammickry.lpdt.fx;
+package com.gammickry.lpdt.fx.poc;
 
 import com.gammickry.boardgame.OpponentType;
 import javafx.scene.effect.DropShadow;

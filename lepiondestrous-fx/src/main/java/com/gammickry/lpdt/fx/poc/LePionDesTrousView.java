@@ -1,4 +1,4 @@
-package com.gammickry.lpdt.fx;
+package com.gammickry.lpdt.fx.poc;
 
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
