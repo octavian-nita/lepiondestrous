@@ -1,14 +1,21 @@
 define(function () {
   'use strict';
 
-  /** @constructor */
-  function Board(cols, rows) {
-    if (!(this instanceof Board)) { return new Board(cols, rows); }
+  /**
+   * Representation of a m×n board used in <a href="http://en.wikipedia.org/wiki/M,n,k-game">m,n,k-games</a> and
+   * other <a href="http://en.wikipedia.org/wiki/Abstract_strategy_game">abstract strategy (board) games</a>.
+   *
+   * @constructor
+   * @author Octavian Theodor NITA (http://github.com/octavian-nita)
+   * @version 1.0, June 26, 2015
+   */
+  function MNBoard(cols, rows) {
+    if (!(this instanceof MNBoard)) { return new MNBoard(cols, rows); }
 
     if (isNaN(cols = cols === undefined ? 14 : Number(cols)) ||
-        cols <= 0) { throw new Error('the number of columns in a board should be a strictly positive number'); }
+        cols <= 0) { throw new Error('the number of columns in an m×n board should be a strictly positive number'); }
     if (isNaN(rows = rows === undefined ? cols : Number(rows)) ||
-        rows <= 0) { throw new Error('the number of rows in a board should be a strictly positive number'); }
+        rows <= 0) { throw new Error('the number of rows in an m×n board should be a strictly positive number'); }
 
     /** @readonly */
     Object.defineProperty(this, 'cols', { enumerable: true, value: cols });
@@ -20,7 +27,7 @@ define(function () {
     this._grid = new Array(this.rows * this.cols);
   }
 
-  Board.prototype.at = function (col, row) {
+  MNBoard.prototype.at = function (col, row) {
     if (isNaN(col = Number(col)) || col < 0 ||
         col >= this.cols) { throw new Error('the specified column is off the board'); }
     if (isNaN(row = Number(row)) || row < 0 ||
@@ -28,38 +35,45 @@ define(function () {
     return this._grid[this.rows * row + col];
   };
 
-  Board.prototype.empty = function (col, row) { return !this.at(col, row); };
+  MNBoard.prototype.empty = function (col, row) { return this.at(col, row) === undefined; };
 
-  Board.prototype.place = function (col, row, piece) {
+  MNBoard.prototype.place = function (col, row, piece) {
     if (piece === undefined) { throw new Error('cannot place an empty piece'); }
     var oldPiece = this.at(col, row);
     this._grid[this.rows * row + col] = piece;
     return oldPiece;
   };
 
-  Board.prototype.displace = function (col, row) {
+  MNBoard.prototype.displace = function (col, row) {
     var piece = this.at(col, row);
-    if (piece === undefined) { throw new Error('cannot displace an empty location'); }
+    if (piece === undefined) { throw new Error('cannot displace from an empty location'); }
     this._grid[this.rows * row + col] = undefined;
     return piece;
   };
 
   /** @constructor */
-  function Player(piece) {
+  function Player(piece, piecesLeft) {
     if (!(this instanceof Player)) { return new Player(piece); }
+
+    if (piece === undefined) { throw new Error('a player\'s piece must be specified'); }
+    if (isNaN(piecesLeft = piecesLeft === undefined ? 42 : Number(piecesLeft)) ||
+        piecesLeft <= 0) { throw new Error('the number of pieces left should be a strictly positive number'); }
 
     /** @readonly */
     Object.defineProperty(this, 'piece', { enumerable: true, value: piece });
 
     /** @protected */
-    this._pawnsLeft = 42;
+    this._piecesLeft = piecesLeft;
   }
 
+  Player.prototype.piecesLeft = function () { return this._piecesLeft; };
+
+  /** @return {*} the piece <code>this</code> player has played */
   Player.prototype.play = function () {
-    if (this._pawnsLeft <= 0) {
-      throw new Error('player ' + this.piece + ' has no more pawns to play');
+    if (this._piecesLeft <= 0) {
+      throw new Error('player ' + this.piece + ' has no more pieces left to play');
     }
-    this._pawnsLeft--;
+    this._piecesLeft--;
     return this.piece;
   };
 
@@ -74,7 +88,7 @@ define(function () {
     Object.defineProperty(this, 'size', { enumerable: true, value: 14 });
 
     /** @protected */
-    this._board = new Board(this.size);
+    this._board = new MNBoard(this.size);
 
     /** @protected */
     this._players = Object.create(null);
@@ -106,12 +120,14 @@ define(function () {
 
   Game.prototype.currentPiece = function () { return this._players[this._current].piece; };
 
+  Game.prototype.currentPlayer = function () { return this._players[this._current]; };
+
   Game.prototype.play = function (col, row) {
     if (!this._board.empty(col, row)) { return 'LOCATION_OCCUPIED'; }
 
     var player = this._players[this._current];
     if (player) {
-      if (player._pawnsLeft === 0) { return 'NO_MORE_PAWNS'; }
+      if (player.piecesLeft() === 0) { return 'NO_MORE_PIECES'; }
 
       this._board.place(col, row, player.play());
       this._current = this._current === Game.PIECE_LIGHT ? Game.PIECE_DARK : Game.PIECE_LIGHT;

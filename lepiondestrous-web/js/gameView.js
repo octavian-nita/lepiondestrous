@@ -208,7 +208,7 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
     cx.lineTo(11, 0);
     cx.stroke();
 
-    cx.font = 0.5 + 'pt ' + T.fontFamily;
+    cx.font = 0.8 + 'px ' + T.fontFamily;
     cx.textAlign = 'center';
     cx.fillStyle = T.foreground;
     cx.fillText('  ' + this._game.name + '  ', this._board.width / (this._board.unit * 2), 1);

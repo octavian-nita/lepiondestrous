@@ -5,5 +5,5 @@ require(['require.domReady!', 'gameView'], function (doc, GameView) {
   'use strict';
 
   // Create and render the game view:
-  GameView(doc.getElementsByClassName('lpdt-game')[0]);
+  GameView(doc.getElementsByClassName('lepiondestrous')[0]);
 });
