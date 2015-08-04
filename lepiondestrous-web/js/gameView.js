@@ -138,9 +138,9 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
     // Build a map of layers; since these have the z-index set already,
     // we don't care about the order in which they are stored in a map:
     layers = Object.create(null);
-    layers.board = Gfx.createLayer(container, 0, 'board');
-    layers.pawns = Gfx.createLayer(container, 1, 'pawns');
-    layers.glass = Gfx.createLayer(container, 2, 'glass');
+    layers.board = Gfx.createLayer(container, 100, 'board');
+    layers.pawns = Gfx.createLayer(container, 101, 'pawns');
+    layers.glass = Gfx.createLayer(container, 102, 'glass');
     Object.freeze(layers);
 
     // Render the game view off-screen:
@@ -153,6 +153,21 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
     // Set up parent container:
     container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
     for (i = 0, keys = Object.keys(layers), l = keys.length; i < l; i++) { container.appendChild(layers[keys[i]]); }
+
+    var msg = document.createElement('p'), style = msg.style;
+
+    style.position = 'absolute';
+    style.top = '70%';
+    style.left = '50%';
+    style.zIndex = 200;
+    style.transform = 'translateX(-50%)';
+    style.color = T.foreground;
+    style.background = 'rgba(0, 0, 0, 0.7)';
+    style['border-radius'] = '25px';
+    style.lineHeight = '3em';
+    msg.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;No more pieces left for player...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+
+    container.appendChild(msg);
   }
 
   GameView.prototype.render = function (layers) {

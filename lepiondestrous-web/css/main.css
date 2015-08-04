@@ -28,7 +28,7 @@
 *, *:before, *:after { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
 /* http://camendesign.com/code/developpeurs_sans_frontieres; style html, body to limit page wrappers */
-html { overflow: auto; height: 100%; background: #fff; color: #555; font-size: 62.5%; }
+html { overflow: auto; height: 100%; font-size: 62.5%; }
 
 body {
   position: relative;
@@ -51,10 +51,7 @@ body {
   transform-style: preserve-3d;
 }
 
-.lepiondestrous {
-  margin: 0 auto;
-
-  /* Vertical align: */
+.vertically-centered {
   position: relative; top: 50%;
   -webkit-transform: -webkit-translateY(-50%);
   -webkit-transform: translateY(-50%);
@@ -62,11 +59,11 @@ body {
   -ms-transform: translateY(-50%);
   -o-transform: translateY(-50%);
   transform: translateY(-50%);
+}
 
-  /* Size the game area / board: */
-  width: 568px; height: 320px; /* iPhone 5 landscape */
-  width: 320px; height: 568px; /* iPhone 5 portrait */
+.le-pion-des-trous { margin: 0 auto; height: 100%; width: 100%; }
+
+.le-pion-des-trous {
+  width: 320px; height: 568px;
   width: 550px; height: 750px;
-  width: 100%; height: 100%;
-  font-family: "Chantelli Antiqua";
 }

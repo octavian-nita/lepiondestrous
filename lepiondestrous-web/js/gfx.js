@@ -98,8 +98,7 @@ define(function () {
         canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversample || 1;
 
     style.position = 'absolute';
-    style.zIndex = zIndex || 0;
-    style.background = 'transparent';
+    style.zIndex = Number(zIndex) || 0;
     style.width = width + 'px';
     style.height = height + 'px';
 
