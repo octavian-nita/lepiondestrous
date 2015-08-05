@@ -66,6 +66,7 @@ define(function () {
     this._piecesLeft = piecesLeft;
   }
 
+  /** @return {number} how many pieces <code>this</code> player has left */
   Player.prototype.piecesLeft = function () { return this._piecesLeft; };
 
   /** @return {*} the piece <code>this</code> player has played */

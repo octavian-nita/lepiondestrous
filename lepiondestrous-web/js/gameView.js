@@ -18,6 +18,28 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
     context.shadowBlur = T.dropShadow.blur;
   }
 
+  function createMessageLayer(zIndex, className) {
+    var elem = document.createElement('p'), style = elem.style;
+
+    style.position = 'absolute';
+    style.zIndex = Number(zIndex) || 0;
+    style.top = '65%';
+    style.left = '50%';
+    style.transform = 'translateX(-50%)';
+    style.display = 'none';
+    style.borderRadius = '25px';
+    style.padding = '10px 15px';
+    style.color = T.foreground;
+    style.background = 'rgba(0, 0, 0, 0.7)';
+    style.textAlign = 'center';
+
+    style.transition =
+    style['-o-transition'] = style['-moz-transition'] = style['-webkit-transition'] = 'opacity 3s ease';
+
+    if (className) { elem.className = className + ''; }
+    return elem;
+  }
+
   /**
    * Gameboard geometry (where within a parent container the gameboard is drawn, how large it is, etc.),
    * in terms of a container's dimensions.
@@ -133,48 +155,56 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
      */
     this._board = new BoardGeometry(container, options);
 
-    var i, keys, l, layers, holeListener = new BoardEventListener(this);
+    /**
+     * A map of layer elements; since these have the z-index set already we
+     * don't really care about the order in which they are stored in a map.
+     *
+     * @protected
+     */
+    this._layers = Object.create(null);
+    this._layers.board = Gfx.createLayer(container, 100, 'board');
+    this._layers.pawns = Gfx.createLayer(container, 101, 'pawns');
+    this._layers.glass = Gfx.createLayer(container, 102, 'glass');
+    this._layers.messg = createMessageLayer(200, 'message');
+    Object.freeze(this._layers);
 
-    // Build a map of layers; since these have the z-index set already,
-    // we don't care about the order in which they are stored in a map:
-    layers = Object.create(null);
-    layers.board = Gfx.createLayer(container, 100, 'board');
-    layers.pawns = Gfx.createLayer(container, 101, 'pawns');
-    layers.glass = Gfx.createLayer(container, 102, 'glass');
-    Object.freeze(layers);
+    var i, keys, l, holeListener = new BoardEventListener(this);
 
     // Render the game view off-screen:
-    this.render(layers);
+    this.render();
 
     // Set up event listeners:
-    layers.glass.addEventListener('mousedown', holeListener);
-    layers.glass.addEventListener('mousemove', holeListener);
+    this._layers.glass.addEventListener('mousedown', holeListener);
+    this._layers.glass.addEventListener('mousemove', holeListener);
 
-    // Set up parent container:
+    // Set up the parent container:
     container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
-    for (i = 0, keys = Object.keys(layers), l = keys.length; i < l; i++) { container.appendChild(layers[keys[i]]); }
+    for (i = 0, keys = Object.keys(this._layers), l = keys.length; i < l; i++) {
+      container.appendChild(this._layers[keys[i]]);
+    }
+    container.appendChild(this._layers.messg);
 
-    var msg = document.createElement('p'), style = msg.style;
-
-    style.position = 'absolute';
-    style.top = '70%';
-    style.left = '50%';
-    style.zIndex = 200;
-    style.transform = 'translateX(-50%)';
-    style.color = T.foreground;
-    style.background = 'rgba(0, 0, 0, 0.7)';
-    style['border-radius'] = '25px';
-    style.lineHeight = '3em';
-    msg.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;No more pieces left for player...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-
-    container.appendChild(msg);
+    this.message('No more pawns to play...');
   }
 
-  GameView.prototype.render = function (layers) {
-    var boardContext = layers.board.getContext('2d');
+  GameView.prototype.message = function (message) {
+    var elem = this._layers.messg, style = elem.style, timeoutId;
+    elem.innerHTML = message;
+
+    style.display = 'block';
+    style.opacity = 1;
+    timeoutId = setTimeout(function () {
+      style.opacity = 0;
+      //style.display = 'none';
+      clearTimeout(timeoutId);
+    }, 1000);
+  };
+
+  GameView.prototype.render = function () {
+    var boardContext = this._layers.board.getContext('2d');
     this._renderBoard(boardContext);
     this._renderHoles(boardContext);
-    this._renderPawns(layers.pawns.getContext('2d'));
+    this._renderPawns(this._layers.pawns.getContext('2d'));
   };
 
   GameView.prototype._renderBoard = function (cx) {
