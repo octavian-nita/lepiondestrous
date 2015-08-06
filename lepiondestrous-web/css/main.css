@@ -51,7 +51,10 @@ body {
   transform-style: preserve-3d;
 }
 
-.vertically-centered {
+.le-pion-des-trous {
+  margin: 0 auto; height: 100%; width: 100%;
+
+  /* Vertically centered: */
   position: relative; top: 50%;
   -webkit-transform: -webkit-translateY(-50%);
   -webkit-transform: translateY(-50%);
@@ -61,8 +64,7 @@ body {
   transform: translateY(-50%);
 }
 
-.le-pion-des-trous { margin: 0 auto; height: 100%; width: 100%; }
-
+/* TODO: REMOVE THIS AFTER TESTING! */
 .le-pion-des-trous {
   width: 320px; height: 568px;
   width: 550px; height: 750px;

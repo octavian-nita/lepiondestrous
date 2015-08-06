@@ -1,21 +1,14 @@
-define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
+define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
   'use strict';
 
-  var O = Object.freeze({ // Game view default options
-                          board: {
-                            maxHeight: 695,
-                            maxWidth: 504
-                          },
-                          gameSize: 14
-                        }),
-      g = new Gfx();
+  var g = new Gfx(), theme = GameConfig.theme();
 
   function shadow(context) {
     if (!context) { return; }
-    context.shadowOffsetX = T.dropShadow.offsetX;
-    context.shadowOffsetY = T.dropShadow.offsetY;
-    context.shadowColor = T.dropShadow.color;
-    context.shadowBlur = T.dropShadow.blur;
+    context.shadowOffsetX = GameConfig.dropShadow.offsetX;
+    context.shadowOffsetY = GameConfig.dropShadow.offsetY;
+    context.shadowColor = GameConfig.dropShadow.color;
+    context.shadowBlur = GameConfig.dropShadow.blur;
   }
 
   function createMessageLayer(zIndex, className) {
@@ -26,10 +19,10 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
     style.top = '65%';
     style.left = '50%';
     style.transform = 'translateX(-50%)';
-    style.display = 'none';
+    style.height = 0;
     style.borderRadius = '25px';
     style.padding = '10px 15px';
-    style.color = T.foreground;
+    style.color = GameConfig.foreground;
     style.background = 'rgba(0, 0, 0, 0.7)';
     style.textAlign = 'center';
 
@@ -188,15 +181,14 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
   }
 
   GameView.prototype.message = function (message) {
-    var elem = this._layers.messg, style = elem.style, timeoutId;
+    var elem = this._layers.messg, style = elem.style;
     elem.innerHTML = message;
 
-    style.display = 'block';
     style.opacity = 1;
-    timeoutId = setTimeout(function () {
+    style.height = 'auto';
+    setTimeout(function () {
       style.opacity = 0;
-      //style.display = 'none';
-      clearTimeout(timeoutId);
+      style.zIndex = 0;
     }, 1000);
   };
 
@@ -209,19 +201,19 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
 
   GameView.prototype._renderBoard = function (cx) {
     if (!cx || !this._board) { return; }
-    cx.canvas.style.background = T.boardLight;
+    cx.canvas.style.background = GameConfig.boardLight;
 
     cx.save();
 
     shadow(cx);
 
-    cx.fillStyle = T.boardDark;
+    cx.fillStyle = GameConfig.boardDark;
     cx.fillRect(this._board.x, this._board.y, this._board.width, this._board.height);
 
     cx.translate(this._board.x, this._board.y);    // move the origin to the board top left corner
     cx.scale(this._board.unit, this._board.unit);  // draw the board decorations in terms of units
 
-    cx.strokeStyle = T.foreground;
+    cx.strokeStyle = GameConfig.foreground;
     cx.lineWidth = Gfx.canvasOversample / this._board.unit;  // the canvas is oversampled and the board is scaled
 
     // Arch Bridge:
@@ -253,9 +245,9 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
     cx.lineTo(11, 0);
     cx.stroke();
 
-    cx.font = 0.8 + 'px ' + T.fontFamily;
+    cx.font = 0.8 + 'px ' + GameConfig.fontFamily;
     cx.textAlign = 'center';
-    cx.fillStyle = T.foreground;
+    cx.fillStyle = GameConfig.foreground;
     cx.fillText('  ' + this._game.name + '  ', this._board.width / (this._board.unit * 2), 1);
 
     cx.restore();
@@ -288,7 +280,7 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
     g.use(cx);
 
     // Hole outlines:
-    cx.fillStyle = T.holeLight;
+    cx.fillStyle = GameConfig.holeLight;
 
     cx.translate(this._board.x, this._board.y);
     renderScoreboardHoles();
@@ -298,7 +290,7 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
 
     // Hole inner shadows:
     shadow(cx);
-    cx.strokeStyle = T.holeDark;
+    cx.strokeStyle = GameConfig.holeDark;
     cx.lineWidth = 4;
 
     for (y = delta + r; y < w; y += delta + d) {
@@ -326,7 +318,7 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
     for (row = 0; row < size; row++) {
       for (col = 0; col < size; col++) {
         if (piece = game.pieceAt(col, row)) {
-          cx.fillStyle = piece === Game.PIECE_LIGHT ? T.pawnLight : T.pawnDark;
+          cx.fillStyle = piece === Game.PIECE_LIGHT ? GameConfig.pawnLight : GameConfig.pawnDark;
           g.circle(col * centerDelta, row * centerDelta, r);
         }
       }
@@ -396,12 +388,13 @@ define(['./gfx', './gameTheme', './game'], function (Gfx, T, Game) {
 
       game.play(currCol, currRow);
 
-      cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PIECE_LIGHT ? T.pawnLight : T.pawnDark;
+      cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PIECE_LIGHT ? GameConfig.pawnLight : GameConfig.pawnDark;
       shadow(cx);
 
     } else {
 
-      cx.fillStyle = game.currentPiece() === Game.PIECE_LIGHT ? T.pawnLightTransparent : T.pawnDarkTransparent;
+      cx.fillStyle =
+      game.currentPiece() === Game.PIECE_LIGHT ? GameConfig.pawnLightTransparent : GameConfig.pawnDarkTransparent;
       if (this._prevCol !== -1 && this._prevRow !== -1 && game.emptyAt(this._prevCol, this._prevRow)) {
         cx.clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
                      this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
