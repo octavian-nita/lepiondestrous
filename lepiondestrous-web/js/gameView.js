@@ -1,33 +1,41 @@
-define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
+define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
   'use strict';
 
-  var g = new Gfx(), theme = GameConfig.theme();
+  var g = new Gfx(), theme = cfg.theme;
 
   function shadow(context) {
     if (!context) { return; }
-    context.shadowOffsetX = GameConfig.dropShadow.offsetX;
-    context.shadowOffsetY = GameConfig.dropShadow.offsetY;
-    context.shadowColor = GameConfig.dropShadow.color;
-    context.shadowBlur = GameConfig.dropShadow.blur;
+
+    var shadow = theme.shadow;
+    context.shadowOffsetX = shadow.offsetX;
+    context.shadowOffsetY = shadow.offsetY;
+    context.shadowColor = shadow.color;
+    context.shadowBlur = shadow.blur;
   }
 
   function createMessageLayer(zIndex, className) {
-    var elem = document.createElement('p'), style = elem.style;
+    var elem = document.createElement('div'), style = elem.style;
 
     style.position = 'absolute';
-    style.zIndex = Number(zIndex) || 0;
+    style.zIndex = Number(zIndex) || 1000;
+
     style.top = '65%';
     style.left = '50%';
     style.transform = 'translateX(-50%)';
-    style.height = 0;
+
     style.borderRadius = '25px';
-    style.padding = '10px 15px';
-    style.color = GameConfig.foreground;
+    style.padding = '0 25px';
+
+    style.color = theme.foreground;
     style.background = 'rgba(0, 0, 0, 0.7)';
     style.textAlign = 'center';
 
+    style.display = 'none';
+    style.opacity = 0;
     style.transition =
-    style['-o-transition'] = style['-moz-transition'] = style['-webkit-transition'] = 'opacity 3s ease';
+    style['-o-transition'] =
+    style['-moz-transition'] =
+    style['-webkit-transition'] = 'opacity ' + (Number(cfg.toastEaseDelay) || 3000) + 'ms ease';
 
     if (className) { elem.className = className + ''; }
     return elem;
@@ -35,21 +43,17 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
 
   /**
    * Gameboard geometry (where within a parent container the gameboard is drawn, how large it is, etc.),
-   * in terms of a container's dimensions.
+   * in terms of a container's dimensions. Currently the board is always laid out vertically.
    *
    * @constructor
    */
-  function BoardGeometry(container, options) {
-    if (!(this instanceof BoardGeometry)) { return new BoardGeometry(container, options); }
+  function BoardGeometry(container) {
+    if (!(this instanceof BoardGeometry)) { return new BoardGeometry(container); }
     if (!container) { return; }
 
-    var opts = Object.create(O), i, keys, l, boardRatio;
-    if (options) { // compute view options
-      for (i = 0, keys = Object.keys(options), l = keys.length; i < l; i++) { opts[keys[i]] = options[keys[i]]; }
-    }
+    var gameSize = cfg.gameSize, boardRatio = gameSize / (gameSize + 5);
 
-    // Set up the board geometry (always vertical, http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html):
-    boardRatio = opts.gameSize / (opts.gameSize + 5);
+    // http://www.frontcoded.com/javascript-fit-rectange-into-bounds.html
     if (boardRatio > container.offsetWidth / container.offsetHeight) {
 
       /**
@@ -57,7 +61,7 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
        *
        * @type {number}
        */
-      this.width = Math.min(container.offsetWidth, opts.board.maxWidth);
+      this.width = Math.min(container.offsetWidth, cfg.board.maxWidth);
 
       /**
        * The height of the board, in pixels.
@@ -67,7 +71,7 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
       this.height = this.width / boardRatio;
 
     } else {
-      this.height = Math.min(container.offsetHeight, opts.board.maxHeight);
+      this.height = Math.min(container.offsetHeight, cfg.board.maxHeight);
       this.width = this.height * boardRatio;
     }
 
@@ -97,10 +101,10 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
      *
      * @type {number}
      */
-    this.unit = this.height * boardRatio / opts.gameSize;
+    this.unit = this.height * boardRatio / gameSize;
 
     /**
-     * The board has <code>opts.gameSize</code> × <code>opts.gameSize</code> play holes of a certain diameter,
+     * The board has <code>gameSize</code> × <code>gameSize</code> play holes of a certain diameter,
      * less than or equal to the board unit.
      *
      * @type {number}
@@ -119,7 +123,7 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
      *
      * @type {number}
      */
-    this.holeDelta = (this.width - this.holeDiameter * opts.gameSize) / (opts.gameSize + 1);
+    this.holeDelta = (this.width - this.holeDiameter * gameSize) / (gameSize + 1);
 
     /**
      * The space between two consecutive hole centers.
@@ -129,9 +133,13 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
     this.holeCenterDelta = this.holeDelta + this.holeDiameter;
   }
 
+  BoardGeometry.prototype.foo = function () {
+    // TODO: implement me!
+  };
+
   /** @constructor */
-  function GameView(container, options) {
-    if (!(this instanceof GameView)) { return new GameView(container, options); }
+  function GameView(container) {
+    if (!(this instanceof GameView)) { return new GameView(container); }
     if (!container) { return; }
 
     /**
@@ -146,7 +154,7 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
      *
      * @protected
      */
-    this._board = new BoardGeometry(container, options);
+    this._board = new BoardGeometry(container);
 
     /**
      * A map of layer elements; since these have the z-index set already we
@@ -158,7 +166,7 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
     this._layers.board = Gfx.createLayer(container, 100, 'board');
     this._layers.pawns = Gfx.createLayer(container, 101, 'pawns');
     this._layers.glass = Gfx.createLayer(container, 102, 'glass');
-    this._layers.messg = createMessageLayer(200, 'message');
+    this._layers.toast = createMessageLayer(200, 'toast');
     Object.freeze(this._layers);
 
     var i, keys, l, holeListener = new BoardEventListener(this);
@@ -175,22 +183,10 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
     for (i = 0, keys = Object.keys(this._layers), l = keys.length; i < l; i++) {
       container.appendChild(this._layers[keys[i]]);
     }
-    container.appendChild(this._layers.messg);
+    container.appendChild(this._layers.toast);
 
-    this.message('No more pawns to play...');
+    this.toast('Le ' + (this._game.currentPiece() === Game.PIECE_LIGHT ? 'blanc' : 'noir') + ' commence!', 1000);
   }
-
-  GameView.prototype.message = function (message) {
-    var elem = this._layers.messg, style = elem.style;
-    elem.innerHTML = message;
-
-    style.opacity = 1;
-    style.height = 'auto';
-    setTimeout(function () {
-      style.opacity = 0;
-      style.zIndex = 0;
-    }, 1000);
-  };
 
   GameView.prototype.render = function () {
     var boardContext = this._layers.board.getContext('2d');
@@ -201,19 +197,19 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
 
   GameView.prototype._renderBoard = function (cx) {
     if (!cx || !this._board) { return; }
-    cx.canvas.style.background = GameConfig.boardLight;
+    cx.canvas.style.background = theme.boardLight;
 
     cx.save();
 
     shadow(cx);
 
-    cx.fillStyle = GameConfig.boardDark;
+    cx.fillStyle = theme.boardDark;
     cx.fillRect(this._board.x, this._board.y, this._board.width, this._board.height);
 
     cx.translate(this._board.x, this._board.y);    // move the origin to the board top left corner
     cx.scale(this._board.unit, this._board.unit);  // draw the board decorations in terms of units
 
-    cx.strokeStyle = GameConfig.foreground;
+    cx.strokeStyle = theme.foreground;
     cx.lineWidth = Gfx.canvasOversample / this._board.unit;  // the canvas is oversampled and the board is scaled
 
     // Arch Bridge:
@@ -245,9 +241,9 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
     cx.lineTo(11, 0);
     cx.stroke();
 
-    cx.font = 0.8 + 'px ' + GameConfig.fontFamily;
+    cx.font = 0.8 + 'px ' + theme.fontFamily;
     cx.textAlign = 'center';
-    cx.fillStyle = GameConfig.foreground;
+    cx.fillStyle = theme.foreground;
     cx.fillText('  ' + this._game.name + '  ', this._board.width / (this._board.unit * 2), 1);
 
     cx.restore();
@@ -280,7 +276,7 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
     g.use(cx);
 
     // Hole outlines:
-    cx.fillStyle = GameConfig.holeLight;
+    cx.fillStyle = theme.holeLight;
 
     cx.translate(this._board.x, this._board.y);
     renderScoreboardHoles();
@@ -290,7 +286,7 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
 
     // Hole inner shadows:
     shadow(cx);
-    cx.strokeStyle = GameConfig.holeDark;
+    cx.strokeStyle = theme.holeDark;
     cx.lineWidth = 4;
 
     for (y = delta + r; y < w; y += delta + d) {
@@ -318,13 +314,32 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
     for (row = 0; row < size; row++) {
       for (col = 0; col < size; col++) {
         if (piece = game.pieceAt(col, row)) {
-          cx.fillStyle = piece === Game.PIECE_LIGHT ? GameConfig.pawnLight : GameConfig.pawnDark;
+          cx.fillStyle = piece === Game.PIECE_LIGHT ? theme.pawnLight : theme.pawnDark;
           g.circle(col * centerDelta, row * centerDelta, r);
         }
       }
     }
 
     g.end();
+  };
+
+  GameView.prototype.toast = function (message, delay) {
+    var elem = this._layers.toast, style = elem.style;
+
+    if (window.getComputedStyle(elem).display != 'none') {
+      elem.innerHTML += '<p>' + message + '</p>';
+    } else {
+      elem.innerHTML = '<p>' + message + '</p>';
+
+      style.display = 'block';
+      style.opacity = 1;
+      setTimeout(function () {
+        style.opacity = 0;
+        setTimeout(function () {
+          style.display = 'none';
+        }, Number(cfg.toastEaseDelay) || 3000);
+      }, Number(delay) || Number(cfg.toastDelay) || 750);
+    }
   };
 
   /**
@@ -348,7 +363,7 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
     var board = this._gameView._board, currCol, currRow, currXY;
 
     // Obtain and translate event coordinates to the beginning of the playable area:
-    currXY = Gfx.windowToElement(event && event.target, event);
+    currXY = Gfx.position(event.target, event.clientX, event.clientY);
     if (!currXY) { return; }
     currXY.x -= board.x;
     currXY.y -= board.playAreaY;
@@ -375,6 +390,8 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
       this._prevCol = currCol;
       this._prevRow = currRow;
     }
+
+    event.stopPropagation();
   };
 
   BoardEventListener.prototype._onHole = function (currCol, currRow, event) {
@@ -388,13 +405,13 @@ define(['./gfx', './gameConfig', './game'], function (Gfx, GameConfig, Game) {
 
       game.play(currCol, currRow);
 
-      cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PIECE_LIGHT ? GameConfig.pawnLight : GameConfig.pawnDark;
+      cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PIECE_LIGHT ? theme.pawnLight : theme.pawnDark;
       shadow(cx);
 
     } else {
 
       cx.fillStyle =
-      game.currentPiece() === Game.PIECE_LIGHT ? GameConfig.pawnLightTransparent : GameConfig.pawnDarkTransparent;
+      game.currentPiece() === Game.PIECE_LIGHT ? theme.pawnLightTransparent : theme.pawnDarkTransparent;
       if (this._prevCol !== -1 && this._prevRow !== -1 && game.emptyAt(this._prevCol, this._prevRow)) {
         cx.clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
                      this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,

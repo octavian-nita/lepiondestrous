@@ -2,7 +2,7 @@ define(function () {
   'use strict';
 
   /**
-   * More or less fluent API for commonly used 2D rendering context drawing operations.
+   * Fluent (more or less) API for commonly used 2D rendering context drawing operations.
    *
    * @constructor
    */
@@ -111,16 +111,16 @@ define(function () {
   };
 
   /** @static */
-  Gfx.windowToElement = function (element, clientXOrEvent, clientY, isOversampled) {
-    var bounds = element && element.getBoundingClientRect(),
-        oversample = isOversampled && Gfx.canvasOversample || 1;
-    if (!bounds || !clientXOrEvent) { return; }
+  Gfx.position = function (element, clientXOrXY, clientY, isOversampled) {
+    if (!element || !clientXOrXY) { return; }
 
-    return typeof clientXOrEvent === 'object' ? {
-      x: (clientXOrEvent.clientX - bounds.left) * oversample,
-      y: (clientXOrEvent.clientY - bounds.top) * oversample
+    var bounds = element.getBoundingClientRect(), oversample = isOversampled && Gfx.canvasOversample || 1;
+
+    return typeof clientXOrXY === 'object' ? {
+      x: (clientXOrXY.clientX - bounds.left) * oversample,
+      y: (clientXOrXY.clientY - bounds.top) * oversample
     } : {
-      x: (clientXOrEvent - bounds.left) * oversample,
+      x: (clientXOrXY - bounds.left) * oversample,
       y: (clientY - bounds.top) * oversample
     };
   };
