@@ -111,12 +111,12 @@ define(function () {
   };
 
   /** @static */
-  Gfx.position = function (element, clientXOrXY, clientY, isOversampled) {
-    if (!element || !clientXOrXY) { return; }
+  Gfx.relativePosition = function (element, clientXOrXY, clientY, isOversampled) {
+    if (!element) { return; }
 
     var bounds = element.getBoundingClientRect(), oversample = isOversampled && Gfx.canvasOversample || 1;
 
-    return typeof clientXOrXY === 'object' ? {
+    return clientXOrXY && typeof clientXOrXY === 'object' ? {
       x: (clientXOrXY.clientX - bounds.left) * oversample,
       y: (clientXOrXY.clientY - bounds.top) * oversample
     } : {

@@ -97,7 +97,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
     this.playAreaY = this.y + this.height - this.width;
 
     /**
-     * The board is drawn based on units.
+     * The board is drawn based on square units.
      *
      * @type {number}
      */
@@ -126,15 +126,24 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
     this.holeDelta = (this.width - this.holeDiameter * gameSize) / (gameSize + 1);
 
     /**
-     * The space between two consecutive hole centers.
+     * The space between two consecutive hole centers, stored for convenience.
      *
      * @type {number}
      */
     this.holeCenterDelta = this.holeDelta + this.holeDiameter;
   }
 
-  BoardGeometry.prototype.foo = function () {
-    // TODO: implement me!
+  BoardGeometry.prototype.relativePosition = function (event) {
+    // TODO: encapsulate logic that analyzes the coordinates relative to the board geometry!
+
+    var position = Gfx.relativePosition(event.target, event);
+    if (!position) { return; }
+
+    // Translate event coordinates to the beginning of the playable area:
+    position.x -= this.x;
+    position.y -= this.playAreaY;
+
+    return position;
   };
 
   /** @constructor */
@@ -363,7 +372,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
     var board = this._gameView._board, currCol, currRow, currXY;
 
     // Obtain and translate event coordinates to the beginning of the playable area:
-    currXY = Gfx.position(event.target, event.clientX, event.clientY);
+    currXY = Gfx.relativePosition(event.target, event);
     if (!currXY) { return; }
     currXY.x -= board.x;
     currXY.y -= board.playAreaY;
