@@ -1,4 +1,4 @@
-define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
+define(['./gameConfig', './game', './Gfx'], function (cfg, Game, Gfx) {
   'use strict';
 
   var g = new gfx(), theme = cfg.theme;
