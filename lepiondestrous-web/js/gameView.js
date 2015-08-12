@@ -1,7 +1,7 @@
 define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
   'use strict';
 
-  var g = new Gfx(), theme = cfg.theme;
+  var g = new gfx(), theme = cfg.theme;
 
   function shadow(context) {
     if (!context) { return; }
@@ -136,7 +136,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
   BoardGeometry.prototype.relativePosition = function (event) {
     // TODO: encapsulate logic that analyzes the coordinates relative to the board geometry!
 
-    var position = Gfx.relativePosition(event.target, event);
+    var position = gfx.relativePosition(event.target, event);
     if (!position) { return; }
 
     // Translate event coordinates to the beginning of the playable area:
@@ -172,9 +172,9 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
      * @protected
      */
     this._layers = Object.create(null);
-    this._layers.board = Gfx.createLayer(container, 100, 'board');
-    this._layers.pawns = Gfx.createLayer(container, 101, 'pawns');
-    this._layers.glass = Gfx.createLayer(container, 102, 'glass');
+    this._layers.board = gfx.createLayer(container, 100, 'board');
+    this._layers.pawns = gfx.createLayer(container, 101, 'pawns');
+    this._layers.glass = gfx.createLayer(container, 102, 'glass');
     this._layers.toast = createMessageLayer(200, 'toast');
     Object.freeze(this._layers);
 
@@ -219,7 +219,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
     cx.scale(this._board.unit, this._board.unit);  // draw the board decorations in terms of units
 
     cx.strokeStyle = theme.foreground;
-    cx.lineWidth = Gfx.canvasOversample / this._board.unit;  // the canvas is oversampled and the board is scaled
+    cx.lineWidth = gfx.canvasOversample / this._board.unit;  // the canvas is oversampled and the board is scaled
 
     // Arch Bridge:
     cx.beginPath();
@@ -372,7 +372,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
     var board = this._gameView._board, currCol, currRow, currXY;
 
     // Obtain and translate event coordinates to the beginning of the playable area:
-    currXY = Gfx.relativePosition(event.target, event);
+    currXY = gfx.relativePosition(event.target, event);
     if (!currXY) { return; }
     currXY.x -= board.x;
     currXY.y -= board.playAreaY;
