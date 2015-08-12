@@ -1,0 +1,10 @@
+{
+  "browser": true,
+  "indent": 2,
+  "maxerr": 50,
+  "maxlen": 120,
+  "predef": [
+    "require",
+    "define"
+  ]
+}

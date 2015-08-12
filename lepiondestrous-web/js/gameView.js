@@ -1,7 +1,7 @@
-define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
+define(['require.i18n!nls/t', './gameConfig', './game', './gfx'], function (t, cfg, Game, Gfx) {
   'use strict';
 
-  var g = new Gfx(), theme = cfg.theme;
+  var g = new gfx(), theme = cfg.theme;
 
   function shadow(context) {
     if (!context) { return; }
@@ -19,7 +19,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
     style.position = 'absolute';
     style.zIndex = Number(zIndex) || 1000;
 
-    style.top = '65%';
+    style.top = '50%';
     style.left = '50%';
     style.transform = 'translateX(-50%)';
 
@@ -136,7 +136,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
   BoardGeometry.prototype.relativePosition = function (event) {
     // TODO: encapsulate logic that analyzes the coordinates relative to the board geometry!
 
-    var position = Gfx.relativePosition(event.target, event);
+    var position = gfx.relativePosition(event.target, event);
     if (!position) { return; }
 
     // Translate event coordinates to the beginning of the playable area:
@@ -156,7 +156,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
      *
      * @protected
      */
-    this._game = new Game();
+    this._game = new game();
 
     /**
      * Gameboard geometry.
@@ -172,9 +172,9 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
      * @protected
      */
     this._layers = Object.create(null);
-    this._layers.board = Gfx.createLayer(container, 100, 'board');
-    this._layers.pawns = Gfx.createLayer(container, 101, 'pawns');
-    this._layers.glass = Gfx.createLayer(container, 102, 'glass');
+    this._layers.board = gfx.createLayer(container, 100, 'board');
+    this._layers.pawns = gfx.createLayer(container, 101, 'pawns');
+    this._layers.glass = gfx.createLayer(container, 102, 'glass');
     this._layers.toast = createMessageLayer(200, 'toast');
     Object.freeze(this._layers);
 
@@ -194,7 +194,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
     }
     container.appendChild(this._layers.toast);
 
-    this.toast('Le ' + (this._game.currentPiece() === Game.PIECE_LIGHT ? 'blanc' : 'noir') + ' commence!', 1000);
+    this.toast(t[this._game.currentPiece() === game.PIECE_LIGHT ? 'LIGHT_PLAYS' : 'DARK_PLAYS'], 1000);
   }
 
   GameView.prototype.render = function () {
@@ -219,7 +219,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
     cx.scale(this._board.unit, this._board.unit);  // draw the board decorations in terms of units
 
     cx.strokeStyle = theme.foreground;
-    cx.lineWidth = Gfx.canvasOversample / this._board.unit;  // the canvas is oversampled and the board is scaled
+    cx.lineWidth = gfx.canvasOversample / this._board.unit;  // the canvas is oversampled and the board is scaled
 
     // Arch Bridge:
     cx.beginPath();
@@ -323,7 +323,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
     for (row = 0; row < size; row++) {
       for (col = 0; col < size; col++) {
         if (piece = game.pieceAt(col, row)) {
-          cx.fillStyle = piece === Game.PIECE_LIGHT ? theme.pawnLight : theme.pawnDark;
+          cx.fillStyle = piece === game.PIECE_LIGHT ? theme.pawnLight : theme.pawnDark;
           g.circle(col * centerDelta, row * centerDelta, r);
         }
       }
@@ -372,7 +372,7 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
     var board = this._gameView._board, currCol, currRow, currXY;
 
     // Obtain and translate event coordinates to the beginning of the playable area:
-    currXY = Gfx.relativePosition(event.target, event);
+    currXY = gfx.relativePosition(event.target, event);
     if (!currXY) { return; }
     currXY.x -= board.x;
     currXY.y -= board.playAreaY;
@@ -414,13 +414,13 @@ define(['./gameConfig', './game', './gfx'], function (cfg, Game, Gfx) {
 
       game.play(currCol, currRow);
 
-      cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PIECE_LIGHT ? theme.pawnLight : theme.pawnDark;
+      cx.fillStyle = game.pieceAt(currCol, currRow) === game.PIECE_LIGHT ? theme.pawnLight : theme.pawnDark;
       shadow(cx);
 
     } else {
 
       cx.fillStyle =
-      game.currentPiece() === Game.PIECE_LIGHT ? theme.pawnLightTransparent : theme.pawnDarkTransparent;
+      game.currentPiece() === game.PIECE_LIGHT ? theme.pawnLightTransparent : theme.pawnDarkTransparent;
       if (this._prevCol !== -1 && this._prevRow !== -1 && game.emptyAt(this._prevCol, this._prevRow)) {
         cx.clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
                      this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
