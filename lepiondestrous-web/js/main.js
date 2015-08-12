@@ -1,6 +1,6 @@
-require(['require.domReady!', 'gameView'], function (doc, GameView) {
+require(['require.domReady!', 'GameView'], function (doc, GameView) {
   'use strict';
 
   // Create and render the game view:
-  GameView(doc.getElementsByClassName('le-pion-des-trous')[0]);
+  new GameView(doc.getElementsByClassName('le-pion-des-trous')[0]);
 });
