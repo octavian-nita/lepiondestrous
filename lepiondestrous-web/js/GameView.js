@@ -6,11 +6,11 @@ define(['./gameConfig', './Game', './Gfx'], function (cfg, Game, Gfx) {
   function shadow(context) {
     if (!context) { return; }
 
-    var shadow = theme.shadow;
-    context.shadowOffsetX = shadow.offsetX;
-    context.shadowOffsetY = shadow.offsetY;
-    context.shadowColor = shadow.color;
-    context.shadowBlur = shadow.blur;
+    var sh = theme.shadow;
+    context.shadowOffsetX = sh.offsetX;
+    context.shadowOffsetY = sh.offsetY;
+    context.shadowColor = sh.color;
+    context.shadowBlur = sh.blur;
   }
 
   function createMessageLayer(zIndex, className) {
@@ -49,7 +49,7 @@ define(['./gameConfig', './Game', './Gfx'], function (cfg, Game, Gfx) {
    */
   function BoardGeometry(container) {
     if (!(this instanceof BoardGeometry)) { return new BoardGeometry(container); }
-    if (!container) { return; }
+    if (!container) { throw new Error('CONTAINER_ELEMENT_REQUIRED'); }
 
     var gameSize = cfg.gameSize, boardRatio = gameSize / (gameSize + 5);
 
@@ -149,7 +149,7 @@ define(['./gameConfig', './Game', './Gfx'], function (cfg, Game, Gfx) {
   /** @constructor */
   function GameView(container) {
     if (!(this instanceof GameView)) { return new GameView(container); }
-    if (!container) { return; }
+    if (!container) { throw new Error('CONTAINER_ELEMENT_REQUIRED'); }
 
     /**
      * Game model.
