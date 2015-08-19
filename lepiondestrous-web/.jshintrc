@@ -3,6 +3,7 @@
   "indent": 2,
   "maxerr": 50,
   "maxlen": 120,
+  "globalstrict": true,
   "globals": [
     "require",
     "define"
