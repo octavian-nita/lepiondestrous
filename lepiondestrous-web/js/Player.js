@@ -2,37 +2,43 @@ define(function () {
   'use strict';
 
   /**
-   * @constructor
+   * Initializes a player with <code>pieceCount</code> pieces of the same <code>piece</code> type.
+   *
    * @author Octavian Theodor NITA (http://github.com/octavian-nita)
    * @version 1.0, June 26, 2015
+   *
+   * @constructor
+   * @param {*} piece the type of piece <code>this</code> player uses
+   * @param {number} [pieceCount=42] the number of pieces (of the same type) <code>this</code> player initially has
    */
-  function Player(piece, piecesLeft) {
+  function Player(piece, pieceCount) {
     if (!(this instanceof Player)) { return new Player(piece); }
 
-    if (piece === undefined) { throw new Error('a player\'s piece must be specified'); }
-    if (isNaN(piecesLeft = piecesLeft === undefined ? 42 : Number(piecesLeft)) ||
-        piecesLeft <= 0) { throw new Error('the number of pieces left should be a strictly positive number'); }
+    if (piece === undefined) { throw new Error('a player\'s piece type must be specified'); }
+    if (isNaN(pieceCount = pieceCount === undefined ? 42 : Number(pieceCount)) ||
+        pieceCount <= 0) { throw new Error('the number of pieces left should be a strictly positive number'); }
 
     /** @readonly */
     Object.defineProperty(this, 'piece', { enumerable: true, value: piece });
 
     /** @protected */
-    this._piecesLeft = piecesLeft;
+    this._pieceCount = pieceCount;
   }
 
   /**
    * @return {number} how many pieces <code>this</code> player has left
    */
-  Player.prototype.piecesLeft = function () { return this._piecesLeft; };
+  Player.prototype.pieceCount = function () { return this._pieceCount; };
 
   /**
-   * @return {*} the piece <code>this</code> player has played
+   * @param {Board} board
+   * @return {*} the piece <code>this</code> player plays
    */
-  Player.prototype.play = function () {
-    if (this._piecesLeft <= 0) {
+  Player.prototype.play = function (board) {
+    if (this._pieceCount <= 0) {
       throw new Error('player ' + this.piece + ' has no more pieces left to play');
     }
-    this._piecesLeft--;
+    this._pieceCount--;
     return this.piece;
   };
 

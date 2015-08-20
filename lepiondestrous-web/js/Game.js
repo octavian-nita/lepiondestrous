@@ -1,7 +1,7 @@
 define(
-  ['MNBoard', 'Player'],
+  ['Board', 'Player'],
 
-  function (MNBoard, Player) {
+  function (Board, Player) {
     'use strict';
 
     /** @constructor */
@@ -15,7 +15,7 @@ define(
       Object.defineProperty(this, 'size', { enumerable: true, value: 14 });
 
       /** @protected */
-      this._board = new MNBoard(this.size);
+      this._board = new Board(this.size);
 
       /** @protected */
       this._players = Object.create(null);
@@ -54,7 +54,7 @@ define(
 
       var player = this._players[this._current];
       if (player) {
-        if (player.piecesLeft() === 0) { return 'NO_MORE_PIECES'; }
+        if (player.pieceCount() === 0) { return 'NO_MORE_PIECES'; }
 
         this._board.place(col, row, player.play());
         this._current = this._current === Game.PIECE_LIGHT ? Game.PIECE_DARK : Game.PIECE_LIGHT;
