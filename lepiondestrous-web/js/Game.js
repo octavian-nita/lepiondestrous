@@ -19,12 +19,12 @@ define(
 
       /** @protected */
       this._players = Object.create(null);
-      this._players[Game.PIECE_LIGHT] = new Player(Game.PIECE_LIGHT);
-      this._players[Game.PIECE_DARK] = new Player(Game.PIECE_DARK);
+      this._players[Game.PLAYER_LIGHT] = new Player(Game.PLAYER_LIGHT);
+      this._players[Game.PLAYER_DARK] = new Player(Game.PLAYER_DARK);
       Object.freeze(this._players);
 
       /** @protected */
-      this._current = Game.PIECE_LIGHT;
+      this._current = Game.PLAYER_LIGHT;
     }
 
     /**
@@ -32,14 +32,14 @@ define(
      * @readonly
      * @static
      */
-    Object.defineProperty(Game, 'PIECE_LIGHT', { enumerable: true, value: 1 });
+    Object.defineProperty(Game, 'PLAYER_LIGHT', { enumerable: true, value: 1 });
 
     /**
      * @const {2}
      * @readonly
      * @static
      */
-    Object.defineProperty(Game, 'PIECE_DARK', { enumerable: true, value: 2 });
+    Object.defineProperty(Game, 'PLAYER_DARK', { enumerable: true, value: 2 });
 
     Game.prototype.emptyAt = function (col, row) { return this._board.empty(col, row); };
 
@@ -57,7 +57,7 @@ define(
         if (player.pieceCount() === 0) { return 'NO_MORE_PIECES'; }
 
         this._board.place(col, row, player.play());
-        this._current = this._current === Game.PIECE_LIGHT ? Game.PIECE_DARK : Game.PIECE_LIGHT;
+        this._current = this._current === Game.PLAYER_LIGHT ? Game.PLAYER_DARK : Game.PLAYER_LIGHT;
       }
     };
 

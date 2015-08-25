@@ -197,7 +197,7 @@ define(
       }
       container.appendChild(this._layers.toast);
 
-      this.toast('Le ' + (this._game.currentPiece() === Game.PIECE_LIGHT ? 'blanc' : 'noir') + ' commence!', 1000);
+      this.toast('Le ' + (this._game.currentPiece() === Game.PLAYER_LIGHT ? 'blanc' : 'noir') + ' commence!', 1000);
     }
 
     GameView.prototype.render = function () {
@@ -326,7 +326,7 @@ define(
       for (row = 0; row < size; row++) {
         for (col = 0; col < size; col++) {
           if (piece = game.pieceAt(col, row)) {
-            cx.fillStyle = piece === Game.PIECE_LIGHT ? theme.pawnLight : theme.pawnDark;
+            cx.fillStyle = piece === Game.PLAYER_LIGHT ? theme.pawnLight : theme.pawnDark;
             g.circle(col * centerDelta, row * centerDelta, r);
           }
         }
@@ -417,13 +417,13 @@ define(
 
         game.play(currCol, currRow);
 
-        cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PIECE_LIGHT ? theme.pawnLight : theme.pawnDark;
+        cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PLAYER_LIGHT ? theme.pawnLight : theme.pawnDark;
         shadow(cx);
 
       } else {
 
         cx.fillStyle =
-        game.currentPiece() === Game.PIECE_LIGHT ? theme.pawnLightTransparent : theme.pawnDarkTransparent;
+        game.currentPiece() === Game.PLAYER_LIGHT ? theme.pawnLightTransparent : theme.pawnDarkTransparent;
         if (this._prevCol !== -1 && this._prevRow !== -1 && game.emptyAt(this._prevCol, this._prevRow)) {
           cx.clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
                        this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
