@@ -16,7 +16,7 @@ define(
       context.shadowBlur = sh.blur;
     }
 
-    function createMessageLayer(zIndex, className) {
+    function createToast(zIndex, className) {
       var elem = document.createElement('div'), style = elem.style;
 
       style.position = 'absolute';
@@ -39,6 +39,7 @@ define(
       style['-o-transition'] =
       style['-moz-transition'] =
       style['-webkit-transition'] = 'opacity ' + (Number(cfg.toastEaseDelay) || 3000) + 'ms ease';
+      style['pointer-events'] = 'none';
 
       if (className) { elem.className = className + ''; }
       return elem;
@@ -178,7 +179,7 @@ define(
       this._layers.board = Gfx.createCanvas(container, 100, 'board');
       this._layers.pawns = Gfx.createCanvas(container, 101, 'pawns');
       this._layers.glass = Gfx.createCanvas(container, 102, 'glass');
-      this._layers.toast = createMessageLayer(200, 'toast');
+      this._layers.toast = createToast(200, 'toast');
       Object.freeze(this._layers);
 
       var i, keys, l, holeListener = new BoardEventListener(this);
