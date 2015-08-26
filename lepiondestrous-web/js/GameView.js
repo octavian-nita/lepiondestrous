@@ -26,7 +26,7 @@ define(
       style.left = '50%';
       style.transform = 'translateX(-50%)';
 
-      style.borderRadius = '25px';
+      style.borderRadius = '75px';
       style.padding = '0 25px';
 
       style.color = theme.foreground;
