@@ -175,9 +175,9 @@ define(
        * @protected
        */
       this._layers = Object.create(null);
-      this._layers.board = Gfx.createLayer(container, 100, 'board');
-      this._layers.pawns = Gfx.createLayer(container, 101, 'pawns');
-      this._layers.glass = Gfx.createLayer(container, 102, 'glass');
+      this._layers.board = Gfx.createCanvas(container, 100, 'board');
+      this._layers.pawns = Gfx.createCanvas(container, 101, 'pawns');
+      this._layers.glass = Gfx.createCanvas(container, 102, 'glass');
       this._layers.toast = createMessageLayer(200, 'toast');
       Object.freeze(this._layers);
 

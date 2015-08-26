@@ -4,6 +4,9 @@ define(function () {
   /**
    * Fluent (more or less) API for commonly used 2D rendering context drawing operations.
    *
+   * @author Octavian Theodor NITA (http://github.com/octavian-nita)
+   * @version 1.0, August 12, 2015
+   *
    * @constructor
    */
   function Gfx() {
@@ -74,6 +77,7 @@ define(function () {
     var ctx = this._contexts[this._contexts.length - 1];
     if (!ctx) { return this; }
 
+    // TODO: consider refactoring inner shadows to http://www.quora.com/How-can-I-draw-inset-shadow-on-HTML-canvas
     ctx.save(); // in order to restore the clipping region since the technique is based on manipulating it
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Gfx.TWO_PI);
@@ -89,10 +93,10 @@ define(function () {
   /**
    * @static
    * @return {HTMLCanvasElement} an eventually oversampled canvas element, sized to fill the provided
-   *         <code>container</code> or to 300px × 150px if no container is provided and pre-styled to be used as a
-   *         {@link https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#Use_multiple_layered_canvases_for_complex_scenes. layer}
+   *         <code>container</code> or to 300px × 150px if no container is provided and pre-styled to
+   *         be used as a {@link http://goo.gl/LgEbvt layer}
    */
-  Gfx.createLayer = function (container, zIndex, className) {
+  Gfx.createCanvas = function (container, zIndex, className) {
     var width = container && container.offsetWidth || 300,
         height = container && container.offsetHeight || 150,
         canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversample || 1;

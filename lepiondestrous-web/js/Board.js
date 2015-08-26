@@ -4,7 +4,7 @@ define(function () {
   /**
    * <p>An m×n board used in <a href="http://en.wikipedia.org/wiki/M,n,k-game">m,n,k-games</a> and other
    * <a href="http://en.wikipedia.org/wiki/Abstract_strategy_game">abstract strategy (board) games</a>.</p>
-   * <p>Empty space is represented by <code>undefined</code>.</p>
+   * <p>An empty location on the board is represented by <code>undefined</code>.</p>
    *
    * @author Octavian Theodor NITA (http://github.com/octavian-nita)
    * @version 1.0, June 26, 2015

@@ -1,16 +1,15 @@
-/*jshint -W097 */
 'use strict';
 
 define({
          gameSize: 14,
 
          board: {
-           maxHeight: 695,
-           maxWidth: 504
+           maxHeight: 695,     // CSS px
+           maxWidth: 504       // CSS px
          },
 
-         toastEaseDelay: 3000, // ms
-         toastDelay: 750,      // ms
+         toastDelay: 750,      // millis
+         toastEaseDelay: 3000, // millis
 
          theme: {
            boardDark: '#795548',
@@ -20,8 +19,9 @@ define({
            holeLight: '#5d4037',
 
            pawnDark: '#d32f2f',
-           pawnDarkTransparent: 'rgba(211, 47, 47, 0.6)',
            pawnLight: 'white',
+
+           pawnDarkTransparent: 'rgba(211, 47, 47, 0.6)',
            pawnLightTransparent: 'rgba(256, 256, 256, 0.6)',
 
            shadow: { offsetX: 0, offsetY: 5, blur: 20, color: 'rgba(0, 0, 0, 0.9)' },
