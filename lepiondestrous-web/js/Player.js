@@ -18,7 +18,7 @@ define(
       if (!(this instanceof Player)) { return new Player(piece); }
 
       if (piece === undefined) { throw new Error('a player\'s piece type must be specified'); }
-      if (isNaN(pieceCount = pieceCount === undefined ? 42 : Number(pieceCount)) ||
+      if (isNaN(pieceCount = pieceCount === undefined ? 2 : Number(pieceCount)) ||
           pieceCount <= 0) { throw new Error('the number of pieces left should be a strictly positive number'); }
 
       /** @readonly */

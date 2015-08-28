@@ -1,7 +1,7 @@
 define(
-  ['./gameConfig', './Game', './Gfx'],
+  ['require.i18n!', 'gameConfig', 'Game', 'GameStateError', 'Gfx'],
 
-  function (cfg, Game, Gfx) {
+  function (t, cfg, Game, GameStateError, Gfx) {
     'use strict';
 
     var g = new Gfx(), theme = cfg.theme;
@@ -416,7 +416,17 @@ define(
 
       if (event.type === 'mousedown') {
 
-        game.play(currCol, currRow);
+        try {
+          game.play(currCol, currRow);
+        } catch (error) {
+
+          if (error instanceof GameStateError) {
+            this._gameView.toast(t[error.message]);
+            return;
+          }
+
+          throw error;
+        }
 
         cx.fillStyle = game.pieceAt(currCol, currRow) === Game.PLAYER_LIGHT ? theme.pawnLight : theme.pawnDark;
         shadow(cx);
