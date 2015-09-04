@@ -1,5 +1,5 @@
 define(
-  ['Board', 'Player', 'GameStateError'],
+  ['Board', 'Player', 'GameError'],
 
   function (Board, Player, GameStateError) {
     'use strict';
@@ -51,9 +51,9 @@ define(
 
     Game.prototype.play = function (col, row) {
       var player = this._players[this._current];
-      if (player.pieceCount() === 0) { throw new GameStateError('NO_MORE_PIECES'); }
+      if (player.pieceCount() === 0) { throw new GameError('NO_MORE_PIECES'); }
 
-      if (!this._board.empty(col, row)) { throw new GameStateError('LOCATION_OCCUPIED'); }
+      if (!this._board.empty(col, row)) { throw new GameError('LOCATION_OCCUPIED'); }
 
       this._board.place(col, row, player.play());
       this._current = this._current === Game.PLAYER_LIGHT ? Game.PLAYER_DARK : Game.PLAYER_LIGHT;

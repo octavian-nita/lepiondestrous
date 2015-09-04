@@ -1,5 +1,5 @@
 define(
-  ['require.i18n!', 'gameConfig', 'Game', 'GameStateError', 'Gfx'],
+  ['require.i18n!nls/t', 'gameConfig', 'Game', 'GameError', 'Gfx'],
 
   function (t, cfg, Game, GameStateError, Gfx) {
     'use strict';
@@ -153,7 +153,6 @@ define(
     /** @constructor */
     function GameView(container) {
       if (!(this instanceof GameView)) { return new GameView(container); }
-      if (!container) { throw new Error('ERR_CONTAINER_ELEMENT_REQUIRED'); }
 
       /**
        * Game model.
@@ -375,6 +374,8 @@ define(
     BoardEventListener.prototype.handleEvent = function (event) {
       var board = this._gameView._board, currCol, currRow, currXY;
 
+      event.stopPropagation();
+
       // Obtain and translate event coordinates to the beginning of the playable area:
       currXY = Gfx.relativePosition(event.target, event);
       if (!currXY) { return; }
@@ -388,7 +389,9 @@ define(
       // Handle the event only on holes or pawns:
       if (currXY.x % board.holeCenterDelta < board.holeDelta ||
           currXY.y % board.holeCenterDelta < board.holeDelta) {
-        typeof this._onHoleMiss === 'function' && this._onHoleMiss(event);
+        if (typeof this._onHoleMiss === 'function') {
+          this._onHoleMiss(event);
+        }
         this._prevCol = this._prevRow = -1;
         return;
       }
@@ -399,12 +402,12 @@ define(
       if (currCol === this._prevCol && currRow === this._prevRow && event.type === 'mousemove') { return; }
 
       if (this._gameView._game.emptyAt(currCol, currRow)) {
-        typeof this._onHole === 'function' && this._onHole(currCol, currRow, event);
+        if (typeof this._onHole === 'function') {
+          this._onHole(currCol, currRow, event);
+        }
         this._prevCol = currCol;
         this._prevRow = currRow;
       }
-
-      event.stopPropagation();
     };
 
     BoardEventListener.prototype._onHole = function (currCol, currRow, event) {
@@ -420,7 +423,7 @@ define(
           game.play(currCol, currRow);
         } catch (error) {
 
-          if (error instanceof GameStateError) {
+          if (error instanceof GameError) {
             this._gameView.toast(t[error.message]);
             return;
           }

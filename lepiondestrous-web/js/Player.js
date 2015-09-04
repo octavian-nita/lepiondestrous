@@ -1,5 +1,5 @@
 define(
-  ['GameStateError'],
+  ['GameError'],
 
   function () {
     'use strict';
@@ -39,7 +39,7 @@ define(
      */
     Player.prototype.play = function (board) {
       if (this._pieceCount <= 0) {
-        throw new GameStateError('NO_MORE_PIECES');
+        throw new GameError('NO_MORE_PIECES');
       }
       this._pieceCount--;
       return this.piece;

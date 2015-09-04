@@ -16,24 +16,24 @@ define(function () {
    * @see http://stackoverflow.com/questions/1382107/whats-a-good-way-to-extend-error-in-javascript
    * @see http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#Custom_Error_Types
    */
-  function GameStateError(message) {
-    if (!(this instanceof GameStateError)) { return new GameStateError(message); }
+  function GameError(message) {
+    if (!(this instanceof GameError)) { return new GameError(message); }
 
     var error = new Error(message); // capture a stack trace
-    error.name = 'GameStateError';  // might get used in the stack trace computation
+    error.name = 'GameError';       // might get used in the stack trace computation
 
     /** @override */
-    this.stack = error.stack;
+    this.stack = error.stack;       // save the stack trace as a property
 
     /** @override */
     this.message = message;
   }
 
-  GameStateError.prototype = Object.create(Error.prototype);
+  GameError.prototype = Object.create(Error.prototype);
 
-  GameStateError.prototype.constructor = GameStateError;
+  GameError.prototype.constructor = GameError;
 
-  GameStateError.prototype.name = 'GameStateError';
+  GameError.prototype.name = 'GameError';
 
-  return GameStateError;
+  return GameError;
 });

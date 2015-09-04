@@ -22,7 +22,7 @@ define(function () {
 
   /**
    * @param {CanvasRenderingContext2D} ctx its state is saved and it becomes the current rendering context
-   *                                       <code>this</code> instance will draw on
+   *                                       <code>this</code> instance draws on
    * @return {Gfx}
    */
   Gfx.prototype.use = function (ctx) {
@@ -48,7 +48,10 @@ define(function () {
   Gfx.prototype.ctx = function () { return this._contexts[this._contexts.length - 1]; };
 
   /**
-   * @param {function} [fn='fill'] rendering context function to draw / end the arc path used to define the circle
+   * @param {number} x
+   * @param {number} y
+   * @param {number} r
+   * @param {function} [fn='fill'] rendering context function to draw/end the arc path used to define the circle
    *                               (e.g. <code>'clip'</code>)
    * @return {Gfx}
    */
@@ -72,12 +75,17 @@ define(function () {
     return this;
   };
 
-  /** @return {Gfx} */
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @param {number} r
+   * @return {Gfx}
+   */
   Gfx.prototype.innerShadowCircle = function (x, y, r) { // a bit harder to generalize an 'inner-shadow' routine...
     var ctx = this._contexts[this._contexts.length - 1];
     if (!ctx) { return this; }
 
-    // TODO: consider refactoring inner shadows to http://www.quora.com/How-can-I-draw-inset-shadow-on-HTML-canvas
+    // Alternative inner shadow technique: http://www.quora.com/How-can-I-draw-inset-shadow-on-HTML-canvas
     ctx.save(); // in order to restore the clipping region since the technique is based on manipulating it
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Gfx.TWO_PI);
@@ -92,6 +100,9 @@ define(function () {
 
   /**
    * @static
+   * @param {HTMLElement} [container]
+   * @param {number|string} [zIndex=0]
+   * @param {string} [className]
    * @return {HTMLCanvasElement} an eventually oversampled canvas element, sized to fill the provided
    *         <code>container</code> or to 300px × 150px if no container is provided and pre-styled to
    *         be used as a {@link http://goo.gl/LgEbvt layer}
@@ -114,17 +125,23 @@ define(function () {
     return canvas;
   };
 
-  /** @static */
-  Gfx.relativePosition = function (element, clientXOrXY, clientY, isOversampled) {
-    if (!element) { return; }
+  /**
+   * @static
+   * @param {HTMLElement} element
+   * @param {number|Event} clientXOrEvent
+   * @param {number} [clientY]
+   * @param {boolean} [isOversampled]
+   */
+  Gfx.relativePosition = function (element, clientXOrEvent, clientY, isOversampled) {
+    if (!element || !clientXOrEvent) { return; }
 
     var bounds = element.getBoundingClientRect(), oversample = isOversampled && Gfx.canvasOversample || 1;
 
-    return clientXOrXY && typeof clientXOrXY === 'object' ? {
-      x: (clientXOrXY.clientX - bounds.left) * oversample,
-      y: (clientXOrXY.clientY - bounds.top) * oversample
+    return typeof clientXOrEvent === 'object' ? {
+      x: (clientXOrEvent.clientX - bounds.left) * oversample,
+      y: (clientXOrEvent.clientY - bounds.top) * oversample
     } : {
-      x: (clientXOrXY - bounds.left) * oversample,
+      x: (clientXOrEvent - bounds.left) * oversample,
       y: (clientY - bounds.top) * oversample
     };
   };
