@@ -1,7 +1,7 @@
 define(
   ['GameError'],
 
-  function () {
+  function (GameError) {
     'use strict';
 
     /**

@@ -1,15 +1,16 @@
 'use strict';
 
 define({
+  id: new Date().getTime(),
          gameSize: 14,
 
          board: {
-           maxHeight: 695,     // CSS px
-           maxWidth: 504       // CSS px
+           maxHeight: 695,        // CSS px
+           maxWidth: 504          // CSS px
          },
 
-         toastDelay: 750,      // millis
-         toastEaseDelay: 3000, // millis
+         toastTimeout: 750,       // millis
+         toastEaseDuration: 3000, // millis
 
          theme: {
            boardDark: '#795548',
