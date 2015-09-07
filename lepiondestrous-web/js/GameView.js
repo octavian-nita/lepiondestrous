@@ -222,7 +222,7 @@ define(
       cx.scale(this._board.unit, this._board.unit);  // draw the board decorations in terms of units
 
       cx.strokeStyle = theme.foreground;
-      cx.lineWidth = Gfx.canvasOversample / this._board.unit;  // the canvas is oversampled and the board is scaled
+      cx.lineWidth = Gfx.canvasOversampling / this._board.unit;  // the canvas is oversampled and the board is scaled
 
       // Arch Bridge:
       cx.beginPath();

@@ -110,7 +110,7 @@ define(function () {
   Gfx.createCanvas = function (container, zIndex, className) {
     var width = container && container.offsetWidth || 300,
         height = container && container.offsetHeight || 150,
-        canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversample || 1;
+        canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversampling || 1;
 
     style.position = 'absolute';
     style.zIndex = Number(zIndex) || 0;
@@ -135,14 +135,14 @@ define(function () {
   Gfx.relativePosition = function (element, clientXOrEvent, clientY, isOversampled) {
     if (!element || !clientXOrEvent) { return; }
 
-    var bounds = element.getBoundingClientRect(), oversample = isOversampled && Gfx.canvasOversample || 1;
+    var bounds = element.getBoundingClientRect(), oversampling = isOversampled && Gfx.canvasOversampling || 1;
 
     return typeof clientXOrEvent === 'object' ? {
-      x: (clientXOrEvent.clientX - bounds.left) * oversample,
-      y: (clientXOrEvent.clientY - bounds.top) * oversample
+      x: (clientXOrEvent.clientX - bounds.left) * oversampling,
+      y: (clientXOrEvent.clientY - bounds.top) * oversampling
     } : {
-      x: (clientXOrEvent - bounds.left) * oversample,
-      y: (clientY - bounds.top) * oversample
+      x: (clientXOrEvent - bounds.left) * oversampling,
+      y: (clientY - bounds.top) * oversampling
     };
   };
 
@@ -151,7 +151,7 @@ define(function () {
    * @type {number}
    * @default 2
    */
-  Gfx.canvasOversample = 2;
+  Gfx.canvasOversampling = 2;
 
   /**
    * @static
