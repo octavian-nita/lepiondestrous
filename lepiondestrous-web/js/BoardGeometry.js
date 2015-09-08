@@ -3,7 +3,7 @@ define(
 
   function (cfg) {
     'use strict';
-console.log('CFG:', cfg.id);
+
     /**
      * Gameboard geometry (where within a parent container the gameboard is drawn, how large it is, etc.),
      * in terms of a container's dimensions. Currently the board is always laid out vertically.

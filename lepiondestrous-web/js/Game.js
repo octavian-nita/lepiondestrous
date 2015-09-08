@@ -25,6 +25,9 @@ define(
 
       /** @protected */
       this._current = Game.PLAYER_LIGHT;
+
+      /** @protected */
+      this._started = false;
     }
 
     /**
@@ -50,6 +53,8 @@ define(
     Game.prototype.currentPlayer = function () { return this._players[this._current]; };
 
     Game.prototype.play = function (col, row) {
+      if (!this._started) { this._started = true; }
+
       var player = this._players[this._current];
       if (player.pieceCount() === 0) { throw new GameError('NO_MORE_PIECES'); }
 
@@ -58,6 +63,8 @@ define(
       this._board.place(col, row, player.play());
       this._current = this._current === Game.PLAYER_LIGHT ? Game.PLAYER_DARK : Game.PLAYER_LIGHT;
     };
+
+    Game.prototype.started = function () { return this._started; };
 
     return Game;
   });

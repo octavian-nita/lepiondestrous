@@ -1,9 +1,15 @@
 define(
-  ['Game', 'GameError', 'Gfx', 'BoardGeometry', 'gameConfig', 'require.i18n!nls/t'],
+  ['Game',
+   'GameError',
+   'BoardGeometry',
+   'Toast',
+   'Gfx',
+   'gameConfig',
+   'require.i18n!nls/t'],
 
-  function (Game, GameError, Gfx, BoardGeometry, cfg, t) {
+  function (Game, GameError, BoardGeometry, Toast, Gfx, cfg, t) {
     'use strict';
-    console.log('CFG:', cfg.id);
+
     var g = new Gfx(), theme = cfg.theme;
 
     function shadow(context) {
@@ -16,84 +22,50 @@ define(
       context.shadowBlur = sh.blur;
     }
 
-    function createToast(zIndex, className) {
-      var elem = document.createElement('div'), style = elem.style;
-
-      style.position = 'absolute';
-      style.zIndex = Number(zIndex) || 1000;
-
-      style.top = '65%';
-      style.left = '50%';
-      style.transform = 'translateX(-50%)';
-
-      style.borderRadius = '75px';
-      style.padding = '0 25px';
-
-      style.color = theme.foreground;
-      style.background = 'rgba(0, 0, 0, 0.7)';
-      style.textAlign = 'center';
-
-      style.display = 'none';
-      style.opacity = 0;
-      style.transition =
-      style['-o-transition'] =
-      style['-moz-transition'] =
-      style['-webkit-transition'] = 'opacity ' + (Number(cfg.toastEaseDuration) || 3000) + 'ms ease';
-      style['pointer-events'] = 'none';
-
-      if (className) { elem.className = className + ''; }
-      return elem;
-    }
-
     /** @constructor */
     function GameView(container) {
       if (!(this instanceof GameView)) { return new GameView(container); }
 
-      /**
-       * Game model.
-       *
-       * @protected
-       */
-      this._game = new Game();
+      this._game = new Game();                          // game model / logic
 
-      /**
-       * Gameboard geometry.
-       *
-       * @protected
-       */
-      this._board = new BoardGeometry(container);
+      this._container = container;
 
-      /**
-       * A map of layer elements; since these have the z-index set already we
-       * don't really care about the order in which they are stored in a map.
-       *
-       * @protected
-       */
+      this._board = new BoardGeometry(this._container); // gameboard geometry
+
+      this._toast = new Toast('toast');
+
+      // A map of layer elements; since these have the z-index set already we
+      // don't really care about the order in which they are stored in a map.
       this._layers = Object.create(null);
-      this._layers.board = Gfx.createCanvas(container, 100, 'board');
-      this._layers.pawns = Gfx.createCanvas(container, 101, 'pawns');
-      this._layers.glass = Gfx.createCanvas(container, 102, 'glass');
-      this._layers.toast = createToast(200, 'toast');
-      Object.freeze(this._layers);
-
-      var i, keys, l, holeListener = new BoardEventListener(this);
+      this._layers.board = Gfx.createCanvas('board', 10, container);
+      this._layers.pawns = Gfx.createCanvas('pawns', 20, container);
+      this._layers.glass = Gfx.createCanvas('glass', 30, container);
 
       // Render the game view off-screen:
       this.render();
 
       // Set up event listeners:
+      var holeListener = new BoardEventListener(this);
       this._layers.glass.addEventListener('mousedown', holeListener);
       this._layers.glass.addEventListener('mousemove', holeListener);
-
-      // Set up the parent container:
-      container.innerHTML = ''; // we might have initial parent content in order to help with / force font loading, etc.
-      for (i = 0, keys = Object.keys(this._layers), l = keys.length; i < l; i++) {
-        container.appendChild(this._layers[keys[i]]);
-      }
-      container.appendChild(this._layers.toast);
-
-      this.toast('Le ' + (this._game.currentPiece() === Game.PLAYER_LIGHT ? 'blanc' : 'noir') + ' commence!', 1000);
     }
+
+    GameView.prototype.show = function () {
+      var container = this._container, layers = this._layers, layer;
+
+      // Clear the parent container (we might have initial parent content in order to force font loading, etc.):
+      container.innerHTML = '';
+
+      // Add the various layers:
+      for (layer in layers) { container.appendChild(layers[layer]); }
+
+      // Add the toast notification area:
+      container.appendChild(this._toast.element);
+
+      if (!this._game.started()) {
+        this._toast.show('Le ' + (this._game.currentPiece() === Game.PLAYER_LIGHT ? 'blanc' : 'noir') + ' commence!');
+      }
+    };
 
     GameView.prototype.render = function () {
       var boardContext = this._layers.board.getContext('2d');
@@ -230,25 +202,6 @@ define(
       g.end();
     };
 
-    GameView.prototype.toast = function (message, delay) {
-      var elem = this._layers.toast, style = elem.style;
-
-      if (window.getComputedStyle(elem).display != 'none') {
-        elem.innerHTML += '<p>' + message + '</p>';
-      } else {
-        elem.innerHTML = '<p>' + message + '</p>';
-
-        style.display = 'block';
-        style.opacity = 1;
-        setTimeout(function () {
-          style.opacity = 0;
-          setTimeout(function () {
-            style.display = 'none';
-          }, Number(cfg.toastEaseDuration) || 3000);
-        }, Number(delay) || Number(cfg.toastTimeout) || 750);
-      }
-    };
-
     /**
      * @constructor
      * @implements {EventListener}
@@ -319,7 +272,7 @@ define(
         } catch (error) {
 
           if (error instanceof GameError) {
-            this._gameView.toast(t[error.message]);
+            this._gameView._toast.show(t[error.message]);
             return;
           }
 
@@ -351,9 +304,11 @@ define(
       if (!(canvas instanceof HTMLCanvasElement)) { return; }
 
       canvas.style.cursor = 'default';
-      if (this._prevCol !== -1 && this._prevRow !== -1 && this._gameView._game.emptyAt(this._prevCol, this._prevRow)) {
+      if (this._prevCol !== -1 && this._prevRow !== -1 &&
+          this._gameView._game.emptyAt(this._prevCol, this._prevRow)) {
         canvas.getContext('2d').clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
-                                          this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,
+                                          this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta -
+                                          1,
                                           board.holeDiameter + 2, board.holeDiameter + 2);
       }
     };

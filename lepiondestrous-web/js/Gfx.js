@@ -100,17 +100,19 @@ define(function () {
 
   /**
    * @static
-   * @param {HTMLElement} [container]
-   * @param {number|string} [zIndex=0]
    * @param {string} [className]
+   * @param {number|string} [zIndex=0]
+   * @param {HTMLElement} [container]
    * @return {HTMLCanvasElement} an eventually oversampled canvas element, sized to fill the provided
    *         <code>container</code> or to 300px × 150px if no container is provided and pre-styled to
    *         be used as a {@link http://goo.gl/LgEbvt layer}
    */
-  Gfx.createCanvas = function (container, zIndex, className) {
+  Gfx.createCanvas = function (className, zIndex, container) {
     var width = container && container.offsetWidth || 300,
         height = container && container.offsetHeight || 150,
         canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversampling || 1;
+
+    if (className) { canvas.className = className + ''; }
 
     style.position = 'absolute';
     style.zIndex = Number(zIndex) || 0;
@@ -121,7 +123,6 @@ define(function () {
     canvas.height = height * oversample;
     canvas.getContext('2d').scale(oversample, oversample);
 
-    if (className) { canvas.className = className + ''; }
     return canvas;
   };
 
