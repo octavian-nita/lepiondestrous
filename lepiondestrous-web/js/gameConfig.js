@@ -1,7 +1,6 @@
 'use strict';
 
 define({
-  id: new Date().getTime(),
          gameSize: 14,
 
          board: {
