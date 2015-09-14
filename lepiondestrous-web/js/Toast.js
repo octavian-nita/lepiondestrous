@@ -32,7 +32,7 @@ define(
       style.left = '50%';
 
       etc.pcss(style, 'transform', 'translateX(-50%)');
-      etc.pcss(style, 'transition', 'opacity ' + this._easeDuration + 'ms ease');
+      etc.pcss(style, 'transition', 'opacity ' + this._easeDuration + 'ms ' + this._easeDelay + 'ms ease');
 
       style.display = 'none';
       style.padding = '0 25px';
@@ -63,20 +63,14 @@ define(
 
       setTimeout(function () {
 
-        style.opacity = 0;
-
-        setTimeout(function () {
-          toast.cancel();
-        }, easeDuration);
-      }, easeDelay);
+        toast.cancel();
+      }, easeDuration);
     };
 
     Toast.prototype.cancel = function () {
       var e = this.element, s = e.style;
-
-      //s.opacity = 0;
+      s.opacity = 0;
       s.display = 'none';
-
       e.innerHTML = '';
     };
 

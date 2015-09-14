@@ -2,12 +2,12 @@ define(
   ['Game',
    'GameError',
    'BoardGeometry',
+   'Toast',
    'Gfx',
    'gameConfig',
-   'lib/humane.min',
    'lib/require.i18n!nls/t'],
 
-  function (Game, GameError, BoardGeometry, Gfx, cfg, h, t) {
+  function (Game, GameError, BoardGeometry, Toast, Gfx, cfg, t) {
     'use strict';
 
     var g = new Gfx(), theme = cfg.theme;
@@ -26,18 +26,18 @@ define(
     function GameView(container) {
       if (!(this instanceof GameView)) { return new GameView(container); }
 
-      this._game = new Game();                          // game model / logic
-
       this._container = container;
 
-      this._board = new BoardGeometry(this._container); // gameboard geometry
+      this._game = new Game();                     // game model / logic
 
-      // A map of layer elements; since these have the z-index set already we
-      // don't really care about the order in which they are stored in a map.
-      this._layers = Object.create(null);
+      this._board = new BoardGeometry(container);  // gameboard geometry
+
+      this._layers = Object.create(null);          // map of layer elements
       this._layers.board = Gfx.createCanvas('board', 10, container);
       this._layers.pawns = Gfx.createCanvas('pawns', 20, container);
       this._layers.glass = Gfx.createCanvas('glass', 30, container);
+
+      this._toast = new Toast('toast');            // toast notification
 
       // Render the game view off-screen:
       this.render();
@@ -56,11 +56,10 @@ define(
 
       // Add the various layers:
       for (layer in layers) { container.appendChild(layers[layer]); }
-
-      this._toast = h.create({container: this._container});
+      container.appendChild(this._toast.element);
 
       if (!this._game.started()) {
-        this._toast.log(t[this._game.currentPiece() === Game.PLAYER_LIGHT ? 'LIGHT_PLAYS' : 'DARK_PLAYS']);
+        this._toast.show(t[this._game.currentPiece() === Game.PLAYER_LIGHT ? 'LIGHT_PLAYS' : 'DARK_PLAYS']);
       }
     };
 
@@ -269,7 +268,7 @@ define(
         } catch (error) {
 
           if (error instanceof GameError) {
-            this._gameView._toast.log(t[error.message]);
+            this._gameView._toast.show(t[error.message]);
             return;
           }
 
