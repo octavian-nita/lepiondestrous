@@ -2,12 +2,12 @@ define(
   ['Game',
    'GameError',
    'BoardGeometry',
-   'Toast',
    'Gfx',
    'gameConfig',
-   'require.i18n!nls/t'],
+   'lib/humane.min',
+   'lib/require.i18n!nls/t'],
 
-  function (Game, GameError, BoardGeometry, Toast, Gfx, cfg, t) {
+  function (Game, GameError, BoardGeometry, Gfx, cfg, h, t) {
     'use strict';
 
     var g = new Gfx(), theme = cfg.theme;
@@ -31,8 +31,6 @@ define(
       this._container = container;
 
       this._board = new BoardGeometry(this._container); // gameboard geometry
-
-      this._toast = new Toast('toast');
 
       // A map of layer elements; since these have the z-index set already we
       // don't really care about the order in which they are stored in a map.
@@ -59,11 +57,10 @@ define(
       // Add the various layers:
       for (layer in layers) { container.appendChild(layers[layer]); }
 
-      // Add the toast notification area:
-      container.appendChild(this._toast.element);
+      this._toast = h.create({container: this._container});
 
       if (!this._game.started()) {
-        this._toast.show('Le ' + (this._game.currentPiece() === Game.PLAYER_LIGHT ? 'blanc' : 'noir') + ' commence!');
+        this._toast.log(t[this._game.currentPiece() === Game.PLAYER_LIGHT ? 'LIGHT_PLAYS' : 'DARK_PLAYS']);
       }
     };
 
@@ -183,7 +180,7 @@ define(
     GameView.prototype._renderPawns = function (cx) {
       if (!cx || !this._board || !this._game) { return; }
 
-      var game = this._game, size = game.size, r = this._board.holeRadius,
+      var game        = this._game, size = game.size, r = this._board.holeRadius,
           centerDelta = this._board.holeCenterDelta, row, col, piece;
       g.use(cx);
 
@@ -272,7 +269,7 @@ define(
         } catch (error) {
 
           if (error instanceof GameError) {
-            this._gameView._toast.show(t[error.message]);
+            this._gameView._toast.log(t[error.message]);
             return;
           }
 
@@ -285,7 +282,7 @@ define(
       } else {
 
         cx.fillStyle =
-        game.currentPiece() === Game.PLAYER_LIGHT ? theme.pawnLightTransparent : theme.pawnDarkTransparent;
+          game.currentPiece() === Game.PLAYER_LIGHT ? theme.pawnLightTransparent : theme.pawnDarkTransparent;
         if (this._prevCol !== -1 && this._prevRow !== -1 && game.emptyAt(this._prevCol, this._prevRow)) {
           cx.clearRect(this._prevCol * board.holeCenterDelta + board.x + board.holeDelta - 1,
                        this._prevRow * board.holeCenterDelta + board.playAreaY + board.holeDelta - 1,

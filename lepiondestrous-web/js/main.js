@@ -1,5 +1,5 @@
 require(
-  ['require.domReady!', 'GameView'],
+  ['lib/require.domReady!', 'GameView'],
 
   function (doc, GameView) {
     'use strict';

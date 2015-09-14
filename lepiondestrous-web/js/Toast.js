@@ -18,13 +18,11 @@ define(
     function Toast(className, zIndex) {
       if (!(this instanceof Toast)) { return new Toast(className, zIndex); }
 
-      this._timeout = Number(cfg.toastTimeout) || 750;
+      this._easeDelay = Number(cfg.toastEaseDelay) || 750;
 
       this._easeDuration = Number(cfg.toastEaseDuration) || 3000;
 
-      this._transition = 'opacity ' + this._easeDuration + 'ms ease';
-
-      Object.defineProperty(this, 'element', { enumerable: true, value: document.createElement('div') });
+      Object.defineProperty(this, 'element', {enumerable: true, value: document.createElement('div')});
       if (className) { this.element.className = className + ''; }
 
       var style = this.element.style;
@@ -32,7 +30,9 @@ define(
       style.position = 'absolute';
       style.top = '65%';
       style.left = '50%';
+
       etc.pcss(style, 'transform', 'translateX(-50%)');
+      etc.pcss(style, 'transition', 'opacity ' + this._easeDuration + 'ms ease');
 
       style.display = 'none';
       style.padding = '0 25px';
@@ -47,9 +47,9 @@ define(
       style.pointerEvents = 'none';
     }
 
-    Toast.prototype.show = function (message, timeout) {
-      var element = this.element, style = element.style,
-          transition = this._transition, timeout = Number(timeout) || this._timeout;
+    Toast.prototype.show = function (message, delay) {
+      var toast     = this, element = this.element, style = element.style,
+          easeDelay = Number(delay) || this._easeDelay, easeDuration = this._easeDuration;
 
       if (window.getComputedStyle(element).display != 'none') {
         element.innerHTML += '<p>' + message + '</p>';
@@ -64,25 +64,20 @@ define(
       setTimeout(function () {
 
         style.opacity = 0;
-        etc.pcss(style, 'transition', transition);
 
         setTimeout(function () {
-          style.display = 'none';
-          style.transition =
-          style['-o-transition'] =
-          style['-ms-transition'] =
-          style['-moz-transition'] =
-          style['-webkit-transition'] = 'none';
-        }, Number(cfg.toastEaseDuration) || 3000);
-      }, timeout);
+          toast.cancel();
+        }, easeDuration);
+      }, easeDelay);
     };
 
     Toast.prototype.cancel = function () {
-      var element = this.element, style = element.style;
+      var e = this.element, s = e.style;
 
-      element.innerHTML = '';
-      style.display = 'none';
-      etc.pcss(style, 'transition', 'none');
+      //s.opacity = 0;
+      s.display = 'none';
+
+      e.innerHTML = '';
     };
 
     return Toast;
