@@ -18,10 +18,6 @@ define(
     function Toast(className, zIndex) {
       if (!(this instanceof Toast)) { return new Toast(className, zIndex); }
 
-      this._easeDelay = Number(cfg.toastEaseDelay) || 750;
-
-      this._easeDuration = Number(cfg.toastEaseDuration) || 3000;
-
       Object.defineProperty(this, 'element', {enumerable: true, value: document.createElement('div')});
       if (className) { this.element.className = className + ''; }
 
@@ -32,9 +28,12 @@ define(
       style.left = '50%';
 
       etc.pcss(style, 'transform', 'translateX(-50%)');
-      etc.pcss(style, 'transition', 'opacity ' + this._easeDuration + 'ms ' + this._easeDelay + 'ms ease');
+      etc.pcss(style, 'transition', 'opacity ' +
+                                    (Number(cfg.toastEaseDuration) || 3000) + 'ms ease-in-out ' +
+                                    (Number(cfg.toastEaseDelay) || 750) + 'ms');
 
-      style.display = 'none';
+      style.opacity = 0;
+
       style.padding = '0 25px';
       style.overflow = 'hidden';
       style.maxHeight = '30%';
@@ -48,30 +47,24 @@ define(
     }
 
     Toast.prototype.show = function (message, delay) {
-      var toast     = this, element = this.element, style = element.style,
-          easeDelay = Number(delay) || this._easeDelay, easeDuration = this._easeDuration;
+      var e = this.element, s = e.style;
 
-      if (window.getComputedStyle(element).display != 'none') {
-        element.innerHTML += '<p>' + message + '</p>';
+      if (window.getComputedStyle(e).opacity > '0') {
+        e.innerHTML += '<p>' + message + '</p>';
         return;
       }
 
-      element.innerHTML = '<p>' + message + '</p>';
+      e.innerHTML = '<p>' + message + '</p>';
 
-      style.display = 'block';
-      style.opacity = 1;
-
-      setTimeout(function () {
-
-        toast.cancel();
-      }, easeDuration);
+      s.opacity = 1;
+      e.offsetHeight;
+      s.opacity = 0;
     };
 
     Toast.prototype.cancel = function () {
       var e = this.element, s = e.style;
-      s.opacity = 0;
-      s.display = 'none';
       e.innerHTML = '';
+      s.opacity = 0;
     };
 
     return Toast;
