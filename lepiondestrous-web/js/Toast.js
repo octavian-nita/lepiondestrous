@@ -19,19 +19,21 @@ define(
       if (!(this instanceof Toast)) { return new Toast(className, zIndex); }
 
       Object.defineProperty(this, 'element', {enumerable: true, value: document.createElement('div')});
-      if (className) { this.element.className = className + ''; }
+      if (className) { this.element.className = className; }
 
       var style = this.element.style;
+      style.pointerEvents = 'none';
+
       style.zIndex = Number(zIndex) || 9999;
       style.position = 'absolute';
       style.top = '65%';
       style.left = '50%';
-
       etc.pcss(style, 'transform', 'translateX(-50%)');
-      etc.pcss(style, 'transition', 'opacity ' +
-                                    (Number(cfg.toastEaseDuration) || 3000) + 'ms ease-in-out ' +
-                                    (Number(cfg.toastEaseDelay) || 750) + 'ms');
 
+      /*etc.pcss(style, 'transition', 'opacity ' +
+       (Number(cfg.toastEaseDuration) || 3000) + 'ms ease-in-out ' +
+       (Number(cfg.toastEaseDelay) || 750) + 'ms');
+       */
       style.opacity = 0;
 
       style.padding = '0 25px';
@@ -42,8 +44,6 @@ define(
       style.background = 'rgba(0, 0, 0, 0.7)';
       style.color = cfg.theme.foreground;
       style.textAlign = 'center';
-
-      style.pointerEvents = 'none';
     }
 
     Toast.prototype.show = function (message, delay) {
@@ -57,8 +57,12 @@ define(
       e.innerHTML = '<p>' + message + '</p>';
 
       s.opacity = 1;
-      e.offsetHeight;
+      etc.pcss(s, 'transition', 'opacity ' +
+                                (Number(cfg.toastEaseDuration) || 3000) + 'ms ease-in-out ' +
+                                (Number(cfg.toastEaseDelay) || 750) + 'ms');
+      console.log(e.offsetHeight); // jshint ignore:line
       s.opacity = 0;
+      etc.pcss(s, 'transition', '');
     };
 
     Toast.prototype.cancel = function () {

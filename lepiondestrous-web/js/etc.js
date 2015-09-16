@@ -10,12 +10,12 @@ define(function () {
   etc.pcss = function (elementOrStyle, propertyName, value) {
     if (!elementOrStyle) { return; }
 
-    var style = elementOrStyle.style? elementOrStyle.style : elementOrStyle;
+    var style = elementOrStyle.style ? elementOrStyle.style : elementOrStyle;
     style[propertyName] =
-    style['-o-' + propertyName] =
-    style['-ms-' + propertyName] =
-    style['-moz-' + propertyName] =
-    style['-webkit-' + propertyName] = value;
+      style['-o-' + propertyName] =
+        style['-ms-' + propertyName] =
+          style['-moz-' + propertyName] =
+            style['-webkit-' + propertyName] = value;
   };
 
   return Object.freeze(etc);
