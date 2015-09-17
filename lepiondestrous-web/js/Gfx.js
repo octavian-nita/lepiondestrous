@@ -108,14 +108,14 @@ define(function () {
    *         be used as a {@link http://goo.gl/LgEbvt layer}
    */
   Gfx.createCanvas = function (className, zIndex, container) {
-    var width = container && container.offsetWidth || 300,
+    var width  = container && container.offsetWidth || 300,
         height = container && container.offsetHeight || 150,
         canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversampling || 1;
 
     if (className) { canvas.className = className + ''; }
 
     style.position = 'absolute';
-    style.zIndex = Number(zIndex) || 0;
+    style.zIndex = zIndex || 0;
     style.width = width + 'px';
     style.height = height + 'px';
 

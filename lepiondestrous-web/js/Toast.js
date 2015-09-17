@@ -1,7 +1,7 @@
 define(
-  ['gameConfig', 'etc'],
+  ['gameConfig', 'util'],
 
-  function (cfg, etc) {
+  function (cfg, util) {
     'use strict';
 
     /**
@@ -24,45 +24,39 @@ define(
       var style = this.element.style;
       style.pointerEvents = 'none';
 
-      style.zIndex = Number(zIndex) || 9999;
+      style.zIndex = zIndex || 9999;
       style.position = 'absolute';
       style.top = '65%';
       style.left = '50%';
-      etc.pcss(style, 'transform', 'translateX(-50%)');
+      util.pcss(style, 'transform', 'translateX(-50%)');
 
-      /*etc.pcss(style, 'transition', 'opacity ' +
-       (Number(cfg.toastEaseDuration) || 3000) + 'ms ease-in-out ' +
-       (Number(cfg.toastEaseDelay) || 750) + 'ms');
-       */
-      style.opacity = 0;
-
+      style.maxHeight = '30%';
       style.padding = '0 25px';
       style.overflow = 'hidden';
-      style.maxHeight = '30%';
       style.borderRadius = '75px';
 
       style.background = 'rgba(0, 0, 0, 0.7)';
       style.color = cfg.theme.foreground;
       style.textAlign = 'center';
+
+      style.opacity = 0;
     }
 
     Toast.prototype.show = function (message, delay) {
+      if (!message) { return; }
+
       var e = this.element, s = e.style;
 
       if (window.getComputedStyle(e).opacity > '0') {
         e.innerHTML += '<p>' + message + '</p>';
         return;
       }
-
       e.innerHTML = '<p>' + message + '</p>';
 
+      util.pcss(s, 'transition', 'opacity ' +
+                                 ((Number(cfg.toastEaseDuration) || 3000) / 2) + 'ms ease-in-out ' /*+
+                                 (Number(cfg.toastEaseDelay) || 750) + 'ms'*/);
       s.opacity = 1;
-      etc.pcss(s, 'transition', 'opacity ' +
-                                (Number(cfg.toastEaseDuration) || 3000) + 'ms ease-in-out ' +
-                                (Number(cfg.toastEaseDelay) || 750) + 'ms');
-      console.log(e.offsetHeight); // jshint ignore:line
-      s.opacity = 0;
-      etc.pcss(s, 'transition', '');
     };
 
     Toast.prototype.cancel = function () {

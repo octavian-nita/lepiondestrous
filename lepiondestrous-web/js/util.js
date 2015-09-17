@@ -5,9 +5,9 @@ define(function () {
    * @author Octavian Theodor NITA (http://github.com/octavian-nita)
    * @version 1.0, September 10, 2015
    */
-  var etc = {};
+  var util = {};
 
-  etc.pcss = function (elementOrStyle, propertyName, value) {
+  util.pcss = function (elementOrStyle, propertyName, value) {
     if (!elementOrStyle) { return; }
 
     var style = elementOrStyle.style ? elementOrStyle.style : elementOrStyle;
@@ -18,5 +18,5 @@ define(function () {
             style['-webkit-' + propertyName] = value;
   };
 
-  return Object.freeze(etc);
+  return Object.freeze(util);
 });
