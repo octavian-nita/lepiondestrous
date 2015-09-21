@@ -76,7 +76,7 @@ define(
        *
        * @type {number}
        */
-      this.holeDiameter = this.unit * 1.5 / 3;
+      this.holeDiameter = this.unit * 1.5 / 2.5;
 
       /**
        * A hole's radius, stored for convenience.
