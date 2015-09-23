@@ -21,11 +21,9 @@ define(function () {
     if (isNaN(rows = rows === undefined ? cols : Number(rows)) ||
         rows <= 0) { throw new Error('the number of rows on a m×n board should be a strictly positive number'); }
 
-    /** @readonly */
-    Object.defineProperty(this, 'cols', { enumerable: true, value: cols });
+    this.cols = cols;
 
-    /** @readonly */
-    Object.defineProperty(this, 'rows', { enumerable: true, value: rows });
+    this.rows = rows;
 
     /** @protected */
     this._grid = new Array(this.rows * this.cols);

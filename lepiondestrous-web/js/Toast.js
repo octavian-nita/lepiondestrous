@@ -5,18 +5,6 @@ define(
     'use strict';
 
     /**
-     * @constructor
-     * @implements {EventListener}
-     */
-    function ToastListener() {
-      if (!(this instanceof ToastListener)) { return new ToastListener(); }
-    }
-
-    ToastListener.prototype.handleEvent = function (event) {
-
-    };
-
-    /**
      * @author Octavian Theodor NITA (http://github.com/octavian-nita)
      * @version 1.0, August 24, 2015
      *
@@ -30,19 +18,47 @@ define(
     function Toast(className, zIndex) {
       if (!(this instanceof Toast)) { return new Toast(className, zIndex); }
 
-      this._easeInTransition = 'opacity ' +
-                               ((Number(cfg.toastEaseDuration) || 3000) / 3) + 'ms ease-in-out';
+      /** @protected */
+      this._easeDelay = (Number(cfg.toastEaseDelay) || 750) + 'ms';
 
-      this._easeOutTransition = 'opacity ' +
-                                (Number(cfg.toastEaseDuration) || 3000) + 'ms ease-in-out ' +
-                                (Number(cfg.toastEaseDelay) || 750) + 'ms';
+      /** @protected */
+      this._easeInTransition = 'opacity ' + ((Number(cfg.toastEaseDuration) || 3000) / 3) + 'ms ease-in-out';
 
-      Object.defineProperty(this, 'element', {enumerable: true, value: document.createElement('div')});
+      /** @protected */
+      this._easeOutTransition = 'opacity ' + (Number(cfg.toastEaseDuration) || 3000) + 'ms ease-in-out';
+
+      this.element = document.createElement('div');
+
+      var style = this.element.style, shadow = cfg.theme.shadow, toast = this;
+
       if (className) { this.element.className = className; }
 
-      this.element.addEventListener("transitionend", new ToastListener(), false);
+      this.element.addEventListener("transitionend", function (event) {
+        var element = event && event.target, style, opacity;
+        if (!element) { return; }
 
-      var style = this.element.style, shadow = cfg.theme.shadow;
+        style = element.style;
+        opacity = window.getComputedStyle(element);
+
+        console.trace('event:');
+
+        if (opacity > 0.9) {
+          console.trace(' >>> toast visible!');
+
+          util.pcss(style, 'transition', toast._easeOutTransition + ' ' + toast._easeDelay);
+          style.opacity = 0;
+
+          return;
+        }
+
+        if (opacity < 0.1) {
+          console.trace(' >>> toast invisible!');
+
+          util.pcss(style, 'transition', '');
+          element.innerHTML = '';
+
+        }
+      }, false);
 
       // Positioning (see http://codeguide.co/#css-declaration-order)
       style.position = 'absolute';
@@ -67,7 +83,7 @@ define(
 
       // Other
       style.pointerEvents = 'none'; // IE 11+
-      style.opacity = 1;
+      style.opacity = 0;
     }
 
     Toast.prototype.show = function (message, delay) {
@@ -75,23 +91,9 @@ define(
 
       var e = this.element, s = e.style;
 
-      if (window.getComputedStyle(e).opacity > '0') {
-        e.innerHTML += '<p>' + message + '</p>';
-        return;
-      }
+      util.pcss(s, 'transition', this._easeInTransition);
       e.innerHTML = '<p>' + message + '</p>';
       s.opacity = 1;
-      //e.offsetHeight; // jshint ignore:line
-    };
-
-    Toast.prototype.hide = function () {
-      var e = this.element, s = e.style;
-
-      if (window.getComputedStyle(e).opacity === '0') {
-        return;
-      }
-      e.innerHTML = '';
-      s.opacity = 0;
     };
 
     return Toast;

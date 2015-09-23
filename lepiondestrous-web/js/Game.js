@@ -1,18 +1,16 @@
 define(
   ['Board', 'Player', 'GameError'],
 
-  function (Board, Player, GameStateError) {
+  function (Board, Player, GameError) {
     'use strict';
 
     /** @constructor */
     function Game() {
       if (!(this instanceof Game)) { return new Game(); }
 
-      /** @readonly */
-      Object.defineProperty(this, 'name', { enumerable: true, value: 'Le pion des trous' });
+      this.name = 'Le pion des trous';
 
-      /** @readonly */
-      Object.defineProperty(this, 'size', { enumerable: true, value: 14 });
+      this.size = 14;
 
       /** @protected */
       this._board = new Board(this.size);
@@ -32,17 +30,15 @@ define(
 
     /**
      * @const {1}
-     * @readonly
      * @static
      */
-    Object.defineProperty(Game, 'PLAYER_LIGHT', { enumerable: true, value: 1 });
+    Game.PLAYER_LIGHT = 1;
 
     /**
      * @const {2}
-     * @readonly
      * @static
      */
-    Object.defineProperty(Game, 'PLAYER_DARK', { enumerable: true, value: 2 });
+    Game.PLAYER_DARK = 2;
 
     Game.prototype.emptyAt = function (col, row) { return this._board.empty(col, row); };
 

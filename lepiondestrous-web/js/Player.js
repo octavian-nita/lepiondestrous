@@ -21,8 +21,7 @@ define(
       if (isNaN(pieceCount = pieceCount === undefined ? 2 : Number(pieceCount)) ||
           pieceCount <= 0) { throw new Error('the number of pieces left should be a strictly positive number'); }
 
-      /** @readonly */
-      Object.defineProperty(this, 'piece', { enumerable: true, value: piece });
+      this.piece = piece;
 
       /** @protected */
       this._pieceCount = pieceCount;
