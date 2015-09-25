@@ -19,46 +19,46 @@ define(
       if (!(this instanceof Toast)) { return new Toast(className, zIndex); }
 
       /** @protected */
-      this._easeDelay = (Number(cfg.toastEaseDelay) || 750) + 'ms';
+      this._easeDelay = (Number(cfg.toastEaseDelay) || 250) + 'ms';
 
       /** @protected */
-      this._easeInTransition = 'opacity ' + ((Number(cfg.toastEaseDuration) || 3000) / 3) + 'ms ease-in-out';
+      this._easeInTransition = 'opacity ' + ((Number(cfg.toastEaseDuration) || 2500) / 3) + 'ms ease-in-out';
 
       /** @protected */
-      this._easeOutTransition = 'opacity ' + (Number(cfg.toastEaseDuration) || 3000) + 'ms ease-in-out';
+      this._easeOutTransition = 'opacity ' + (Number(cfg.toastEaseDuration) || 2500) + 'ms ease-in-out';
 
       this.element = document.createElement('div');
+      if (className) { this.element.className = className; }
 
       var style = this.element.style, shadow = cfg.theme.shadow, toast = this;
 
-      if (className) { this.element.className = className; }
-
       this.element.addEventListener("transitionend", function (event) {
-        var element = event && event.target, style, opacity;
-        if (!element) { return; }
+        var e = event && event.target, s, delay, opacity;
+        if (!e) { return; }
 
-        style = element.style;
-        opacity = window.getComputedStyle(element);
+        console.trace('transitionend triggered');
 
-        console.trace('event:');
+        s = e.style;
+        delay = e.getAttribute('data-delay');
+        opacity = window.getComputedStyle(e).opacity;
 
-        if (opacity > 0.9) {
-          console.trace(' >>> toast visible!');
+        if (opacity > 0.99) {
 
-          util.pcss(style, 'transition', toast._easeOutTransition + ' ' + toast._easeDelay);
-          style.opacity = 0;
+          util.pcss(s, 'transition', toast._easeOutTransition + ' ' + (delay || toast._easeDelay));
+          s.opacity = 0;
 
-          return;
-        }
+        } else if (opacity < 0.01) {
 
-        if (opacity < 0.1) {
-          console.trace(' >>> toast invisible!');
+          e.innerHTML = '';
+          e.setAttribute('data-delay', '');
 
-          util.pcss(style, 'transition', '');
-          element.innerHTML = '';
+          util.pcss(s, 'transition', '');
 
         }
       }, false);
+
+      // http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
+      util.pcss(style, 'transform', 'translateZ(0)');
 
       // Positioning (see http://codeguide.co/#css-declaration-order)
       style.position = 'absolute';
@@ -91,9 +91,24 @@ define(
 
       var e = this.element, s = e.style;
 
-      util.pcss(s, 'transition', this._easeInTransition);
+      // Hack to get animations started
+      e.offsetHeight; // jshint ignore:line
+
       e.innerHTML = '<p>' + message + '</p>';
+      if (delay) { e.setAttribute('data-delay', delay); }
+
+      util.pcss(s, 'transition', this._easeInTransition);
       s.opacity = 1;
+    };
+
+    Toast.prototype.hide = function () {
+      var e = this.element, s = e.style;
+
+      // Hack to get animations started
+      e.offsetHeight; // jshint ignore:line
+
+      util.pcss(s, 'transition', ''); // the faster one...
+      s.opacity = 0;
     };
 
     return Toast;
