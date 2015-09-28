@@ -58,11 +58,13 @@ define(
       for (layer in layers) { container.appendChild(layers[layer]); }
       container.appendChild(this._toast.element);
 
+      var toast = this._toast;
       if (!this._game.started()) {
         this._toast.show(t[this._game.currentPiece() === Game.PLAYER_LIGHT ? 'LIGHT_PLAYS' : 'DARK_PLAYS']);
-        /*setTimeout(function () {
-          this._toast.hide();
-        }, 500);*/
+        setTimeout(function () {
+          toast.hide();
+          toast.show('TEST!', 50000);
+        }, 500);
       }
     };
 

@@ -36,23 +36,22 @@ define(
         var e = event && event.target, s, delay, opacity;
         if (!e) { return; }
 
-        console.trace('transitionend triggered');
-
         s = e.style;
         delay = e.getAttribute('data-delay');
         opacity = window.getComputedStyle(e).opacity;
 
         if (opacity > 0.99) {
 
+          console.trace('DELAY:', delay);
           util.pcss(s, 'transition', toast._easeOutTransition + ' ' + (delay || toast._easeDelay));
           s.opacity = 0;
 
         } else if (opacity < 0.01) {
 
           e.innerHTML = '';
-          e.setAttribute('data-delay', '');
+          //e.setAttribute('data-delay', '');
 
-          util.pcss(s, 'transition', '');
+          //util.pcss(s, 'transition', '');
 
         }
       }, false);
@@ -107,7 +106,7 @@ define(
       // Hack to get animations started
       e.offsetHeight; // jshint ignore:line
 
-      util.pcss(s, 'transition', ''); // the faster one...
+      util.pcss(s, 'transition', this._easeInTransition); // the faster one...
       s.opacity = 0;
     };
 
