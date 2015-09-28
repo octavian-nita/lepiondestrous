@@ -19,39 +19,37 @@ define(
       if (!(this instanceof Toast)) { return new Toast(className, zIndex); }
 
       /** @protected */
-      this._easeDelay = (Number(cfg.toastEaseDelay) || 250) + 'ms';
+      this._delay = (Number(cfg.toastDelay) || 250) + 'ms';
 
       /** @protected */
-      this._easeInTransition = 'opacity ' + ((Number(cfg.toastEaseDuration) || 2500) / 3) + 'ms ease-in-out';
+      this._inTransition = 'opacity ' + ((Number(cfg.toastDuration) || 2500) / 3) + 'ms ease-in-out';
 
       /** @protected */
-      this._easeOutTransition = 'opacity ' + (Number(cfg.toastEaseDuration) || 2500) + 'ms ease-in-out';
+      this._outTransition = 'opacity ' + (Number(cfg.toastDuration) || 2500) + 'ms ease-in-out';
 
       this.element = document.createElement('div');
       if (className) { this.element.className = className; }
 
-      var style = this.element.style, shadow = cfg.theme.shadow, toast = this;
+      var toast = this, style = this.element.style, shadow = cfg.theme.shadow;
 
-      this.element.addEventListener("transitionend", function (event) {
-        var e = event && event.target, s, delay, opacity;
-        if (!e) { return; }
+      this.element.addEventListener('transitionend', function (event) {
+        var element = event && event.target, style, delay, opacity;
+        if (!element) { return; }
 
-        s = e.style;
-        delay = e.getAttribute('data-delay');
-        opacity = window.getComputedStyle(e).opacity;
+        style = element.style;
+        delay = element.getAttribute('data-delay');
+        opacity = window.getComputedStyle(element).opacity;
 
         if (opacity > 0.99) {
 
-          console.trace('DELAY:', delay);
-          util.pcss(s, 'transition', toast._easeOutTransition + ' ' + (delay || toast._easeDelay));
-          s.opacity = 0;
+          util.pcss(style, 'transition', toast._outTransition + ' ' + (delay || toast._delay));
+          style.opacity = 0;
 
         } else if (opacity < 0.01) {
 
-          e.innerHTML = '';
-          //e.setAttribute('data-delay', '');
-
-          //util.pcss(s, 'transition', '');
+          util.pcss(style, 'transition', '');
+          element.setAttribute('data-delay', '');
+          element.innerHTML = '';
 
         }
       }, false);
@@ -85,29 +83,24 @@ define(
       style.opacity = 0;
     }
 
-    Toast.prototype.show = function (message, delay) {
-      if (!message) { return; }
+    /** @return {Toast} <code>this</code> */
+    Toast.prototype.show = function (messageOrFalsy, delay) {
+      var element = this.element, style = element.style;
 
-      var e = this.element, s = e.style;
+      // Hack to get the animation started:
+      element.offsetHeight; // jshint ignore:line
+      util.pcss(style, 'transition', this._inTransition);
 
-      // Hack to get animations started
-      e.offsetHeight; // jshint ignore:line
+      if (messageOrFalsy) {
+        element.innerHTML = '<p>' + messageOrFalsy + '</p>';
+        if (delay) { element.setAttribute('data-delay', delay + 'ms'); }
 
-      e.innerHTML = '<p>' + message + '</p>';
-      if (delay) { e.setAttribute('data-delay', delay); }
+        style.opacity = 1;
+      } else {
+        style.opacity = 0;
+      }
 
-      util.pcss(s, 'transition', this._easeInTransition);
-      s.opacity = 1;
-    };
-
-    Toast.prototype.hide = function () {
-      var e = this.element, s = e.style;
-
-      // Hack to get animations started
-      e.offsetHeight; // jshint ignore:line
-
-      util.pcss(s, 'transition', this._easeInTransition); // the faster one...
-      s.opacity = 0;
+      return this;
     };
 
     return Toast;

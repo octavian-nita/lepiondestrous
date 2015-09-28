@@ -61,9 +61,9 @@ define(
       var toast = this._toast;
       if (!this._game.started()) {
         this._toast.show(t[this._game.currentPiece() === Game.PLAYER_LIGHT ? 'LIGHT_PLAYS' : 'DARK_PLAYS']);
+
         setTimeout(function () {
-          toast.hide();
-          toast.show('TEST!', 50000);
+          toast.show(false).show('Test!', 100);
         }, 500);
       }
     };

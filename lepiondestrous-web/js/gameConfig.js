@@ -4,12 +4,12 @@ define({
   gameSize: 14,
 
   board: {
-    maxHeight: 695,        // CSS px
-    maxWidth: 504          // CSS px
+    maxHeight: 695,    // CSS px
+    maxWidth: 504      // CSS px
   },
 
-  toastEaseDelay: 250,     // millis
-  toastEaseDuration: 2500, // millis
+  toastDelay: 250,     // millis
+  toastDuration: 2500, // millis
 
   theme: {
     boardDark: '#795548',
