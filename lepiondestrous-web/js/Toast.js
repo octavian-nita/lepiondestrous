@@ -27,6 +27,7 @@ define(
       /** @protected */
       this._outTransition = 'opacity ' + (Number(cfg.toastDuration) || 2500) + 'ms ease-in-out';
 
+      /** @public */
       this.element = document.createElement('div');
       if (className) { this.element.className = className; }
 
