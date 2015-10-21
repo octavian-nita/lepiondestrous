@@ -1,13 +1,12 @@
-define(function () {
-  'use strict';
+'use strict';
 
-  /**
-   * @author Octavian Theodor NITA (http://github.com/octavian-nita)
-   * @version 1.0, September 10, 2015
-   */
-  var util = {};
-
-  util.pcss = function (elementOrStyle, propertyName, value) {
+/**
+ * @module util
+ * @author Octavian Theodor NITA (http://github.com/octavian-nita)
+ * @version 1.0, Sep 10, 2015
+ */
+define({
+  pcss: function (elementOrStyle, propertyName, value) {
     if (!elementOrStyle) { return; }
 
     var style = elementOrStyle.style ? elementOrStyle.style : elementOrStyle;
@@ -16,7 +15,5 @@ define(function () {
         style['-ms-' + propertyName] =
           style['-moz-' + propertyName] =
             style['-webkit-' + propertyName] = value;
-  };
-
-  return Object.freeze(util);
+  }
 });
