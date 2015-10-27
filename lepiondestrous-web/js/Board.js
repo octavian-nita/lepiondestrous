@@ -7,7 +7,7 @@ define(function () {
    * <p>An empty location on the board is represented by <code>undefined</code>.</p>
    *
    * @author Octavian Theodor NITA (http://github.com/octavian-nita)
-   * @version 1.0, June 26, 2015
+   * @version 1.0, Jun 26, 2015
    *
    * @constructor
    * @param {number} [cols=14] the number of columns on the board

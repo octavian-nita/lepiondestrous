@@ -6,7 +6,7 @@ define(
 
     /**
      * @author Octavian Theodor NITA (http://github.com/octavian-nita)
-     * @version 1.0, August 24, 2015
+     * @version 1.0, Aug 24, 2015
      *
      * @constructor
      * @param {string} [className]
@@ -41,19 +41,15 @@ define(
         delay = element.getAttribute('data-delay');
         opacity = window.getComputedStyle(element).opacity;
 
-        if (opacity > 0.99) {
-
+        if (opacity > 0.99) { // toast just shown
           util.pcss(style, 'transition', toast._outTransition + ' ' + (delay || toast._delay));
           style.opacity = 0;
-
-        } else if (opacity < 0.01) {
-
+        } else if (opacity < 0.01) { // toast just hidden
           util.pcss(style, 'transition', '');
           element.setAttribute('data-delay', '');
           element.innerHTML = '';
-
         }
-      }, false);
+      });
 
       // http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
       util.pcss(style, 'transform', 'translateZ(0)');

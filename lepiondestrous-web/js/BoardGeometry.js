@@ -9,7 +9,7 @@ define(
      * in terms of a container's dimensions. Currently the board is always laid out vertically.
      *
      * @author Octavian Theodor NITA (http://github.com/octavian-nita)
-     * @version 1.0, September 7, 2015
+     * @version 1.0, Sep 7, 2015
      *
      * @constructor
      * @param {HTMLElement} container

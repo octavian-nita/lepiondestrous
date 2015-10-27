@@ -3,7 +3,7 @@ define(function () {
 
   /**
    * @author Octavian Theodor NITA (http://github.com/octavian-nita)
-   * @version 1.0, August 24, 2015
+   * @version 1.0, Aug 24, 2015
    *
    * @constructor
    * @augments Error

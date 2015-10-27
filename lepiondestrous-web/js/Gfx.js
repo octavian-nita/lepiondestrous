@@ -5,7 +5,7 @@ define(function () {
    * Fluent (more or less) API for commonly used 2D rendering context drawing operations.
    *
    * @author Octavian Theodor NITA (http://github.com/octavian-nita)
-   * @version 1.0, August 12, 2015
+   * @version 1.0, Aug 12, 2015
    *
    * @constructor
    */

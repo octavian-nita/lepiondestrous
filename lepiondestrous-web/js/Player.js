@@ -8,7 +8,7 @@ define(
      * Initializes a player with <code>pieceCount</code> pieces of the same <code>piece</code> type.
      *
      * @author Octavian Theodor NITA (http://github.com/octavian-nita)
-     * @version 1.0, June 26, 2015
+     * @version 1.0, Jun 26, 2015
      *
      * @constructor
      * @param {*} piece the type of piece <code>this</code> player uses
