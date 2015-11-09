@@ -19,40 +19,23 @@ define(
       if (!(this instanceof Toast)) { return new Toast(className, zIndex); }
 
       /** @protected */
-      this._delay = (Number(cfg.toastDelay) || 250) + 'ms';
+      this._delay = (Number(cfg.toast.delay) || 250) + 'ms';
 
       /** @protected */
-      this._inTransition = 'opacity ' + ((Number(cfg.toastDuration) || 2500) / 3) + 'ms ease-in-out';
+      this._inTransition = 'opacity ' + ((Number(cfg.toast.duration) || 2500) / 3) + 'ms ease-in-out';
 
       /** @protected */
-      this._outTransition = 'opacity ' + (Number(cfg.toastDuration) || 2500) + 'ms ease-in-out';
+      this._outTransition = 'opacity ' + (Number(cfg.toast.duration) || 2500) + 'ms ease-in-out';
 
       /** @public */
       this.element = document.createElement('div');
       if (className) { this.element.className = className; }
 
-      var toast = this, style = this.element.style, shadow = cfg.theme.shadow;
-
-      this.element.addEventListener('transitionend', function (event) {
-        var element = event && event.target, style, delay, opacity;
-        if (!element) { return; }
-
-        style = element.style;
-        delay = element.getAttribute('data-delay');
-        opacity = window.getComputedStyle(element).opacity;
-
-        if (opacity > 0.99) { // toast just shown
-          util.pcss(style, 'transition', toast._outTransition + ' ' + (delay || toast._delay));
-          style.opacity = 0;
-        } else if (opacity < 0.01) { // toast just hidden
-          util.pcss(style, 'transition', '');
-          element.setAttribute('data-delay', '');
-          element.innerHTML = '';
-        }
-      });
+      var style = this.element.style, shadow = cfg.theme.shadow;
 
       // http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
       util.pcss(style, 'transform', 'translateZ(0)');
+      util.pcss(style, 'user-select', 'none');
 
       // Positioning (see http://codeguide.co/#css-declaration-order)
       style.position = 'absolute';
@@ -78,6 +61,24 @@ define(
       // Other
       style.pointerEvents = 'none'; // IE 11+
       style.opacity = 0;
+
+      this.element.addEventListener('transitionend', function (event) {
+        var element = event && event.target, style, delay, opacity;
+        if (!element) { return; }
+
+        style = element.style;
+        delay = element.getAttribute('data-delay');
+        opacity = window.getComputedStyle(element).opacity;
+
+        if (opacity > 0.99) { // toast just shown
+          util.pcss(style, 'transition', this._outTransition + ' ' + (delay || this._delay));
+          style.opacity = 0;
+        } else if (opacity < 0.01) { // toast just hidden
+          util.pcss(style, 'transition', '');
+          element.setAttribute('data-delay', '');
+          element.innerHTML = '';
+        }
+      }.bind(this));
     }
 
     /** @return {Toast} <code>this</code> */

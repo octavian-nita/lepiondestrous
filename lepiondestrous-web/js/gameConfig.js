@@ -8,8 +8,10 @@ define({
     maxWidth: 504      // CSS px
   },
 
-  toastDelay: 250,     // millis
-  toastDuration: 2500, // millis
+  toast: {
+    delay: 250,    // millis
+    duration: 2500 // millis
+  },
 
   theme: {
     boardDark: '#795548',
