@@ -18,24 +18,27 @@ define(
     function Toast(className, zIndex) {
       if (!(this instanceof Toast)) { return new Toast(className, zIndex); }
 
-      /** @protected */
-      this._delay = (Number(cfg.toast.delay) || 250) + 'ms';
+      var duration = Number(cfg.toast.duration) || Toast.DEFAULT_DURATION, shadow = cfg.theme.shadow, style;
 
-      /** @protected */
-      this._inTransition = 'opacity ' + ((Number(cfg.toast.duration) || 2500) / 3) + 'ms ease-in-out';
+      /** @protected */ this._animating = false;
 
-      /** @protected */
-      this._outTransition = 'opacity ' + (Number(cfg.toast.duration) || 2500) + 'ms ease-in-out';
+      /** @protected */ this._messageQueue = [];
 
-      /** @public */
-      this.element = document.createElement('div');
-      if (className) { this.element.className = className; }
+      /** @protected */ this._delay = (Number(cfg.toast.delay) || Toast.DEFAULT_DELAY) + 'ms';
 
-      var style = this.element.style, shadow = cfg.theme.shadow;
+      /** @protected */ this._fastTransition = 'opacity ' + (duration / 4) + 'ms ease-in-out';
+
+      /** @protected */ this._slowTransition = 'opacity ' + duration + 'ms ease-in-out';
+
+      /** @public */ this.element = document.createElement('div');
+
+      this.element.className = className || Toast.DEFAULT_CLASS;
+
+      // Style the backing HTML element:
+      style = this.element.style;
 
       // http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
       util.pcss(style, 'transform', 'translateZ(0)');
-      util.pcss(style, 'user-select', 'none');
 
       // Positioning (see http://codeguide.co/#css-declaration-order)
       style.position = 'absolute';
@@ -59,7 +62,8 @@ define(
       style.boxShadow = shadow.offsetX + 'px ' + shadow.offsetY + 'px ' + shadow.blur + 'px ' + shadow.color;
 
       // Other
-      style.pointerEvents = 'none'; // IE 11+
+      util.pcss(style, 'user-select', 'none');
+      style.pointerEvents = 'none'; // IE 11+!
       style.opacity = 0;
 
       this.element.addEventListener('transitionend', function (event) {
@@ -71,7 +75,7 @@ define(
         opacity = window.getComputedStyle(element).opacity;
 
         if (opacity > 0.99) { // toast just shown
-          util.pcss(style, 'transition', this._outTransition + ' ' + (delay || this._delay));
+          util.pcss(style, 'transition', this._slowTransition + ' ' + (delay || this._delay));
           style.opacity = 0;
         } else if (opacity < 0.01) { // toast just hidden
           util.pcss(style, 'transition', '');
@@ -87,7 +91,7 @@ define(
 
       // Hack to get the animation started:
       element.offsetHeight; // jshint ignore:line
-      util.pcss(style, 'transition', this._inTransition);
+      util.pcss(style, 'transition', this._fastTransition);
 
       if (messageOrFalsy) {
         element.innerHTML = '<p>' + messageOrFalsy + '</p>';
@@ -100,6 +104,16 @@ define(
 
       return this;
     };
+
+    Toast.prototype._run = function () {
+      if (this._animating || !this._messageQueue.length || !this.element) { return; }
+      this._animating = true;
+
+    };
+
+    Toast.DEFAULT_CLASS = 'toast';
+    Toast.DEFAULT_DELAY = 250;
+    Toast.DEFAULT_DURATION = 2500;
 
     return Toast;
   });

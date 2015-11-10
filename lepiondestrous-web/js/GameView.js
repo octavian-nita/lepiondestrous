@@ -37,7 +37,7 @@ define(
       this._layers.pawns = Gfx.createCanvas('pawns', 20, container);
       this._layers.glass = Gfx.createCanvas('glass', 30, container);
 
-      this._toast = new Toast('toast');            // toast notification
+      this._toast = new Toast();                   // toast notification
 
       // Render the game view off-screen:
       this.render();
