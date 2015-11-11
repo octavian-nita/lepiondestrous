@@ -20,9 +20,9 @@ define(
 
       var duration = Number(cfg.toast.duration) || Toast.DEFAULT_DURATION, shadow = cfg.theme.shadow, style;
 
-      /** @protected */ this._animating = false;
+      /** @protected */ this._animated = false;
 
-      /** @protected */ this._messageQueue = [];
+      /** @protected */ this._messages = new util.Queue();
 
       /** @protected */ this._delay = (Number(cfg.toast.delay) || Toast.DEFAULT_DELAY) + 'ms';
 
@@ -106,9 +106,8 @@ define(
     };
 
     Toast.prototype._run = function () {
-      if (this._animating || !this._messageQueue.length || !this.element) { return; }
-      this._animating = true;
-
+      if (this._animated || this._messages.isEmpty() || !this.element) { return; }
+      this._animated = true;
     };
 
     Toast.DEFAULT_CLASS = 'toast';
