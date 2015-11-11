@@ -24,31 +24,25 @@ define(function () {
     this._offset = 0;
   }
 
-  Queue.prototype.isEmpty = function () { return this.size() === 0; };
+  Queue.prototype.isEmpty = function () { return this._queue.length === 0; };
 
   Queue.prototype.size = function () { return this._queue.length - this._offset; };
 
-  Queue.prototype.peek = function () { return this.size() === 0 ? undefined : this._queue[this._offset]; };
-
   Queue.prototype.push = function (item) { this._queue.push(item); };
 
+  Queue.prototype.peek = function () {
+    if (this._queue.length === 0) { throw new Error('cannot peek at an empty queue'); }
+    return this._queue[this._offset];
+  };
+
   Queue.prototype.pop = function () {
-    if(this.size() === 0) {
-      throw new Error("");
+    if (this._queue.length === 0) { throw new Error('cannot pop from an empty queue'); }
+
+    var item = this._queue[this._offset];
+    if (++this._offset * 2 >= this._queue.length) { // increment the offset and remove the free space if necessary
+      this._queue = this._queue.slice(this._offset);
+      this._offset = 0;
     }
-    // if the queue is empty, return immediately
-    if (queue.length == 0) return undefined;
-
-    // store the item at the front of the queue
-    var item = queue[offset];
-
-    // increment the offset and remove the free space if necessary
-    if (++ offset * 2 >= queue.length){
-      queue  = queue.slice(offset);
-      offset = 0;
-    }
-
-    // return the dequeued item
     return item;
   };
 
