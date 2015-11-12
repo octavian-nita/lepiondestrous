@@ -1,3 +1,8 @@
+/**
+ * @module Toast
+ * @author Octavian Theodor NITA (http://github.com/octavian-nita)
+ * @version 1.0, Aug 24, 2015
+ */
 define(
   ['gameConfig', 'util'],
 
@@ -5,9 +10,6 @@ define(
     'use strict';
 
     /**
-     * @author Octavian Theodor NITA (http://github.com/octavian-nita)
-     * @version 1.0, Aug 24, 2015
-     *
      * @constructor
      * @param {string} [className]
      * @param {number|string} [zIndex=99999]
@@ -87,6 +89,24 @@ define(
 
     /** @return {Toast} <code>this</code> */
     Toast.prototype.show = function (messageOrFalsy, delay) {
+
+      if (!messageOrFalsy) {
+        // TODO: hide gracefully, clean up and return
+        return;
+      }
+
+      this._messages.push(messageOrFalsy);
+      if (this._animated) { return; }
+
+      this._run();
+      return this;
+    };
+
+    Toast.prototype._run = function () {
+      if (this._animated || this._messages.isEmpty() || !this.element) { return; }
+      this._animated = true;
+
+      // TODO: rewrite following...
       var element = this.element, style = element.style;
 
       // Hack to get the animation started:
@@ -101,13 +121,6 @@ define(
       } else {
         style.opacity = 0;
       }
-
-      return this;
-    };
-
-    Toast.prototype._run = function () {
-      if (this._animated || this._messages.isEmpty() || !this.element) { return; }
-      this._animated = true;
     };
 
     Toast.DEFAULT_CLASS = 'toast';

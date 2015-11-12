@@ -1,22 +1,20 @@
-'use strict';
-
 /**
  * @module util
  * @author Octavian Theodor NITA (http://github.com/octavian-nita)
- * @version 1.0, Sep 10, 2015
+ * @version 1.0, Nov 11, 2015
  */
 define(function () {
+  'use strict';
 
   /////////////////////////////////////////////
   //  Data Structures / Abstract Data Types  //
   /////////////////////////////////////////////
 
   /**
-   * Slightly modified version of Stephen Morley's <a href="http://code.stephenmorley.org/javascript/queues/">queue</a>
-   * implementation.
+   * Slightly modified version of Stephen Morley's efficient
+   * <a href="http://code.stephenmorley.org/javascript/queues/">queue</a> implementation.
    *
    * @constructor
-   *
    * @see http://code.stephenmorley.org/javascript/queues/
    */
   function Queue() {
