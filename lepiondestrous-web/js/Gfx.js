@@ -1,11 +1,13 @@
+/**
+ * @module Gfx
+ * @author Octavian Theodor NITA (http://github.com/octavian-nita)
+ * @version 1.0, Aug 12, 2015
+ */
 define(function () {
   'use strict';
 
   /**
    * Fluent (more or less) API for commonly used 2D rendering context drawing operations.
-   *
-   * @author Octavian Theodor NITA (http://github.com/octavian-nita)
-   * @version 1.0, Aug 12, 2015
    *
    * @constructor
    */
@@ -43,9 +45,6 @@ define(function () {
     if (ctx) { ctx.restore(); }
     return this;
   };
-
-  /** @return {CanvasRenderingContext2D} the rendering context <code>this</code> instance currently draws on */
-  Gfx.prototype.ctx = function () { return this._contexts[this._contexts.length - 1]; };
 
   /**
    * @param {number} x
@@ -112,39 +111,17 @@ define(function () {
         height = container && container.offsetHeight || 150,
         canvas = document.createElement('canvas'), style = canvas.style, oversample = Gfx.canvasOversampling || 1;
 
-    if (className) { canvas.className = className + ''; }
-
     style.position = 'absolute';
     style.zIndex = zIndex || 0;
     style.width = width + 'px';
     style.height = height + 'px';
 
+    if (className) { canvas.className = className + ''; }
     canvas.width = width * oversample;
     canvas.height = height * oversample;
     canvas.getContext('2d').scale(oversample, oversample);
 
     return canvas;
-  };
-
-  /**
-   * @static
-   * @param {HTMLElement} element
-   * @param {number|Event} clientXOrEvent
-   * @param {number} [clientY]
-   * @param {boolean} [isOversampled]
-   */
-  Gfx.relativePosition = function (element, clientXOrEvent, clientY, isOversampled) {
-    if (!element || !clientXOrEvent) { return; }
-
-    var bounds = element.getBoundingClientRect(), oversampling = isOversampled && Gfx.canvasOversampling || 1;
-
-    return typeof clientXOrEvent === 'object' ? {
-      x: (clientXOrEvent.clientX - bounds.left) * oversampling,
-      y: (clientXOrEvent.clientY - bounds.top) * oversampling
-    } : {
-      x: (clientXOrEvent - bounds.left) * oversampling,
-      y: (clientY - bounds.top) * oversampling
-    };
   };
 
   /**

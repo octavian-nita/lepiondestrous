@@ -1,5 +1,5 @@
 define(
-  ['gameConfig'],
+  ['config'],
 
   function (cfg) {
     'use strict';

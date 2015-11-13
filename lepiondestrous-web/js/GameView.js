@@ -4,13 +4,14 @@ define(
    'BoardGeometry',
    'Toast',
    'Gfx',
-   'gameConfig',
+   'config',
+   'util',
    'lib/require.i18n!nls/t'],
 
-  function (Game, GameError, BoardGeometry, Toast, Gfx, cfg, t) {
+  function (Game, GameError, BoardGeometry, Toast, Gfx, config, util, t) {
     'use strict';
 
-    var g = new Gfx(), theme = cfg.theme;
+    var g = new Gfx(), theme = config.theme;
 
     function shadow(context) {
       if (!context) { return; }
@@ -58,7 +59,6 @@ define(
       for (layer in layers) { container.appendChild(layers[layer]); }
       container.appendChild(this._toast.element);
 
-      var toast = this._toast;
       if (!this._game.started()) {
         this._toast.show(t[this._game.currentPiece() === Game.PLAYER_LIGHT ? 'LIGHT_PLAYS' : 'DARK_PLAYS']);
       }
@@ -222,7 +222,7 @@ define(
       event.stopPropagation();
 
       // Obtain and translate event coordinates to the beginning of the playable area:
-      currXY = Gfx.relativePosition(event.target, event);
+      currXY = util.positionInElement(event.target, event);
       if (!currXY) { return; }
       currXY.x -= board.x;
       currXY.y -= board.playAreaY;

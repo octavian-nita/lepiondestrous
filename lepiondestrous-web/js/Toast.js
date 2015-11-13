@@ -4,9 +4,9 @@
  * @version 1.0, Aug 24, 2015
  */
 define(
-  ['gameConfig', 'util'],
+  ['config', 'util'],
 
-  function (cfg, util) {
+  function (config, util) {
     'use strict';
 
     /**
@@ -20,13 +20,13 @@ define(
     function Toast(className, zIndex) {
       if (!(this instanceof Toast)) { return new Toast(className, zIndex); }
 
-      var duration = Number(cfg.toast.duration) || Toast.DEFAULT_DURATION, shadow = cfg.theme.shadow, style;
+      var duration = Number(config.toast.duration) || Toast.DEFAULT_DURATION, shadow = config.theme.shadow, style;
 
       /** @protected */ this._animated = false;
 
       /** @protected */ this._messages = new util.Queue();
 
-      /** @protected */ this._delay = (Number(cfg.toast.delay) || Toast.DEFAULT_DELAY) + 'ms';
+      /** @protected */ this._delay = (Number(config.toast.delay) || Toast.DEFAULT_DELAY) + 'ms';
 
       /** @protected */ this._fastTransition = 'opacity ' + (duration / 4) + 'ms ease-in-out';
 
@@ -55,7 +55,7 @@ define(
       style.overflow = 'hidden';
 
       // Typography
-      style.color = cfg.theme.foreground;
+      style.color = config.theme.foreground;
       style.textAlign = 'center';
 
       // Visual
@@ -95,7 +95,7 @@ define(
         return;
       }
 
-      this._messages.push(messageOrFalsy);
+      this._messages.push(delay ? {message: messageOrFalsy, delay: delay} : messageOrFalsy);
       if (this._animated) { return; }
 
       this._run();
@@ -103,19 +103,25 @@ define(
     };
 
     Toast.prototype._run = function () {
+      var element = this.element, style = element.style, message, delay;
+
       if (this._animated || this._messages.isEmpty() || !this.element) { return; }
       this._animated = true;
 
-      // TODO: rewrite following...
-      var element = this.element, style = element.style;
+      message = this._messages.pop();
+      if (typeof message === 'object') {
+        message = message.message;
+        delay = message.delay;
+      }
 
+      // TODO: rewrite following...
       // Hack to get the animation started:
       element.offsetHeight; // jshint ignore:line
       util.pcss(style, 'transition', this._fastTransition);
 
       if (messageOrFalsy) {
         element.innerHTML = '<p>' + messageOrFalsy + '</p>';
-        if (delay) { element.setAttribute('data-delay', delay + 'ms'); }
+        element.setAttribute('data-delay', delay + 'ms');
 
         style.opacity = 1;
       } else {
@@ -128,4 +134,5 @@ define(
     Toast.DEFAULT_DURATION = 2500;
 
     return Toast;
-  });
+  })
+;

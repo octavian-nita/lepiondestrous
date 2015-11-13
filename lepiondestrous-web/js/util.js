@@ -18,6 +18,7 @@ define(function () {
    * @see http://code.stephenmorley.org/javascript/queues/
    */
   function Queue() {
+    if (!(this instanceof Queue)) { return new Queue(); }
     this._queue = [];
     this._offset = 0;
   }
@@ -44,6 +45,28 @@ define(function () {
     return item;
   };
 
+  //////////////
+  //  Events  //
+  //////////////
+
+  /**
+   * @param {HTMLElement} element
+   * @param {Object|number} clientXYOrX
+   * @param {number} [clientY]
+   */
+  function positionInElement(element, clientXYOrX, clientY) {
+    if (!element) { return; }
+    var bounds = element.getBoundingClientRect();
+
+    return typeof clientXYOrX === 'object' ? {
+      x: (clientXYOrX.clientX - bounds.left),
+      y: (clientXYOrX.clientY - bounds.top)
+    } : {
+      x: (clientXYOrX - bounds.left),
+      y: (clientY - bounds.top)
+    };
+  }
+
   ////////////////////////
   //  CSS Manipulation  //
   ////////////////////////
@@ -61,6 +84,8 @@ define(function () {
 
   return {
     Queue: Queue,
+
+    positionInElement: positionInElement,
 
     pcss: pcss
   };
