@@ -40,7 +40,7 @@ define(
       style = this.element.style;
 
       // http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
-      util.pcss(style, 'transform', 'translateZ(0)');
+      util.pcss(style, 'transform', 'translateZ(0)'); // keep first!
 
       // Positioning (see http://codeguide.co/#css-declaration-order)
       style.position = 'absolute';
@@ -50,6 +50,7 @@ define(
       util.pcss(style, 'transform', 'translateX(-50%)');
 
       // Display & Box Model
+      style.display = 'none';
       style.maxHeight = '30%';
       style.padding = '0 25px';
       style.overflow = 'hidden';
@@ -63,7 +64,7 @@ define(
       style.borderRadius = '75px';
       style.boxShadow = shadow.offsetX + 'px ' + shadow.offsetY + 'px ' + shadow.blur + 'px ' + shadow.color;
 
-      // Other
+      // Misc
       util.pcss(style, 'user-select', 'none');
       style.pointerEvents = 'none'; // IE 11+!
       style.opacity = 0;
@@ -89,6 +90,7 @@ define(
 
     /** @return {Toast} <code>this</code> */
     Toast.prototype.show = function (messageOrFalsy, delay) {
+      var style = this.element.style;
 
       if (!messageOrFalsy) {
         // TODO: hide gracefully, clean up and return
@@ -100,6 +102,12 @@ define(
 
       this._run();
       return this;
+    };
+
+    Toast.prototype._end = function () {
+      var element = this.element;
+      element.style.display = 'none';
+      element.removeChild(element.firstChild);
     };
 
     Toast.prototype._run = function () {
@@ -134,5 +142,4 @@ define(
     Toast.DEFAULT_DURATION = 2500;
 
     return Toast;
-  })
-;
+  });
