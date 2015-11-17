@@ -9,6 +9,30 @@ define(
   function (config, util) {
     'use strict';
 
+    var DEFAULT_STYLE = [
+      // Positioning (see http://codeguide.co/#css-declaration-order)
+      'position: absolute',
+      'top: 65%',
+      'left: 50%',
+
+      // Display & Box Model
+      //'display: \'none\'';
+      'max-height: 30%',
+      'padding: 0 25px',
+      'overflow: hidden',
+
+      // Typography
+      'text-align: \'center\'',
+
+      // Visual
+      'background: rgba(0, 0, 0, 0.8)',
+      'border-radius: \'75px\'',
+
+      // Misc
+      'pointer-events: \'none\'', // IE 11+!
+      'opacity: 0'
+    ].join(';');
+
     /**
      * @constructor
      * @param {string} [className]
@@ -16,6 +40,7 @@ define(
      *
      * @see http://developer.android.com/guide/topics/ui/notifiers/toasts.html
      * @see http://developer.android.com/reference/android/widget/Toast.html
+     * @see http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
      */
     function Toast(className, zIndex) {
       if (!(this instanceof Toast)) { return new Toast(className, zIndex); }
@@ -38,102 +63,78 @@ define(
 
       // Style the backing HTML element:
       style = this.element.style;
+      style.cssText = DEFAULT_STYLE;
 
-      // http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
-      util.pcss(style, 'transform', 'translateZ(0)'); // keep first!
-
-      // Positioning (see http://codeguide.co/#css-declaration-order)
-      style.position = 'absolute';
-      style.top = '65%';
-      style.left = '50%';
       style.zIndex = zIndex || 99999;
-      util.pcss(style, 'transform', 'translateX(-50%)');
 
-      // Display & Box Model
-      style.display = 'none';
-      style.maxHeight = '30%';
-      style.padding = '0 25px';
-      style.overflow = 'hidden';
-
-      // Typography
       style.color = config.theme.foreground;
-      style.textAlign = 'center';
-
-      // Visual
-      style.background = 'rgba(0, 0, 0, 0.8)';
-      style.borderRadius = '75px';
       style.boxShadow = shadow.offsetX + 'px ' + shadow.offsetY + 'px ' + shadow.blur + 'px ' + shadow.color;
 
-      // Misc
+      util.pcss(style, 'transform', 'translateX(-50%)');
       util.pcss(style, 'user-select', 'none');
-      style.pointerEvents = 'none'; // IE 11+!
-      style.opacity = 0;
 
-      this.element.addEventListener('transitionend', function (event) {
-        var element = event && event.target, style, delay, opacity;
-        if (!element) { return; }
-
-        style = element.style;
-        delay = element.getAttribute('data-delay');
-        opacity = window.getComputedStyle(element).opacity;
-
-        if (opacity > 0.99) { // toast just shown
-          util.pcss(style, 'transition', this._slowTransition + ' ' + (delay || this._delay));
-          style.opacity = 0;
-        } else if (opacity < 0.01) { // toast just hidden
-          util.pcss(style, 'transition', '');
-          element.setAttribute('data-delay', '');
-          element.innerHTML = '';
-        }
-      }.bind(this));
+      this.element.addEventListener('transitionend', Toast.prototype._run.bind(this));
     }
 
     /** @return {Toast} <code>this</code> */
-    Toast.prototype.show = function (messageOrFalsy, delay) {
-      var style = this.element.style;
+    Toast.prototype.show = function (message, delay) {
+      if (!message) {
 
-      if (!messageOrFalsy) {
-        // TODO: hide gracefully, clean up and return
-        return;
+        // TODO: hide quickly and gracefully
+        // TODO: clean up
+        this._messages.clear();
+
+      } else {
+
+        this._messages.push(delay ? {message: message, delay: delay} : message);
+        if (!this._animated) {
+          this._run();
+        }
+
       }
 
-      this._messages.push(delay ? {message: messageOrFalsy, delay: delay} : messageOrFalsy);
-      if (this._animated) { return; }
-
-      this._run();
       return this;
     };
 
     Toast.prototype._end = function () {
       var element = this.element;
-      element.style.display = 'none';
-      element.removeChild(element.firstChild);
+      //element.style.display = 'none';
+      element.innerHTML = '';
+      util.pcss(element.style, 'transition', '');
     };
 
     Toast.prototype._run = function () {
-      var element = this.element, style = element.style, message, delay;
 
-      if (this._animated || this._messages.isEmpty() || !this.element) { return; }
-      this._animated = true;
+      var element = this.element, style = element.style, opacity = window.getComputedStyle(element).opacity, message,
+          delay   = this._delay;
 
-      message = this._messages.pop();
-      if (typeof message === 'object') {
-        message = message.message;
-        delay = message.delay;
-      }
-
-      // TODO: rewrite following...
       // Hack to get the animation started:
-      element.offsetHeight; // jshint ignore:line
-      util.pcss(style, 'transition', this._fastTransition);
+      //element.offsetHeight; // jshint ignore:line
 
-      if (messageOrFalsy) {
-        element.innerHTML = '<p>' + messageOrFalsy + '</p>';
-        element.setAttribute('data-delay', delay + 'ms');
+      if (opacity < 0.01) {
 
-        style.opacity = 1;
-      } else {
-        style.opacity = 0;
+        if (this._messages.isEmpty()) {
+          this._end();
+          return;
+        }
+
+        if (!this._animated) {     // the toast was invisible, the animation has just started
+
+          this._animated = true;
+
+          message = this._messages.peek();
+          element.innerHTML = '<p>' + (typeof message === 'object' ? message.message : message) + '</p>';
+
+          util.pcss(style, 'transition', this._fastTransition);
+          style.opacity = 1;
+
+        } else {                   // the toast has just been made invisible, is there any other message to display?
+
+          // ...
+        }
+
+      } else if (opacity > 0.99) { // the toast has just been made fully visible, begin
+
       }
     };
 

@@ -25,6 +25,8 @@ define(function () {
 
   Queue.prototype.isEmpty = function () { return this._queue.length === 0; };
 
+  Queue.prototype.clear = function () { this._offset = this._queue.length = 0; };
+
   Queue.prototype.size = function () { return this._queue.length - this._offset; };
 
   Queue.prototype.push = function (item) { this._queue.push(item); };
