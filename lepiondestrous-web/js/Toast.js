@@ -10,27 +10,28 @@ define(
     'use strict';
 
     var DEFAULT_STYLE = [
+
       // Positioning (see http://codeguide.co/#css-declaration-order)
       'position: absolute',
       'top: 65%',
       'left: 50%',
 
       // Display & Box Model
-      //'display: \'none\'';
       'max-height: 30%',
       'padding: 0 25px',
       'overflow: hidden',
 
       // Typography
-      'text-align: \'center\'',
+      'text-align: center',
 
       // Visual
       'background: rgba(0, 0, 0, 0.8)',
-      'border-radius: \'75px\'',
+      'border-radius: 75px',
 
       // Misc
-      'pointer-events: \'none\'', // IE 11+!
+      'pointer-events: none', // IE 11+!
       'opacity: 0'
+
     ].join(';');
 
     /**
@@ -79,47 +80,37 @@ define(
     /** @return {Toast} <code>this</code> */
     Toast.prototype.show = function (message, delay) {
       if (!message) {
-
-        // TODO: hide quickly and gracefully
-        // TODO: clean up
         this._messages.clear();
-
       } else {
-
         this._messages.push(delay ? {message: message, delay: delay} : message);
-        if (!this._animated) {
-          this._run();
-        }
-
       }
-
+      this._run();
       return this;
-    };
-
-    Toast.prototype._end = function () {
-      var element = this.element;
-      //element.style.display = 'none';
-      element.innerHTML = '';
-      util.pcss(element.style, 'transition', '');
     };
 
     Toast.prototype._run = function () {
 
-      var element = this.element, style = element.style, opacity = window.getComputedStyle(element).opacity, message,
-          delay   = this._delay;
+      var element = this.element, style = element.style, opacity = window.getComputedStyle(element).opacity,
+          message, delay;
 
       // Hack to get the animation started:
-      //element.offsetHeight; // jshint ignore:line
+      element.offsetHeight; // jshint ignore:line
+
+      if (this._messages.isEmpty()) { // nothing to display or canceling previous run...
+        if (opacity > 0) {
+          util.pcss(style, 'transition', this._fastTransition);
+          style.opacity = 0;
+        } else {
+          util.pcss(style, 'transition', '');
+          element.innerHTML = '';
+        }
+        this._animated = false;
+        return;
+      }
 
       if (opacity < 0.01) {
 
-        if (this._messages.isEmpty()) {
-          this._end();
-          return;
-        }
-
         if (!this._animated) {     // the toast was invisible, the animation has just started
-
           this._animated = true;
 
           message = this._messages.peek();
@@ -128,12 +119,18 @@ define(
           util.pcss(style, 'transition', this._fastTransition);
           style.opacity = 1;
 
-        } else {                   // the toast has just been made invisible, is there any other message to display?
-
-          // ...
+        } else {                   // the toast has just been made invisible
+          this._messages.pop();
+          this._run();             // is there any other message to display?
         }
 
       } else if (opacity > 0.99) { // the toast has just been made fully visible, begin
+
+        message = this._messages.peek();
+        delay = typeof message === 'object' ? message.delay : this._delay;
+
+        util.pcss(style, 'transition', this._slowTransition + ' ' + delay);
+        style.opacity = 0;
 
       }
     };

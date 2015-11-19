@@ -59,6 +59,15 @@ define(
       for (layer in layers) { container.appendChild(layers[layer]); }
       container.appendChild(this._toast.element);
 
+      var tt = this._toast;
+      setTimeout(function () {
+        tt.show("Test!");
+      }, 300);
+
+      /*setTimeout(function () {
+        tt.show();
+      }, 600);*/
+
       if (!this._game.started()) {
         this._toast.show(t[this._game.currentPiece() === Game.PLAYER_LIGHT ? 'LIGHT_PLAYS' : 'DARK_PLAYS']);
       }
