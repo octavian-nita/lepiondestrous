@@ -82,6 +82,11 @@ define(function () {
         style['-ms-' + propertyName] =
           style['-moz-' + propertyName] =
             style['-webkit-' + propertyName] = value;
+    alert(style[propertyName] +
+            style['-o-' + propertyName] +
+              style['-ms-' + propertyName] +
+                style['-moz-' + propertyName] +
+                  style['-webkit-' + propertyName]);
   }
 
   return {

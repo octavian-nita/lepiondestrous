@@ -61,8 +61,11 @@ define(
 
       var tt = this._toast;
       setTimeout(function () {
-        tt.show("Test!");
+        tt.show("Test!", 1000);
       }, 300);
+      /*setTimeout(function () {
+        tt.show("Test 2!", 1000);
+      }, 500);*/
 
       /*setTimeout(function () {
         tt.show();
