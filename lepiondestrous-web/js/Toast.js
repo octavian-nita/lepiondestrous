@@ -80,7 +80,7 @@ define(
     /** @return {Toast} <code>this</code> */
     Toast.prototype.show = function (message, delay) {
       if (!message) {
-        this._messages.clear();
+        this._messages.clear(); // use a falsy first argument to cancel display
       } else {
         this._messages.push(delay ? {message: message, delay: delay} : message);
       }
