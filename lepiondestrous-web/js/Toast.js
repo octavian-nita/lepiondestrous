@@ -96,7 +96,7 @@ define(
       // Hack to get the animation started:
       //element.offsetHeight; // jshint ignore:line
 
-      if (this._messages.isEmpty()) { // nothing to display or canceling previous run...
+      if (this._messages.isEmpty()) { // nothing to display or canceling current run...
         if (opacity > 0) {
           util.pcss(style, 'transition', this._fastTransition);
           style.opacity = 0;
@@ -121,7 +121,12 @@ define(
         } else {                   // the toast has just been made invisible
           this._animated = false;
           this._messages.pop();
-          this._run();             // is there any other message to display?
+          if (this._messages.isEmpty()) { // is there any other message to display?
+            util.pcss(style, 'transition', '');
+            element.innerHTML = '';
+          } else {
+            this._run();
+          }
         }
 
       } else if (opacity > 0.99) { // the toast has just been made fully visible, begin
@@ -129,13 +134,11 @@ define(
         message = this._messages.peek();
         delay = typeof message === 'object' ? message.delay : this._delay;
 
-        alert("BEFORE: " + style.transition);
         if (this._messages.size() > 1) {
-          util.pcss(this.element.style, 'transition', this._fastTransition + ' ' + (delay / 2));
+          util.pcss(style, 'transition', this._fastTransition + ' ' + (delay / 2));
         } else {
-          util.pcss(this.element.style, 'transition', this._slowTransition + ' ' + 1000);
+          util.pcss(style, 'transition', this._slowTransition + ' ' + 1000);
         }
-        alert("AFTER: " + style.transition);
         style.opacity = 0;
 
       }

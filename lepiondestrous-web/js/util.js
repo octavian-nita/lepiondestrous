@@ -82,11 +82,9 @@ define(function () {
         style['-ms-' + propertyName] =
           style['-moz-' + propertyName] =
             style['-webkit-' + propertyName] = value;
-    alert(style[propertyName] +
-            style['-o-' + propertyName] +
-              style['-ms-' + propertyName] +
-                style['-moz-' + propertyName] +
-                  style['-webkit-' + propertyName]);
+    if(propertyName.indexOf('ansition') > 0 && value) {
+      alert(style[propertyName] + ' :->: ' + value);
+    }
   }
 
   return {
