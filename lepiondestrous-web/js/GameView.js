@@ -63,9 +63,9 @@ define(
       setTimeout(function () {
         tt.show("Test!", 1000);
       }, 300);
-      /*setTimeout(function () {
+      setTimeout(function () {
         tt.show("Test 2!", 1000);
-      }, 500);*/
+      }, 500);
 
       /*setTimeout(function () {
         tt.show();

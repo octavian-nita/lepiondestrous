@@ -52,7 +52,7 @@ define(
 
       /** @protected */ this._messages = new util.Queue();
 
-      /** @protected */ this._delay = (Number(config.toast.delay) || Toast.DEFAULT_DELAY) + 'ms';
+      /** @protected */ this._delay = (Number(config.toast.delay) || Toast.DEFAULT_DELAY);
 
       /** @protected */ this._fastTransition = 'opacity ' + (duration / 4) + 'ms ease-in-out';
 
@@ -71,7 +71,7 @@ define(
       style.color = config.theme.foreground;
       style.boxShadow = shadow.offsetX + 'px ' + shadow.offsetY + 'px ' + shadow.blur + 'px ' + shadow.color;
 
-      util.pcss(style, 'transform', 'translateX(-50%)');
+      util.pcss(style, 'transform', 'translateX(-50%, 0, 1%)');
       util.pcss(style, 'user-select', 'none');
 
       this.element.addEventListener('transitionend', Toast.prototype._run.bind(this));
@@ -135,9 +135,9 @@ define(
         delay = typeof message === 'object' ? message.delay : this._delay;
 
         if (this._messages.size() > 1) {
-          util.pcss(style, 'transition', this._fastTransition + ' ' + (delay / 2));
+          util.pcss(style, 'transition', this._fastTransition + ' ' + (delay / 2) + 'ms');
         } else {
-          util.pcss(style, 'transition', this._slowTransition + ' ' + 1000);
+          util.pcss(style, 'transition', this._slowTransition + ' ' + delay + 'ms');
         }
         style.opacity = 0;
 
