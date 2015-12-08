@@ -8,12 +8,12 @@
   font-family: "Chantelli Antiqua";
   font-weight: normal;
   font-style: normal;
-  src: url("../font/chantelli-antiqua.eot");
-  src: url("../font/chantelli-antiqua.eot?#iefix") format("embedded-opentype"),
-  url("../font/chantelli-antiqua.woff2") format("woff2"),
-  url("../font/chantelli-antiqua.woff") format("woff"),
-  url("../font/chantelli-antiqua.ttf") format("truetype"),
-  url("../font/chantelli-antiqua.svg#chantelli-antiqua") format("svg");
+  src: url("../font/maiandra-gd.eot");
+  src: url("../font/maiandra-gd.eot?#iefix") format("embedded-opentype"),
+  url("../font/maiandra-gd.woff2") format("woff2"),
+  url("../font/maiandra-gd.woff") format("woff"),
+  url("../font/maiandra-gd.ttf") format("truetype"),
+  url("../font/maiandra-gd.svg#maiandra-gd") format("svg");
 }
 
 /* http://camendesign.com/code/developpeurs_sans_frontieres
@@ -38,11 +38,6 @@ body {
   font: 1.6rem/1.5 "Chantelli Antiqua", fantasy;
   -webkit-font-smoothing: subpixel-antialiased;
   -webkit-text-stroke: 1px rgba(16, 16, 16, 0.1);
-
-  /* http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css */
-  -webkit-transform-style: preserve-3d;
-  -moz-transform-style: preserve-3d;
-  transform-style: preserve-3d;
 }
 
 .le-pion-des-trous {
@@ -55,6 +50,11 @@ body {
   -ms-transform: translateY(-50%);
   -o-transform: translateY(-50%);
   transform: translateY(-50%);
+
+  /* http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css */
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  transform-style: preserve-3d;
 }
 
 /* TODO: REMOVE THIS AFTER TESTING! */

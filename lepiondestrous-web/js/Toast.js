@@ -13,16 +13,13 @@ define(
 
       // Positioning (see http://codeguide.co/#css-declaration-order)
       'position: absolute',
-      'top: 65%',
       'left: 50%',
+      'top: 70%',
 
       // Display & Box Model
       'max-height: 30%',
       'padding: 0 25px',
       'overflow: hidden',
-
-      // Typography
-      'text-align: center',
 
       // Visual
       'background: rgba(0, 0, 0, 0.8)',
@@ -32,7 +29,7 @@ define(
       'pointer-events: none', // IE 11+!
       'opacity: 0'
 
-    ].join(';');
+    ].join('; ');
 
     /**
      * @constructor
@@ -54,7 +51,7 @@ define(
 
       /** @protected */ this._delay = (Number(config.toast.delay) || Toast.DEFAULT_DELAY);
 
-      /** @protected */ this._fastTransition = 'opacity ' + (duration / 4) + 'ms ease-in-out';
+      /** @protected */ this._fastTransition = 'opacity ' + (duration / 5) + 'ms ease-in-out';
 
       /** @protected */ this._slowTransition = 'opacity ' + duration + 'ms ease-in-out';
 
@@ -64,14 +61,13 @@ define(
 
       // Style the backing HTML element:
       style = this.element.style;
+
       style.cssText = DEFAULT_STYLE;
-
       style.zIndex = zIndex || 99999;
-
       style.color = config.theme.foreground;
       style.boxShadow = shadow.offsetX + 'px ' + shadow.offsetY + 'px ' + shadow.blur + 'px ' + shadow.color;
 
-      util.pcss(style, 'transform', 'translateX(-50%, 0, 1%)');
+      util.pcss(style, 'transform', 'translateX(-50%)');
       util.pcss(style, 'user-select', 'none');
 
       this.element.addEventListener('transitionend', Toast.prototype._run.bind(this));
@@ -93,10 +89,8 @@ define(
       var element = this.element, style = element.style, opacity = window.getComputedStyle(element).opacity,
           message, delay;
 
-      // Hack to get the animation started:
-      //element.offsetHeight; // jshint ignore:line
+      if (this._messages.isEmpty()) { // no message to display or cancel the current run...
 
-      if (this._messages.isEmpty()) { // nothing to display or canceling current run...
         if (opacity > 0) {
           util.pcss(style, 'transition', this._fastTransition);
           style.opacity = 0;
@@ -104,32 +98,8 @@ define(
           util.pcss(style, 'transition', '');
           element.innerHTML = '';
         }
-        return;
-      }
 
-      if (opacity < 0.01) {
-
-        if (!this._animated) {     // the toast was invisible, the animation has just started
-          this._animated = true;
-
-          message = this._messages.peek();
-          element.innerHTML = '<p>' + (typeof message === 'object' ? message.message : message) + '</p>';
-
-          util.pcss(style, 'transition', this._fastTransition);
-          style.opacity = 1;
-
-        } else {                   // the toast has just been made invisible
-          this._animated = false;
-          this._messages.pop();
-          if (this._messages.isEmpty()) { // is there any other message to display?
-            util.pcss(style, 'transition', '');
-            element.innerHTML = '';
-          } else {
-            this._run();
-          }
-        }
-
-      } else if (opacity > 0.99) { // the toast has just been made fully visible, begin
+      } else if (opacity > 0.99) {    // messages queued and the toast has just been made fully visible
 
         message = this._messages.peek();
         delay = typeof message === 'object' ? message.delay : this._delay;
@@ -140,6 +110,28 @@ define(
           util.pcss(style, 'transition', this._slowTransition + ' ' + delay + 'ms');
         }
         style.opacity = 0;
+
+      } else if (opacity < 0.01) {    // messages queued but not displayed
+
+        if (!this._animated) {        // -- the toast was invisible, the animation has just started
+          this._animated = true;
+
+          message = this._messages.peek();
+          element.innerHTML = '<p>' + (typeof message === 'object' ? message.message : message) + '</p>';
+
+          util.pcss(style, 'transition', this._fastTransition);
+          style.opacity = 1;
+
+        } else {                      // -- the toast has just been made invisible
+          this._animated = false;
+          this._messages.pop();
+          if (this._messages.isEmpty()) { // is there any other message to display?
+            util.pcss(style, 'transition', '');
+            element.innerHTML = '';
+          } else {
+            this._run();
+          }
+        }
 
       }
     };

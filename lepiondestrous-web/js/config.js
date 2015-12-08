@@ -28,7 +28,7 @@ define({
 
     shadow: {offsetX: 0, offsetY: 5, blur: 20, color: 'rgba(0, 0, 0, 0.9)'},
 
-    fontFamily: '"Chantelli Antiqua"',
+    fontFamily: '"Maiandra GD"',
     foreground: '#ffb300'
   }
 });
