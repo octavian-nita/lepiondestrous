@@ -1,7 +1,7 @@
 /**
  * @module Toast
  * @author Octavian Theodor NITA (http://github.com/octavian-nita)
- * @version 1.0, Aug 24, 2015
+ * @version 1.0, Dec 8, 2015
  */
 define(
   ['config', 'util'],
@@ -9,26 +9,17 @@ define(
   function (config, util) {
     'use strict';
 
-    var DEFAULT_STYLE = [
-
-      // Positioning (see http://codeguide.co/#css-declaration-order)
+    var DEFAULT_STYLE = [ // see http://codeguide.co/#css-declaration-order
       'position: absolute',
       'left: 50%',
       'top: 70%',
-
-      // Display & Box Model
       'max-height: 30%',
       'padding: 0 25px',
       'overflow: hidden',
-
-      // Visual
       'background: rgba(0, 0, 0, 0.8)',
       'border-radius: 75px',
-
-      // Misc
       'pointer-events: none', // IE 11+!
       'opacity: 0'
-
     ].join('; ');
 
     /**
