@@ -129,10 +129,10 @@ define(
       cx.lineTo(11, 0);
       cx.stroke();
 
-      cx.font = '1px ' + theme.fontFamily;
+      cx.font = '0.8px ' + theme.fontFamily;
       cx.textAlign = 'center';
       cx.fillStyle = theme.foreground;
-      cx.fillText(this._game.name.toUpperCase(), this._board.width / (this._board.unit * 2), 0);
+      cx.fillText(this._game.name.toUpperCase(), this._board.width / (this._board.unit * 2), 1);
 
       cx.restore();
     };

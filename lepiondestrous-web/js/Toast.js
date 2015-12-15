@@ -54,7 +54,7 @@ define(
       style = this.element.style;
 
       style.cssText = DEFAULT_STYLE;
-      style.zIndex = zIndex || 99999;
+      style.zIndex = zIndex || 99998;
       style.color = config.theme.foreground;
       style.boxShadow = shadow.offsetX + 'px ' + shadow.offsetY + 'px ' + shadow.blur + 'px ' + shadow.color;
 
