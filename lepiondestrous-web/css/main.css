@@ -57,7 +57,7 @@ body {
   transform-style: preserve-3d;
 }
 
-/* TODO: REMOVE THIS AFTER TESTING! */
+/* FIXME: REMOVE THIS AFTER TESTING! */
 .le-pion-des-trous {
   width: 320px; height: 568px;
   width: 550px; height: 750px;

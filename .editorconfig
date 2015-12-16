@@ -1,0 +1,29 @@
+# EditorConfig is awesome: http://EditorConfig.org
+# ( I kept the comment above because I agree :) )
+
+# Top-most EditorConfig file
+root = true
+
+[*]
+trim_trailing_whitespace = true
+insert_final_newline = true
+max_line_length = 120
+
+# Default charset
+[*.{xhtml,html,css,js,ts,php,py,go}]
+charset = utf-8
+
+# Web, no PHP
+[*.{xhtml,html,css,js,ts}]
+indent_style = space
+indent_size = 2
+
+# PHP, Python
+[*.{php,py}]
+indent_style = space
+indent_size = 4
+
+# Go
+[*.go]
+indent_style = tab
+tab_width = 8
