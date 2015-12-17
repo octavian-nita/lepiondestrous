@@ -35,9 +35,15 @@ body {
   min-height: 100%;
 
   /* http://demosthenes.info/blog/606/Molten-Leading-Exploring-The-CSS-Relationship-Between-Font-Size-Line-Height-and-Margin */
-  font: 1.6rem/1.5 "Chantelli Antiqua", fantasy;
-  -webkit-font-smoothing: subpixel-antialiased;
-  -webkit-text-stroke: 1px rgba(16, 16, 16, 0.1);
+  font: 1.7em/1.5 "Chantelli Antiqua", fantasy;
+  font-smooth: always;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-stroke: 1px rgba(16, 16, 16, 0.3);
+  text-shadow: 0 0 1px rgba(16, 16, 16, 0.3);
+  text-rendering: optimizeLegibility;
+
+  transform: rotate(-0.0000000001deg);
 }
 
 .le-pion-des-trous {
