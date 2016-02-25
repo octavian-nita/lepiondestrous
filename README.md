@@ -1,7 +1,7 @@
 Le pion des trous
 =================
 
-A first attempt to implement a very nice, gomoku (five-in-a-row)-like game,
+A first attempt to implement a very nice, gomoku (five-in-a-row)-like game:
 **[Le pion des trous](https://www.facebook.com/people/Lepion-Destrous/100005579806865)**.
 
 - [link](http://www.lavenir.net/cnt/DMF20131102_00383789)
