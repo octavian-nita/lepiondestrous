@@ -13,13 +13,16 @@ max_line_length = 120
 [*.{xhtml,html,css,js,ts,php,py,rb,go}]
 charset = utf-8
 
-# Web, no PHP
-[*.{xhtml,html,css,js,ts,rb}]
+[*.{java,clj,cljs,cljc,edn}]
+charset = utf-16
+
+# Web, no PHP, Ruby, Clojure
+[*.{xhtml,html,css,js,ts,rb,clj,cljs,cljc,edn}]
 indent_style = space
 indent_size = 2
 
-# PHP, Python
-[*.{php,py}]
+# PHP, Python, Java
+[*.{php,py,java}]
 indent_style = space
 indent_size = 4
 
