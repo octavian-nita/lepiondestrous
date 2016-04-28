@@ -8,25 +8,30 @@ root = true
 trim_trailing_whitespace = true
 insert_final_newline = true
 max_line_length = 120
+indent_style = space
+indent_size = 2
+charset = utf-8
 
 # Default charset
-[*.{xhtml,html,css,js,ts,php,py,rb,go}]
-charset = utf-8
+#[*.{xhtml,html,css,js,ts,php,py,rb,go,hbs}]
+#charset = utf-8
 
 [*.{java,clj,cljs,cljc,edn}]
 charset = utf-16
 
-# Web, no PHP, Ruby, Clojure
-[*.{xhtml,html,css,js,ts,rb,clj,cljs,cljc,edn}]
-indent_style = space
-indent_size = 2
+# Web, no PHP, Ruby, Clojure, YAML
+#[*.{xhtml,html,css,js,ts,rb,clj,cljs,cljc,edn,yml}]
+#indent_size = 2
 
 # PHP, Python, Java
 [*.{php,py,java}]
-indent_style = space
 indent_size = 4
 
 # Go
 [*.go]
 indent_style = tab
 tab_width = 8
+
+# Handlebars templates
+[*.hbs]
+insert_final_newline = false
