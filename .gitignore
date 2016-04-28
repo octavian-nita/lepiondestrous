@@ -10,12 +10,18 @@
 **/nbactions.xml
 **/nb-configuration.xml
 
+# Compiled output & dependencies
 **/bin
 **/target
 **/node_modules
+**/bower_components
+**/dist
+**/tmp
+**/electron-builds
 
 **/*.log*
 **/*.lck*
+**/*.lock*
 
 #
 # Node.js-specific / Node.gitignore
@@ -55,3 +61,6 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+# Misc
+.DS_Store
